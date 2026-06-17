@@ -1,8 +1,14 @@
 import { useState, useEffect } from "react";
+import {
+  FaUserCircle,
+  FaQuestionCircle,
+  FaGraduationCap,
+} from "react-icons/fa";
 
 export default function Dashboard({ onLogout }) {
   const [user, setUser] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
 
   useEffect(() => {
     setUser(JSON.parse(localStorage.getItem("user")));
@@ -14,20 +20,34 @@ export default function Dashboard({ onLogout }) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="flex min-h-screen bg-gray-100">
 
-      <div className="bg-white shadow px-6 py-4 flex justify-between items-center">
-        <h1 className="font-semibold text-lg">Dashboard</h1>
+      {/* LEFT SIDEBAR */}
+      <aside className="w-60 bg-[#252424] border-r p-4">
+       <h1 className="text-xl font-bold mb-6 font-">BLETCHAI</h1>
+        <ul className="space-y-3 text-gray-700">
 
-        <button
-          onClick={() => setShowModal(true)}
-          className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
-        >
-          Logout
-        </button>
-      </div>
+          <li className="hover:bg-gray-100 p-2 rounded-lg cursor-pointer">
+            Dashboard
+          </li>
 
-      <div className="p-6">
+          <li className="hover:bg-gray-100 p-2 rounded-lg cursor-pointer">
+            Pembelajaran
+          </li>
+
+          <li className="hover:bg-gray-100 p-2 rounded-lg cursor-pointer">
+            Chatbot
+          </li>
+
+          <li className="hover:bg-gray-100 p-2 rounded-lg cursor-pointer">
+            Interview
+          </li>
+
+        </ul>
+      </aside>
+
+      {/* MAIN CONTENT */}
+      <div className="flex-1 p-6">
 
         <div className="bg-white p-6 rounded-2xl shadow flex items-center gap-4">
 
@@ -46,6 +66,50 @@ export default function Dashboard({ onLogout }) {
         </div>
 
       </div>
+
+      {/* RIGHT SIDEBAR (SMALL) */}
+      <aside className="w-20 bg-white border-l flex flex-col items-center py-6 gap-6">
+
+        {/* PROFILE */}
+        <div className="relative">
+
+          <FaUserCircle
+            onClick={() => setProfileOpen(!profileOpen)}
+            className="text-3xl text-gray-600 cursor-pointer"
+          />
+
+          {profileOpen && (
+            <div className="absolute right-10 top-0 bg-white border shadow rounded-lg w-32">
+
+              <button className="w-full text-left px-3 py-2 hover:bg-gray-100">
+                Ganti Akun
+              </button>
+
+              <button
+                onClick={handleLogout}
+                className="w-full text-left px-3 py-2 hover:bg-red-100 text-red-600"
+              >
+                Logout
+              </button>
+
+            </div>
+          )}
+
+        </div>
+
+        {/* HELP ICON (FAQ) */}
+        <FaQuestionCircle
+          className="text-2xl text-gray-600 cursor-pointer hover:text-blue-500"
+          title="FAQ"
+        />
+
+        {/* GRADUATION ICON */}
+        <FaGraduationCap
+          className="text-2xl text-gray-600 cursor-pointer hover:text-blue-500"
+          title="Learning"
+        />
+
+      </aside>
 
       {/* MODAL */}
       {showModal && (
