@@ -1,112 +1,128 @@
 import { useState } from "react";
 import { signInWithGoogle } from "../firebase";
+import { Eye, EyeOff, Mail, Lock } from "lucide-react";
 
 export default function Login({ onLogin, onGoRegister }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPass, setShowPass] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleLogin = (e) => {
     e.preventDefault();
-
     const user = JSON.parse(localStorage.getItem("user"));
-
     if (user && email === user.email && password === user.password) {
       localStorage.setItem("isLogin", "true");
-      onLogin(true);
+      if (onLogin) onLogin();
     } else {
-      alert("Login gagal");
+      alert("Email atau kata sandi salah");
     }
   };
 
   const handleGoogle = async () => {
-    const result = await signInWithGoogle();
-    const user = result.user;
-
-    localStorage.setItem("isLogin", "true");
-    localStorage.setItem("user", JSON.stringify({
-      name: user.displayName,
-      email: user.email,
-      photo: user.photoURL
-    }));
-
-    onLogin(true);
+    setLoading(true);
+    try {
+      const result = await signInWithGoogle();
+      const user = result.user;
+      localStorage.setItem("isLogin", "true");
+      localStorage.setItem("user", JSON.stringify({
+        name: user.displayName,
+        email: user.email,
+        photo: user.photoURL,
+      }));
+      if (onLogin) onLogin();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#f3f2ef]">
+    <div className="w-full max-w-sm mx-auto">
+      <h2 className="text-2xl font-bold text-zinc-800 mb-1">Masuk</h2>
+      <p className="text-sm text-zinc-400 mb-7">
+        Buka jalan menuju masa depanmu
+      </p>
 
-      <div className="w-[380px] bg-white p-8 rounded-xl shadow-md">
-
-        {/* TITLE */}
-        <h1 className="text-2xl font-semibold text-center mb-1">
-          Masuk
-        </h1>
-
-        <p className="text-center text-sm text-gray-500 mb-6">
-          Buka jalan menuju masa depanmu
-        </p>
-
-        {/* FORM */}
-        <form onSubmit={handleLogin} className="space-y-3">
-
-          <input
-            className="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Email or phone"
-            onChange={(e) => setEmail(e.target.value)}
-          />
-
-          <input
-            type="password"
-            className="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Password"
-            onChange={(e) => setPassword(e.target.value)}
-          />
-
-          <button className="w-full bg-[#0a66c2] text-white p-3 rounded-full font-medium hover:bg-[#004182] transition">
-            Masuk
-          </button>
-
-        </form>
-
-        {/* FORGOT */}
-        <p className="text-sm text-center text-blue-600 mt-4 cursor-pointer">
-          Lupa kata sandi akun anda?
-        </p>
-
-        {/* DIVIDER */}
-        <div className="flex items-center gap-3 my-6">
-          <div className="flex-1 h-px bg-gray-200"></div>
-          <span className="text-xs text-gray-400">or</span>
-          <div className="flex-1 h-px bg-gray-200"></div>
+      <form onSubmit={handleLogin} className="space-y-4">
+        {/* Email */}
+        <div>
+          <label className="block text-xs font-medium text-zinc-600 mb-1.5">Email</label>
+          <div className="relative">
+            <Mail size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Contoh: email@example.com"
+              required
+              className="w-full pl-10 pr-4 py-2.5 text-sm border border-zinc-200 rounded-xl bg-zinc-50 focus:outline-none focus:border-[#A67C52]/60 focus:bg-white transition placeholder-zinc-400 text-zinc-800"
+            />
+          </div>
         </div>
 
-        {/* GOOGLE BUTTON */}
-        <button
-          onClick={handleGoogle}
-          className="w-full flex items-center justify-center gap-3 border p-3 rounded-full hover:bg-gray-50 transition"
-        >
+        {/* Password */}
+        <div>
+          <label className="block text-xs font-medium text-zinc-600 mb-1.5">Kata Sandi</label>
+          <div className="relative">
+            <Lock size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
+            <input
+              type={showPass ? "text" : "password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Minimal 8 karakter"
+              required
+              className="w-full pl-10 pr-10 py-2.5 text-sm border border-zinc-200 rounded-xl bg-zinc-50 focus:outline-none focus:border-[#A67C52]/60 focus:bg-white transition placeholder-zinc-400 text-zinc-800"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPass(!showPass)}
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 transition"
+            >
+              {showPass ? <EyeOff size={15} /> : <Eye size={15} />}
+            </button>
+          </div>
+        </div>
 
-          <img
-            src="https://www.svgrepo.com/show/355037/google.svg"
-            className="w-5 h-5"
-          />
-
-          <span className="font-medium text-sm">
-            Lanjutkan dengan Google
-          </span>
-
-        </button>
-
-        {/* REGISTER */}
-        <p
-          onClick={() => onGoRegister(true)}
-          className="text-sm text-center mt-6 text-gray-600 cursor-pointer"
-        >
-          Belum memiliki akun? <span className="text-blue-600">Daftar disini!</span>
+        <p className="text-xs text-[#A67C52] cursor-pointer hover:text-[#6D4C41] transition text-right">
+          Lupa kata sandi?
         </p>
 
+        <button
+          type="submit"
+          className="w-full bg-zinc-800 hover:bg-zinc-700 text-white text-sm font-medium py-2.5 rounded-xl transition"
+        >
+          Masuk
+        </button>
+      </form>
+
+      {/* Divider */}
+      <div className="flex items-center gap-3 my-5">
+        <div className="flex-1 h-px bg-zinc-100" />
+        <span className="text-xs text-zinc-400">atau masuk dengan</span>
+        <div className="flex-1 h-px bg-zinc-100" />
       </div>
 
+      {/* Google */}
+      <button
+        onClick={handleGoogle}
+        disabled={loading}
+        className="w-full flex items-center justify-center gap-3 border border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-700 text-sm font-medium py-2.5 rounded-xl transition disabled:opacity-60"
+      >
+        <img src="https://www.svgrepo.com/show/355037/google.svg" className="w-4 h-4" alt="Google" />
+        {loading ? "Memproses..." : "Lanjutkan dengan Google"}
+      </button>
+
+      <p className="text-xs text-center text-zinc-400 mt-6">
+        Belum punya akun?{" "}
+        <span
+          onClick={onGoRegister}
+          className="text-[#A67C52] font-medium cursor-pointer hover:text-[#6D4C41] transition"
+        >
+          Daftar di sini
+        </span>
+      </p>
     </div>
   );
 }
