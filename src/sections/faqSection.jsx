@@ -19,14 +19,12 @@ const faqs = [
       "BletchAI menyediakan latihan interview yang realistis, umpan balik instan, serta rekomendasi pengembangan keterampilan sesuai kebutuhan pengguna.",
   },
   {
-    question:
-      "Saya belum pernah mengikuti interview. Apakah BletchAI cocok untuk saya?",
+    question: "Saya belum pernah mengikuti interview. Apakah BletchAI cocok untuk saya?",
     answer:
       "Tentu. Seluruh simulasi dirancang untuk berbagai tingkat kemampuan, termasuk bagi pemula yang belum pernah mengikuti interview kerja sebelumnya.",
   },
   {
-    question:
-      "Mengapa saya perlu berlatih sebelum interview kerja?",
+    question: "Mengapa saya perlu berlatih sebelum interview kerja?",
     answer:
       "Latihan membantu meningkatkan rasa percaya diri, kemampuan komunikasi, dan kesiapan menghadapi berbagai pertanyaan yang umum muncul saat interview.",
   },
@@ -40,127 +38,120 @@ export default function FaqSection() {
   };
 
   return (
-    <section
-      id="faq"
-      className="bg-[#ECECEC] px-12 py-24"
-    >
+    <section id="faq" className="bg-[#F7F3EE] px-8 py-16">
+
       {/* Header */}
-
-      <div className="text-center mb-14">
-        <h1 className="text-7xl font-black">
+      <div className="text-center mb-10">
+        <motion.h2
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          className="text-4xl font-black text-zinc-900"
+        >
           FAQ
-        </h1>
-
-        <p className="mt-3 text-zinc-500 italic text-2xl">
+        </motion.h2>
+        <motion.p
+          initial={{ opacity: 0, y: 10 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="mt-1.5 text-zinc-500 italic text-sm"
+        >
           Pertanyaan umum
-        </p>
+        </motion.p>
       </div>
 
-      {/* FAQ LIST */}
-
-      <div className="max-w-6xl mx-auto space-y-4">
-
-        {faqs.map((faq, index) => (
-
-          <div
-            key={index}
-            className="
-              rounded-3xl
-              border
-              border-zinc-400
-              overflow-hidden
-              bg-[#ECECEC]
-              transition-all
-              duration-300
-              hover:shadow-md
-            "
-          >
-
-            <button
-              onClick={() => handleToggle(index)}
-              className="
-                w-full
-                flex
-                justify-between
-                items-center
-                px-8
-                py-6
-                text-left
-              "
+      {/* FAQ list */}
+      <div className="max-w-3xl mx-auto space-y-3">
+        {faqs.map((faq, index) => {
+          const isOpen = activeIndex === index;
+          return (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 14 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.4, delay: index * 0.07 }}
+              className={`
+                relative rounded-2xl border overflow-hidden transition-colors duration-300
+                ${isOpen
+                  ? "border-[#C49A5A] bg-white"
+                  : "border-[#E2D5C3] bg-white hover:border-[#C49A5A]"}
+              `}
             >
+              {/* Slash wipe overlay saat buka — dari atas ke bawah */}
+              <AnimatePresence>
+                {isOpen && (
+                  <motion.div
+                    key="wipe"
+                    className="absolute inset-0 z-0 pointer-events-none"
+                    style={{
+                      background: "linear-gradient(180deg, #FDF6EE 0%, #FDF6EE 100%)",
+                      clipPath: "polygon(0 0, 100% 0, 100% 0, 0 0)",
+                    }}
+                    initial={{ clipPath: "polygon(0 0, 100% 0, 100% 0, 0 0)" }}
+                    animate={{ clipPath: "polygon(0 0, 100% 0, 100% 100%, 0 100%)" }}
+                    exit={{ clipPath: "polygon(0 0, 100% 0, 100% 0, 0 0)" }}
+                    transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
+                  />
+                )}
+              </AnimatePresence>
 
-              <span className="text-2xl md:text-3xl font-medium">
-                {faq.question}
-              </span>
+              {/* Accent bar kiri */}
+              <motion.div
+                className="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-2xl bg-[#A67C52]"
+                initial={{ scaleY: 0 }}
+                animate={{ scaleY: isOpen ? 1 : 0 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+                style={{ transformOrigin: "top" }}
+              />
 
-              <div
-                className={`
-                  w-14
-                  h-14
-                  rounded-full
-                  flex
-                  items-center
-                  justify-center
-                  transition-all
-                  duration-300
-                  flex-shrink-0
-                  
-                  ${
-                    activeIndex === index
-                      ? "bg-blue-500 text-white rotate-180"
-                      : "bg-[#DDDAD5] text-black"
-                  }
-                `}
+              {/* Tombol */}
+              <button
+                onClick={() => handleToggle(index)}
+                className="relative z-10 w-full flex justify-between items-center px-6 py-4 text-left gap-4"
               >
-                <ChevronDown size={24} />
-              </div>
-
-            </button>
-
-            <AnimatePresence>
-
-              {activeIndex === index && (
+                <span className={`text-base font-semibold transition-colors duration-200 ${isOpen ? "text-[#7A5230]" : "text-zinc-800"}`}>
+                  {faq.question}
+                </span>
 
                 <motion.div
-                  initial={{
-                    height: 0,
-                    opacity: 0,
-                  }}
-                  animate={{
-                    height: "auto",
-                    opacity: 1,
-                  }}
-                  exit={{
-                    height: 0,
-                    opacity: 0,
-                  }}
-                  transition={{
-                    duration: 0.3,
-                  }}
+                  animate={{ rotate: isOpen ? 180 : 0 }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                  className={`
+                    w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-colors duration-300
+                    ${isOpen ? "bg-[#A67C52] text-white" : "bg-[#EDE5D8] text-[#A67C52]"}
+                  `}
                 >
-
-                  <div
-                    className="
-                      px-8
-                      pb-8
-                      text-zinc-600
-                      text-lg
-                      leading-8
-                    "
-                  >
-                    {faq.answer}
-                  </div>
-
+                  <ChevronDown size={16} />
                 </motion.div>
+              </button>
 
-              )}
-
-            </AnimatePresence>
-
-          </div>
-
-        ))}
-
+              {/* Jawaban */}
+              <AnimatePresence initial={false}>
+                {isOpen && (
+                  <motion.div
+                    key="answer"
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.32, ease: [0.4, 0, 0.2, 1] }}
+                    className="relative z-10 overflow-hidden"
+                  >
+                    <div className="px-6 pb-5 pt-0">
+                      {/* divider tipis */}
+                      <div className="h-px bg-[#E8D8C4] mb-4" />
+                      <p className="text-sm text-zinc-600 leading-relaxed">
+                        {faq.answer}
+                      </p>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+          );
+        })}
       </div>
     </section>
   );

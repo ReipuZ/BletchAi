@@ -1,147 +1,260 @@
-import { Search, Send } from "lucide-react";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Search, Send, Star, BookOpen, Mic, FileText, ChevronRight } from "lucide-react";
+import homePageImg from "../assets/image/home_page.png";
+import Reveal, { RevealGroup, revealItem } from "../components/Reveal.jsx";
 
 export default function HomeSection() {
-  const courses = [
+  const [activeCategory, setActiveCategory] = useState("Rekayasa Perangkat Lunak");
+  const [hoveredCategory, setHoveredCategory] = useState(null);
+  const [inputValue, setInputValue] = useState("");
+
+  const categories = [
+    "Rekayasa Perangkat Lunak",
+    "Teknik Otomotif",
+    "Desain Grafis",
+    "Akuntansi",
+    "Tata Boga",
+    "Multimedia",
+  ];
+
+  const quickPrompts = [
+    { icon: FileText, label: "Cara buat CV ATS" },
+    { icon: Mic, label: "Tips interview kerja" },
+    { icon: BookOpen, label: "Materi RPL terbaru" },
+  ];
+
+  const popularTopics = [
     {
-      title: "Teknik Otomotif",
-      image:
-        "https://images.unsplash.com/photo-1486006920555-c77dcf18193c",
+      icon: FileText,
+      title: "Membuat CV ATS Friendly",
+      desc: "Panduan lengkap CV yang lolos sistem rekrutmen modern.",
+      badge: "🔥 Populer",
+      badgeColor: "bg-orange-50 text-orange-600",
     },
     {
-      title: "Pemrograman",
-      image:
-        "https://images.unsplash.com/photo-1515879218367-8466d910aaa4",
+      icon: Mic,
+      title: "Tips Interview Kerja",
+      desc: "Strategi menjawab pertanyaan sulit & bangun kepercayaan diri.",
+      badge: "✨ Baru",
+      badgeColor: "bg-amber-50 text-[#A67C52]",
     },
     {
-      title: "Musik Digital",
-      image:
-        "https://images.unsplash.com/photo-1511379938547-c1f69419868d",
-    },
-    {
-      title: "Desain Teknik",
-      image:
-        "https://images.unsplash.com/photo-1503387762-592deb58ef4e",
-    },
-    {
-      title: "Networking",
-      image:
-        "https://images.unsplash.com/photo-1544197150-b99a580bb7a8",
-    },
-    {
-      title: "Data Analyst",
-      image:
-        "https://images.unsplash.com/photo-1551288049-bebda4e38f71",
+      icon: BookOpen,
+      title: "Optimasi Profil LinkedIn",
+      desc: "Buat profil yang menarik perhatian rekruter industri.",
+      badge: "✨ Baru",
+      badgeColor: "bg-amber-50 text-[#A67C52]",
     },
   ];
 
   return (
-    <section
-      id="home"
-      className="min-h-screen px-12 py-12"
-    >
-      {/* Header */}
-      <div>
-        <h1 className="text-5xl font-bold">
-          Halo, User
-        </h1>
+    <section id="home" className="min-h-screen bg-[#F5F3F0] pb-16">
 
-        <h2 className="text-3xl font-semibold mt-10">
-          Apa yang ingin kamu pelajari hari ini?
-        </h2>
+      {/* ── Hero ── */}
+      <div className="px-12 pt-8">
+        <div className="relative rounded-[28px] overflow-hidden h-[340px] flex flex-col items-center justify-center text-center">
+          <img
+            src={homePageImg}
+            alt=""
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#111315]/80 via-[#111315]/55 to-[#111315]/90" />
+
+          <div className="relative z-10 px-6">
+            <motion.span
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 text-[#E5E5E5] text-xs font-medium px-4 py-1.5 rounded-full mb-4"
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-[#A67C52]" />
+              Sosialisasi & Edukasi Karier
+            </motion.span>
+
+            <motion.h1
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.55, delay: 0.1 }}
+              className="text-4xl font-bold leading-tight"
+            >
+              <span className="text-white">Siapkan Dirimu</span>
+              <br />
+              <span className="text-white">Menghadapi </span>
+              <span className="text-[#D9B996]">Dunia</span>{" "}
+              <span className="text-[#A67C52]">Kerja</span>
+            </motion.h1>
+
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5, delay: 0.25 }}
+              className="text-[#E5E5E5]/75 text-sm mt-3 max-w-md mx-auto leading-relaxed"
+            >
+              Bletch AI hadir membantu kamu mempersiapkan CV, melatih interview,
+              dan menemukan peluang karier yang tepat — kapan saja kamu butuh.
+            </motion.p>
+
+            {/* Quick prompt chips di dalam hero */}
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.35 }}
+              className="flex items-center justify-center gap-2 mt-5 flex-wrap"
+            >
+              {quickPrompts.map(({ icon: Icon, label }) => (
+                <button
+                  key={label}
+                  onClick={() => setInputValue(label)}
+                  className="flex items-center gap-1.5 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 text-white/80 text-xs font-medium px-3 py-1.5 rounded-full transition-all duration-200"
+                >
+                  <Icon size={12} />
+                  {label}
+                </button>
+              ))}
+            </motion.div>
+          </div>
+
+          {/* Slide indicator dots */}
+          <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-10">
+            <span className="w-4 h-1.5 rounded-full bg-[#A67C52]" />
+            <span className="w-1.5 h-1.5 rounded-full bg-white/40" />
+            <span className="w-1.5 h-1.5 rounded-full bg-white/40" />
+          </div>
+        </div>
+
+        {/* ── Search Card ── */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="relative -mt-10 mx-4"
+        >
+          <div className="bg-white rounded-3xl shadow-xl border border-zinc-100 p-6 pb-5">
+
+            {/* Category pills */}
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 mb-5 [&::-webkit-scrollbar]:hidden">
+              {categories.map((cat) => {
+                const isActive = activeCategory === cat;
+                const isHovered = hoveredCategory === cat;
+                return (
+                  <button
+                    key={cat}
+                    onClick={() => setActiveCategory(cat)}
+                    onMouseEnter={() => setHoveredCategory(cat)}
+                    onMouseLeave={() => setHoveredCategory(null)}
+                    className={`
+                      relative shrink-0 overflow-hidden text-xs font-medium px-4 py-2 rounded-full whitespace-nowrap transition-colors duration-300 ease-out border
+                      ${isActive
+                        ? "bg-[#111315] text-white border-[#111315] shadow-md"
+                        : "text-zinc-500 border-zinc-200 hover:border-[#A67C52]/40 hover:text-[#6D4C41]"
+                      }
+                    `}
+                  >
+                    {!isActive && (
+                      <motion.span
+                        className="absolute inset-0 bg-[#A67C52]/10 rounded-full"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: isHovered ? 1 : 0 }}
+                        transition={{ duration: 0.2 }}
+                      />
+                    )}
+                    <AnimatePresence>
+                      {isHovered && !isActive && (
+                        <motion.span
+                          key={`shimmer-${cat}`}
+                          className="absolute inset-y-0 w-1/3 bg-gradient-to-r from-transparent via-white/60 to-transparent pointer-events-none"
+                          initial={{ x: "-150%" }}
+                          animate={{ x: "250%" }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0.7, ease: "easeInOut" }}
+                        />
+                      )}
+                    </AnimatePresence>
+                    <span className="relative z-10">{cat}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <h2 className="text-lg font-semibold text-zinc-800 mb-3">
+              Apa yang ingin kamu pelajari hari ini?
+            </h2>
+
+            {/* Search input */}
+            <div className="bg-[#F5F5F4] rounded-full border border-zinc-200 px-5 py-3.5 flex items-center gap-3 focus-within:border-[#A67C52]/50 focus-within:ring-2 focus-within:ring-[#A67C52]/10 transition-all">
+              <Search size={18} className="text-zinc-400 shrink-0" />
+              <input
+                type="text"
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                placeholder="Tanyakan seputar layanan BLETCHAI..."
+                className="flex-1 bg-transparent outline-none text-sm text-zinc-800 placeholder:text-zinc-400"
+              />
+              <button className="bg-[#6D4C41] hover:bg-[#A67C52] transition-colors duration-200 rounded-full w-9 h-9 flex items-center justify-center shrink-0 shadow-sm">
+                <Send size={15} className="text-white" />
+              </button>
+            </div>
+
+            <p className="text-zinc-400 text-xs mt-2.5 ml-1">
+              Chatbot akan membantu menjawab pertanyaan berdasarkan informasi yang tersedia.
+            </p>
+
+            {/* Social proof */}
+            <div className="flex items-center gap-3 mt-4 pt-4 border-t border-zinc-100">
+              <div className="flex -space-x-2.5">
+                {[["A", "#A67C52"], ["B", "#6D4C41"], ["C", "#8D6E63"], ["D", "#D9B996"]].map(([letter, color]) => (
+                  <div
+                    key={letter}
+                    className="w-8 h-8 rounded-full border-2 border-white flex items-center justify-center text-xs font-semibold text-white"
+                    style={{ backgroundColor: color }}
+                  >
+                    {letter}
+                  </div>
+                ))}
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-zinc-800 leading-tight">2.500+ Peserta Aktif</p>
+                <div className="flex items-center gap-1 mt-0.5">
+                  <Star size={12} className="fill-[#A67C52] text-[#A67C52]" />
+                  <span className="text-xs text-zinc-500">4.9 Rating</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </motion.div>
       </div>
 
-      {/* Search */}
-      <div className="mt-12">
-        <div
-          className="
-            bg-white
-            rounded-full
-            border-2
-            border-zinc-300
-            px-8
-            py-5
-            flex
-            items-center
-            gap-5
-          "
-        >
-          <Search size={35} />
-
-          <input
-            type="text"
-            placeholder="Tanyakan seputar layanan BLETCHAI..."
-            className="
-              flex-1
-              outline-none
-              text-xl
-            "
-          />
-
-          <button>
-            <Send size={32} />
+      {/* ── Materi Populer ── */}
+      <Reveal className="px-12 mt-10" amount={0.15}>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-base font-semibold text-zinc-800">Materi Populer</h3>
+          <button className="flex items-center gap-1 text-xs font-medium text-[#A67C52] hover:text-[#6D4C41] transition-colors">
+            Lihat semua <ChevronRight size={14} />
           </button>
         </div>
 
-        <p className="text-zinc-500 mt-3 ml-16">
-          Chatbot akan membantu menjawab
-          pertanyaan berdasarkan informasi
-          yang tersedia.
-        </p>
-      </div>
-
-      {/* Course */}
-      <div className="mt-20">
-        <h3 className="text-3xl italic text-zinc-600 mb-8">
-          Pelatihan yang direkomendasikan
-        </h3>
-
-        <div className="grid grid-cols-3 gap-6">
-          {courses.map((course, index) => (
-            <div
-              key={index}
-              className="
-                relative
-                overflow-hidden
-                rounded-[40px]
-                h-[280px]
-                cursor-pointer
-                group
-              "
+        <RevealGroup className="grid grid-cols-3 gap-4" stagger={0.1} amount={0.15}>
+          {popularTopics.map(({ icon: Icon, title, desc, badge, badgeColor }) => (
+            <motion.div
+              key={title}
+              variants={revealItem}
+              whileHover={{ y: -2 }}
+              className="bg-white rounded-2xl p-5 border border-zinc-100 hover:border-[#A67C52]/30 hover:shadow-md transition-all cursor-pointer"
             >
-              <img
-                src={course.image}
-                alt={course.title}
-                className="
-                  w-full
-                  h-full
-                  object-cover
-                  transition
-                  duration-300
-                  group-hover:scale-110
-                "
-              />
-
-              <div
-                className="
-                  absolute
-                  inset-0
-                  bg-black/40
-                  opacity-0
-                  group-hover:opacity-100
-                  transition
-                  flex
-                  items-center
-                  justify-center
-                "
-              >
-                <h4 className="text-white text-2xl font-bold">
-                  {course.title}
-                </h4>
+              <div className="w-9 h-9 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center mb-3">
+                <Icon size={18} className="text-[#A67C52]" />
               </div>
-            </div>
+              <p className="text-sm font-semibold text-zinc-800 mb-1">{title}</p>
+              <p className="text-xs text-zinc-500 leading-relaxed">{desc}</p>
+              <span className={`inline-block mt-3 text-xs font-medium px-2.5 py-1 rounded-full ${badgeColor}`}>
+                {badge}
+              </span>
+            </motion.div>
           ))}
-        </div>
-      </div>
+        </RevealGroup>
+      </Reveal>
+
     </section>
   );
 }
