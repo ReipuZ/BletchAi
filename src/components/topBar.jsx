@@ -93,9 +93,8 @@ export default function TopBar({ onLogout, onLogin, activePage = "Home", collaps
   return (
     <header className="relative sticky top-0 z-50 w-full h-16 bg-white border-b border-zinc-100 flex items-center justify-between px-6 gap-3">
 
-      {/* Kiri: Hamburger + Logo */}
+      {/* Kiri: Hamburger*/}
       <div className="flex items-center gap-3 flex-shrink-0">
-        {/* Tombol hamburger collapse sidebar */}
         <button
           onClick={() => setCollapsed?.(!collapsed)}
           className="w-9 h-9 rounded-xl hover:bg-[#A67C52]/10 flex items-center justify-center transition text-zinc-500 hover:text-[#A67C52]"

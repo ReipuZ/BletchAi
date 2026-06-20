@@ -39,18 +39,6 @@ export default function Reveal({
   );
 }
 
-/**
- * RevealGroup
- * Untuk grid/list yang elemennya mau muncul satu-satu (stagger) saat parent masuk viewport.
- * Bungkus grid-mu dengan RevealGroup, lalu tiap item pakai motion.div dengan variants `revealItem`.
- *
- * Contoh:
- * <RevealGroup className="grid grid-cols-3 gap-4">
- *   {items.map((item) => (
- *     <motion.div key={item.id} variants={revealItem}>...</motion.div>
- *   ))}
- * </RevealGroup>
- */
 export function RevealGroup({ children, className = "", stagger = 0.08, amount = 0.2 }) {
   return (
     <motion.div

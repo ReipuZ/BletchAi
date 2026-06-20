@@ -52,7 +52,6 @@ export default function Register({ onGoLogin, onSuccess }) {
           </div>
         </div>
 
-        {/* Email */}
         <div>
           <label className="block text-xs font-medium text-zinc-600 mb-1.5">Email</label>
           <div className="relative">
@@ -68,7 +67,6 @@ export default function Register({ onGoLogin, onSuccess }) {
           </div>
         </div>
 
-        {/* Password */}
         <div>
           <label className="block text-xs font-medium text-zinc-600 mb-1.5">Kata Sandi</label>
           <div className="relative">
@@ -88,7 +86,6 @@ export default function Register({ onGoLogin, onSuccess }) {
           </div>
         </div>
 
-        {/* Confirm Password */}
         <div>
           <label className="block text-xs font-medium text-zinc-600 mb-1.5">Konfirmasi Kata Sandi</label>
           <div className="relative">
@@ -107,7 +104,6 @@ export default function Register({ onGoLogin, onSuccess }) {
           </div>
         </div>
 
-        {/* Agree */}
         <label className="flex items-start gap-2.5 cursor-pointer">
           <input
             type="checkbox"
@@ -131,7 +127,6 @@ export default function Register({ onGoLogin, onSuccess }) {
         </button>
       </form>
 
-      {/* ✅ Link masuk di bawah form */}
       <p className="text-xs text-center text-zinc-400 mt-6">
         Sudah punya akun?{" "}
         <span

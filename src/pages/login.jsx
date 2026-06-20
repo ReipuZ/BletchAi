@@ -62,7 +62,6 @@ export default function Login({ onLogin, onGoRegister }) {
           </div>
         </div>
 
-        {/* Password */}
         <div>
           <label className="block text-xs font-medium text-zinc-600 mb-1.5">Kata Sandi</label>
           <div className="relative">
@@ -97,14 +96,12 @@ export default function Login({ onLogin, onGoRegister }) {
         </button>
       </form>
 
-      {/* Divider */}
       <div className="flex items-center gap-3 my-5">
         <div className="flex-1 h-px bg-zinc-100" />
         <span className="text-xs text-zinc-400">atau masuk dengan</span>
         <div className="flex-1 h-px bg-zinc-100" />
       </div>
 
-      {/* Google */}
       <button
         onClick={handleGoogle}
         disabled={loading}

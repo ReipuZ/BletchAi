@@ -171,18 +171,15 @@ const CARD_W = 220;
 const CARD_GAP = 14;
 const STEP = CARD_W + CARD_GAP;
 
-// Popup di-render ke document.body via portal agar bebas dari overflow parent.
-// Menerima onMouseEnter/onMouseLeave supaya popup sendiri bisa "menjaga" state hover,
-// dan onSelect untuk menangani klik "Lihat Detail".
 function CoursePopup({ course, anchorRect, onMouseEnter, onMouseLeave, onSelect }) {
   if (!anchorRect) return null;
 
   const POPUP_W = 260;
   const POPUP_MARGIN = 10;
 
-  // Hitung posisi: muncul di atas card
+
   const top = anchorRect.top + window.scrollY - POPUP_MARGIN;
-  // Default sejajar kiri card, tapi jangan keluar layar kanan
+
   let left = anchorRect.left + window.scrollX;
   if (left + POPUP_W > window.innerWidth - 12) {
     left = anchorRect.right + window.scrollX - POPUP_W;
@@ -280,7 +277,6 @@ function CourseCard({ course, onSelect }) {
   const cardRef = useRef(null);
   const closeTimerRef = useRef(null);
 
-  // Batalkan rencana "tutup popup" yang sedang berjalan
   const cancelClose = () => {
     if (closeTimerRef.current) {
       clearTimeout(closeTimerRef.current);
@@ -288,9 +284,6 @@ function CourseCard({ course, onSelect }) {
     }
   };
 
-  // Jadwalkan penutupan popup dengan sedikit delay, supaya saat kursor
-  // berpindah dari card menuju popup (melewati celah kecil), popup
-  // tidak langsung hilang sebelum sempat di-hover ulang.
   const scheduleClose = () => {
     cancelClose();
     closeTimerRef.current = setTimeout(() => {
@@ -396,7 +389,7 @@ export default function CourseRecommendation() {
   }, []);
 
   const handleSelectCourse = (course) => {
-    // TODO: arahkan ke halaman detail kursus, mis. navigate(`/kursus/${course.id}`)
+
     console.log("Lihat detail kursus:", course.title);
   };
 
@@ -410,9 +403,6 @@ export default function CourseRecommendation() {
         </button>
       </Reveal>
 
-      {/* Carousel auto-scroll dibiarkan tanpa scroll-reveal per-card:
-          posisinya digerakkan terus-menerus lewat translateX manual (posRef),
-          jadi cukup di-reveal sebagai satu blok lewat fade halus saja. */}
       <Reveal amount={0.1} duration={0.5}>
         <div
           className="overflow-hidden"

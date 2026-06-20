@@ -85,7 +85,6 @@ export default function SidebarLeft({ collapsed }) {
                   }
                 `}
               >
-                {/* Accent bar kiri saat aktif */}
                 {!collapsed && (
                   <span className={`absolute left-0 w-[3px] h-6 rounded-r-full bg-[#A67C52] transition-all duration-200 ${isActive ? "opacity-100" : "opacity-0"}`} />
                 )}
@@ -111,7 +110,6 @@ export default function SidebarLeft({ collapsed }) {
 
       {/* Bottom */}
       <div className="p-3 space-y-3">
-        {/* AI Assistant card */}
         {!collapsed && (
           <div className="rounded-2xl bg-[#FDF6EE] border border-[#EDD9BE]/60 p-4">
             <div className="flex items-center gap-2 mb-1.5">
@@ -129,7 +127,6 @@ export default function SidebarLeft({ collapsed }) {
           </div>
         )}
 
-        {/* AI icon saat collapsed */}
         {collapsed && (
           <div className="flex justify-center">
             <button
@@ -148,7 +145,6 @@ export default function SidebarLeft({ collapsed }) {
         </div>
       </div>
 
-      {/* Fade kanan */}
       <div
         className="absolute top-0 right-0 h-full w-5 translate-x-full pointer-events-none"
         style={{ background: "linear-gradient(to right, rgba(255,255,255,0.15), rgba(255,255,255,0))" }}

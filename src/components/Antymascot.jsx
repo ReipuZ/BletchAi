@@ -1,9 +1,4 @@
 import { motion } from "framer-motion";
-
-/**
- * AntyMascot — maskot semut humanoid BletchAI
- * Warna coklat, menghadap kanan, tangan kiri memegang dagu (pose berpikir)
- */
 export default function AntyMascot({ size = 300, className = "" }) {
   return (
     <motion.div
