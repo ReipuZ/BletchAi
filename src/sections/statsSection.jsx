@@ -1,7 +1,7 @@
 import { motion, useInView } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
 import Reveal, { RevealGroup, revealItem } from "../components/Reveal.jsx";
-import AntyMascot from "../components/AntyMascot.jsx";
+import AntyMascot from "../components/Antymascot.jsx";
 
 const stats = [
   { label: "Pemilihan kata", value: 82, color: "#E24B4A" },
