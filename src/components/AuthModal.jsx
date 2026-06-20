@@ -30,7 +30,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login", onSu
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.22 }}
-          className="fixed inset-0 z-[100] flex items-center justify-center px-0 sm:px-4 py-0 sm:py-6"
+          className="fixed inset-0 z-[100] flex items-center justify-center px-4 py-6"
           style={{ background: "rgba(30,18,8,0.55)", backdropFilter: "blur(6px)" }}
           onClick={onClose}
         >
@@ -39,8 +39,8 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login", onSu
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.93, y: 28 }}
             transition={{ type: "spring", stiffness: 280, damping: 26 }}
-            className="relative w-full h-full sm:h-auto max-w-full sm:max-w-[860px] overflow-y-auto sm:overflow-hidden shadow-2xl flex rounded-none sm:rounded-3xl"
-            style={{ maxHeight: "100vh" }}
+            className="relative w-full max-w-[860px] overflow-hidden shadow-2xl flex rounded-3xl"
+            style={{ maxHeight: "calc(100vh - 3rem)" }}
             onClick={(e) => e.stopPropagation()}
           >
 
@@ -263,7 +263,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login", onSu
             </div>
 
             {/* ── PANEL KANAN ── form */}
-            <div className="flex-1 flex flex-col justify-center px-5 sm:px-8 py-10 sm:py-10 bg-white min-h-screen sm:min-h-0">
+            <div className="relative flex-1 flex flex-col justify-center px-5 sm:px-8 py-8 sm:py-10 bg-white overflow-y-auto">
               {/* Tombol close */}
               <motion.button
                 onClick={onClose}
