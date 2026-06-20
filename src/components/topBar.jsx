@@ -8,6 +8,7 @@ export default function TopBar({ onLogout, onLogin, activePage = "Home", collaps
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [searchFocus, setSearchFocus] = useState(false);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const dropdownRef = useRef(null);
   const searchRef = useRef(null);
 
@@ -61,25 +62,25 @@ export default function TopBar({ onLogout, onLogin, activePage = "Home", collaps
       icon: <MessageCircle size={14} className="text-[#A67C52]" />,
       label: "Coba berbicara dengan Chatbot",
       desc: "Tanyakan apa saja seputar BletchAI",
-      action: () => { setSearchFocus(false); document.getElementById("home")?.scrollIntoView({ behavior: "smooth" }); },
+      action: () => { setSearchFocus(false); setMobileSearchOpen(false); document.getElementById("home")?.scrollIntoView({ behavior: "smooth" }); },
     },
     {
       icon: <Mic size={14} className="text-[#A67C52]" />,
       label: "Mulai Interview",
       desc: "Latih kemampuan interview kamu bersama AI",
-      action: () => { setSearchFocus(false); document.getElementById("interview")?.scrollIntoView({ behavior: "smooth" }); },
+      action: () => { setSearchFocus(false); setMobileSearchOpen(false); document.getElementById("interview")?.scrollIntoView({ behavior: "smooth" }); },
     },
     {
       icon: <BarChart2 size={14} className="text-[#A67C52]" />,
       label: "Lihat Stats",
       desc: "Pantau perkembangan kemampuan kamu",
-      action: () => { setSearchFocus(false); document.getElementById("stats")?.scrollIntoView({ behavior: "smooth" }); },
+      action: () => { setSearchFocus(false); setMobileSearchOpen(false); document.getElementById("stats")?.scrollIntoView({ behavior: "smooth" }); },
     },
     {
       icon: <CircleHelp size={14} className="text-[#A67C52]" />,
       label: "FAQ",
       desc: "Pertanyaan yang sering ditanyakan",
-      action: () => { setSearchFocus(false); document.getElementById("faq")?.scrollIntoView({ behavior: "smooth" }); },
+      action: () => { setSearchFocus(false); setMobileSearchOpen(false); document.getElementById("faq")?.scrollIntoView({ behavior: "smooth" }); },
     },
   ];
 
@@ -91,26 +92,24 @@ export default function TopBar({ onLogout, onLogin, activePage = "Home", collaps
     : searchMenus;
 
   return (
-    <header className="relative sticky top-0 z-50 w-full h-16 bg-white border-b border-zinc-100 flex items-center justify-between px-6 gap-3">
+    <header className="relative sticky top-0 z-50 w-full h-14 sm:h-16 bg-white border-b border-zinc-100 flex items-center justify-between px-3 sm:px-6 gap-2 sm:gap-3">
 
       {/* Kiri: Hamburger*/}
-      <div className="flex items-center gap-3 flex-shrink-0">
+      <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0 min-w-0">
         <button
           onClick={() => setCollapsed?.(!collapsed)}
-          className="w-9 h-9 rounded-xl hover:bg-[#A67C52]/10 flex items-center justify-center transition text-zinc-500 hover:text-[#A67C52]"
+          className="w-9 h-9 rounded-xl hover:bg-[#A67C52]/10 flex items-center justify-center transition text-zinc-500 hover:text-[#A67C52] flex-shrink-0"
           aria-label={collapsed ? "Buka sidebar" : "Tutup sidebar"}
         >
           <Menu size={18} />
         </button>
 
-        <span className="text-[15px] font-semibold text-zinc-800">Bletch AI</span>
+        <span className="text-[14px] sm:text-[15px] font-semibold text-zinc-800 truncate">Bletch AI</span>
       </div>
 
-      {/* Kanan: Search + Notif + Avatar */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-1.5 sm:gap-3">
 
-        {/* Search */}
-        <div className="relative" ref={searchRef}>
+        <div className="relative hidden sm:block" ref={searchRef}>
           <div className="relative">
             <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
             <input
@@ -119,7 +118,7 @@ export default function TopBar({ onLogout, onLogin, activePage = "Home", collaps
               onChange={(e) => setSearch(e.target.value)}
               onFocus={() => setSearchFocus(true)}
               placeholder="Cari kursus atau topik..."
-              className="w-64 bg-zinc-50 border border-zinc-200 text-zinc-800 placeholder-zinc-400 text-sm rounded-xl py-2 pl-10 pr-4 focus:outline-none focus:border-[#A67C52]/60 focus:bg-white transition"
+              className="w-44 md:w-64 bg-zinc-50 border border-zinc-200 text-zinc-800 placeholder-zinc-400 text-sm rounded-xl py-2 pl-10 pr-4 focus:outline-none focus:border-[#A67C52]/60 focus:bg-white transition"
             />
           </div>
 
@@ -147,25 +146,38 @@ export default function TopBar({ onLogout, onLogin, activePage = "Home", collaps
           </div>
         </div>
 
+        <button
+          onClick={() => setMobileSearchOpen(true)}
+          className="sm:hidden w-9 h-9 rounded-xl hover:bg-zinc-100 flex items-center justify-center transition text-zinc-500 hover:text-zinc-700 flex-shrink-0"
+          aria-label="Cari"
+        >
+          <Search size={18} />
+        </button>
+
         {/* Notif */}
-        <button className="relative w-9 h-9 rounded-xl hover:bg-zinc-100 flex items-center justify-center transition text-zinc-500 hover:text-zinc-700">
+        <button className="relative w-9 h-9 rounded-xl hover:bg-zinc-100 flex items-center justify-center transition text-zinc-500 hover:text-zinc-700 flex-shrink-0">
           <Bell size={18} />
           <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#A67C52]" />
         </button>
 
         {/* Avatar + nama */}
-        <div className="relative" ref={dropdownRef}>
+        <div className="relative flex-shrink-0" ref={dropdownRef}>
           <button
             onClick={() => setOpen(!open)}
-            className="flex items-center gap-2.5 pl-1 pr-2 py-1 rounded-xl hover:bg-zinc-100 transition"
+            className="flex items-center gap-2 sm:gap-2.5 pl-0.5 sm:pl-1 pr-1 sm:pr-2 py-1 rounded-xl hover:bg-zinc-100 transition"
           >
             {loggedIn ? (
-              <div className="relative">
-                <img src={avatarSrc} alt="profile" className="w-8 h-8 rounded-full object-cover" />
+              <div className="relative flex-shrink-0 w-8 h-8">
+                <img
+                  src={avatarSrc}
+                  alt="profile"
+                  className="w-8 h-8 rounded-full object-cover block"
+                  referrerPolicy="no-referrer"
+                />
                 <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-[#639922] border-2 border-white" />
               </div>
             ) : (
-              <div className="relative">
+              <div className="relative flex-shrink-0 w-8 h-8">
                 <div className="w-8 h-8 rounded-full bg-zinc-100 flex items-center justify-center">
                   <UserRound size={18} className="text-zinc-500" />
                 </div>
@@ -180,18 +192,23 @@ export default function TopBar({ onLogout, onLogin, activePage = "Home", collaps
               </p>
               <p className="text-[11px] text-zinc-400 leading-none">Siswa</p>
             </div>
-            <ChevronDown size={14} className={`text-zinc-400 transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
+            <ChevronDown size={14} className={`hidden sm:block text-zinc-400 transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
           </button>
 
           {/* Dropdown */}
-          <div className={`absolute right-0 top-12 w-56 rounded-2xl bg-white border border-zinc-100 shadow-lg overflow-hidden transition-all duration-200 ${
+          <div className={`absolute right-0 top-12 w-[min(85vw,17rem)] rounded-2xl bg-white border border-zinc-100 shadow-lg overflow-hidden transition-all duration-200 ${
             open ? "opacity-100 translate-y-0 scale-100" : "opacity-0 pointer-events-none -translate-y-2 scale-95"
           }`}>
             {loggedIn ? (
               <>
                 <div className="px-4 py-3 border-b border-zinc-100 flex items-center gap-3">
-                  <img src={avatarSrc} alt="profile" className="w-9 h-9 rounded-full object-cover flex-shrink-0" />
-                  <div className="min-w-0">
+                  <img
+                    src={avatarSrc}
+                    alt="profile"
+                    className="w-9 h-9 rounded-full object-cover flex-shrink-0 block"
+                    referrerPolicy="no-referrer"
+                  />
+                  <div className="min-w-0 flex-1">
                     <p className="text-zinc-800 text-sm font-medium truncate">{displayName || "User"}</p>
                     <p className="text-zinc-400 text-xs truncate">{displayEmail}</p>
                   </div>
@@ -231,6 +248,44 @@ export default function TopBar({ onLogout, onLogin, activePage = "Home", collaps
           </div>
         </div>
       </div>
+
+      {mobileSearchOpen && (
+        <div className="sm:hidden fixed inset-0 z-[60] bg-white flex flex-col">
+          <div className="flex items-center gap-2 px-4 h-14 border-b border-zinc-100">
+            <Search size={16} className="text-zinc-400 flex-shrink-0" />
+            <input
+              autoFocus
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Cari kursus atau topik..."
+              className="flex-1 text-sm outline-none placeholder-zinc-400 text-zinc-800"
+            />
+            <button onClick={() => setMobileSearchOpen(false)} className="text-zinc-400 p-1">
+              <X size={18} />
+            </button>
+          </div>
+          <div className="flex-1 overflow-y-auto">
+            <p className="text-zinc-400 text-xs px-4 pt-3 pb-1">
+              {search.trim() ? "Hasil pencarian" : "Menu cepat"}
+            </p>
+            {filteredMenus.length > 0 ? filteredMenus.map((menu, i) => (
+              <button key={i} onClick={menu.action}
+                className="w-full flex items-center gap-3 px-4 py-3 hover:bg-zinc-50 transition text-left">
+                <div className="w-8 h-8 rounded-md bg-zinc-100 flex items-center justify-center flex-shrink-0">
+                  {menu.icon}
+                </div>
+                <div>
+                  <p className="text-zinc-700 text-sm font-medium">{menu.label}</p>
+                  <p className="text-zinc-400 text-xs">{menu.desc}</p>
+                </div>
+              </button>
+            )) : (
+              <p className="text-zinc-400 text-sm px-4 py-2">Tidak ditemukan</p>
+            )}
+          </div>
+        </div>
+      )}
 
       <div className="absolute left-0 bottom-0 w-full h-6 translate-y-full pointer-events-none"
         style={{ background: "linear-gradient(to bottom, rgba(255,255,255,0.15), rgba(255,255,255,0) 100%)" }} />

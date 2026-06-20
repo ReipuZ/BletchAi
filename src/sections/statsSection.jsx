@@ -107,17 +107,18 @@ function StatBubble({ label, value, color, delay, floatIndex }) {
 
 export default function StatsSection() {
   return (
-    <section id="stats" className="bg-white py-20 px-12">
+    <section id="stats" className="bg-white py-12 sm:py-16 md:py-20 px-4 sm:px-8 md:px-12">
       <div className="max-w-5xl mx-auto">
 
         {/* Maskot + Statistik */}
-        <div className="grid grid-cols-[300px_1fr] gap-12 items-center mb-20">
+        <div className="grid grid-cols-1 md:grid-cols-[300px_1fr] gap-6 sm:gap-8 md:gap-12 items-center mb-12 sm:mb-16 md:mb-20">
           <Reveal amount={0.4} y={16}>
-            <AntyMascot size={300} className="mx-auto" />
+            <AntyMascot size={180} className="mx-auto md:hidden" />
+            <AntyMascot size={300} className="mx-auto hidden md:block" />
           </Reveal>
 
           <Reveal amount={0.3} delay={0.1} y={16}>
-            <p className="italic text-sm text-zinc-400 mb-5">
+            <p className="italic text-xs sm:text-sm text-zinc-400 mb-4 sm:mb-5 text-center md:text-left">
               *Sepertinya keahlian interview-mu semakin hari semakin baik
             </p>
             <div className="flex flex-col gap-3">
@@ -130,20 +131,20 @@ export default function StatsSection() {
 
         {/* Heading 3 langkah */}
         <Reveal amount={0.4}>
-          <h3 className="text-3xl md:text-4xl font-extrabold text-zinc-900 text-center mb-10">
+          <h3 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-zinc-900 text-center mb-8 sm:mb-10">
             Wujudkan Karier Impianmu dalam 3 Langkah!
           </h3>
         </Reveal>
 
         {/* 3 kartu dengan nomor dan aksen coklat */}
-        <RevealGroup className="grid grid-cols-3 gap-5" stagger={0.12} amount={0.2}>
+        <RevealGroup className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5" stagger={0.12} amount={0.2}>
           {steps.map((step) => (
             <motion.div
               key={step.title}
               variants={revealItem}
               whileHover={{ y: -6, boxShadow: "0 16px 32px rgba(166,124,82,0.12)" }}
               transition={{ duration: 0.2 }}
-              className="relative bg-white rounded-2xl border border-[#E8D8C4] shadow-sm p-6 overflow-hidden cursor-default group"
+              className="relative bg-white rounded-2xl border border-[#E8D8C4] shadow-sm p-5 sm:p-6 overflow-hidden cursor-default group"
             >
               {/* Aksen sudut kanan atas */}
               <div className="absolute top-0 right-0 w-20 h-20 rounded-bl-[60px] bg-[#FDF6EE] transition-colors duration-300 group-hover:bg-[#F5EAD8]" />

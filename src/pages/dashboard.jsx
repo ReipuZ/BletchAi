@@ -23,9 +23,9 @@ export default function Dashboard({ onLogout, onLogin, localUser, isLogin }) {
         isLogin={isLogin}
       />
 
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden min-w-0">
         <SidebarLeft collapsed={collapsed} />
-        <main className="flex-1 h-[calc(100vh-56px)] overflow-y-auto scroll-smooth">
+        <main className="flex-1 min-w-0 h-[calc(100vh-56px)] overflow-y-auto overflow-x-hidden scroll-smooth">
           <HomeSection />
           <KursusSection />
           <InterviewSection />

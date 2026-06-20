@@ -22,11 +22,11 @@ const socials = [
 
 export default function FooterSection() {
   return (
-    <footer className="bg-[#1E1A16] text-white pt-16 pb-8">
-      <div className="max-w-6xl mx-auto px-10">
+    <footer className="bg-[#1E1A16] text-white pt-12 sm:pt-16 pb-8">
+      <div className="max-w-6xl mx-auto px-5 sm:px-8 md:px-10">
 
         {/* Main grid */}
-        <div className="grid grid-cols-[1.8fr_1fr_1fr] gap-16 pb-12 border-b border-white/10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-[1.8fr_1fr_1fr] gap-8 sm:gap-10 md:gap-16 pb-10 sm:pb-12 border-b border-white/10">
 
           {/* Brand col */}
           <motion.div
@@ -34,6 +34,7 @@ export default function FooterSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
+            className="sm:col-span-2 md:col-span-1"
           >
             {/* Logo text */}
             <div className="flex items-center gap-2.5 mb-4">
@@ -93,7 +94,6 @@ export default function FooterSection() {
             </ul>
           </motion.div>
 
-          {/* Contact col */}
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -116,7 +116,7 @@ export default function FooterSection() {
         </div>
 
         {/* Bottom bar */}
-        <div className="pt-6 flex justify-between items-center">
+        <div className="pt-6 flex flex-col sm:flex-row gap-2 sm:gap-0 justify-between items-center text-center sm:text-left">
           <p className="text-xs text-white/30">
             © 2026 <span className="text-white/50 font-semibold">BletchAI</span>. All rights reserved.
           </p>

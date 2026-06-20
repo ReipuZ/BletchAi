@@ -13,6 +13,19 @@ export default function SidebarLeft({ collapsed }) {
   const [active, setActive] = useState("home");
   const isClicking = useRef(false);
 
+  const [isMobile, setIsMobile] = useState(
+    typeof window !== "undefined" ? window.innerWidth < 768 : false
+  );
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const effectiveCollapsed = isMobile ? true : collapsed;
+
   const menuItems = [
     { name: "Dashboard",    icon: House,       target: "home" },
     { name: "Kursus",       icon: BookOpen,    target: "kursus" },
@@ -55,16 +68,17 @@ export default function SidebarLeft({ collapsed }) {
   return (
     <aside
       className={`
-        relative h-screen sticky top-0
+        relative h-screen sticky top-0 z-30
         bg-white border-r border-zinc-100
         transition-all duration-300 ease-in-out
         flex flex-col justify-between
-        ${collapsed ? "w-[68px]" : "w-60"}
+        flex-shrink-0
+        ${effectiveCollapsed ? "w-[60px] sm:w-[68px]" : "w-60"}
       `}
     >
       <div>
         {/* Menu */}
-        <nav className="mt-2 px-2.5 space-y-0.5">
+        <nav className="mt-2 px-2 sm:px-2.5 space-y-0.5">
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = active === item.target;
@@ -73,10 +87,10 @@ export default function SidebarLeft({ collapsed }) {
               <button
                 key={item.name}
                 onClick={() => scrollToSection(item.target)}
-                title={collapsed ? item.name : undefined}
+                title={effectiveCollapsed ? item.name : undefined}
                 className={`
                   group w-full flex items-center box-border
-                  ${collapsed ? "justify-center px-0" : "gap-3 px-3"}
+                  ${effectiveCollapsed ? "justify-center px-0" : "gap-3 px-3"}
                   py-2.5 rounded-xl
                   transition-all duration-150
                   ${isActive
@@ -85,7 +99,7 @@ export default function SidebarLeft({ collapsed }) {
                   }
                 `}
               >
-                {!collapsed && (
+                {!effectiveCollapsed && (
                   <span className={`absolute left-0 w-[3px] h-6 rounded-r-full bg-[#A67C52] transition-all duration-200 ${isActive ? "opacity-100" : "opacity-0"}`} />
                 )}
 
@@ -97,7 +111,7 @@ export default function SidebarLeft({ collapsed }) {
                     ${isActive ? "text-[#A67C52]" : "text-zinc-400 group-hover:text-[#C49A5A]"}
                   `}
                 />
-                {!collapsed && (
+                {!effectiveCollapsed && (
                   <span className={`text-[13.5px] transition-colors duration-150 ${isActive ? "font-semibold text-[#A67C52]" : "font-normal group-hover:text-[#C49A5A]"}`}>
                     {item.name}
                   </span>
@@ -109,8 +123,8 @@ export default function SidebarLeft({ collapsed }) {
       </div>
 
       {/* Bottom */}
-      <div className="p-3 space-y-3">
-        {!collapsed && (
+      <div className="p-2 sm:p-3 space-y-3">
+        {!effectiveCollapsed && (
           <div className="rounded-2xl bg-[#FDF6EE] border border-[#EDD9BE]/60 p-4">
             <div className="flex items-center gap-2 mb-1.5">
               <div className="w-7 h-7 rounded-full bg-[#A67C52] flex items-center justify-center flex-shrink-0">
@@ -127,11 +141,11 @@ export default function SidebarLeft({ collapsed }) {
           </div>
         )}
 
-        {collapsed && (
+        {effectiveCollapsed && (
           <div className="flex justify-center">
             <button
               title="AI Assistant"
-              className="w-10 h-10 rounded-xl bg-[#FDF6EE] border border-[#EDD9BE]/60 flex items-center justify-center hover:bg-[#F5E8D0] transition"
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#FDF6EE] border border-[#EDD9BE]/60 flex items-center justify-center hover:bg-[#F5E8D0] transition"
             >
               <Sparkles size={16} className="text-[#A67C52]" />
             </button>
@@ -139,14 +153,16 @@ export default function SidebarLeft({ collapsed }) {
         )}
 
         <div className="border-t border-zinc-100 pt-3 text-center">
-          <p className="text-[10px] font-medium text-zinc-400 uppercase tracking-[0.08em]">
-            v1.0.0
-          </p>
+          {!effectiveCollapsed && (
+            <p className="text-[10px] font-medium text-zinc-400 uppercase tracking-[0.08em]">
+              v1.0.0
+            </p>
+          )}
         </div>
       </div>
 
       <div
-        className="absolute top-0 right-0 h-full w-5 translate-x-full pointer-events-none"
+        className="absolute top-0 right-0 h-full w-5 translate-x-full pointer-events-none hidden sm:block"
         style={{ background: "linear-gradient(to right, rgba(255,255,255,0.15), rgba(255,255,255,0))" }}
       />
     </aside>

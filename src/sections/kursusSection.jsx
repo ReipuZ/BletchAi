@@ -347,7 +347,6 @@ function CourseCard({ course, onSelect }) {
         </div>
       </div>
 
-      {/* Portal popup */}
       {hovered && (
         <CoursePopup
           course={course}
@@ -394,10 +393,10 @@ export default function CourseRecommendation() {
   };
 
   return (
-    <div id="kursus" className="mt-10 bg-white border-t border-zinc-100 pt-10 pb-12">
+    <div id="kursus" className="mt-8 sm:mt-10 bg-white border-t border-zinc-100 pt-8 sm:pt-10 pb-10 sm:pb-12">
 
-      <Reveal className="px-12 flex items-center justify-between mb-5" amount={0.4}>
-        <h3 className="text-base font-semibold text-zinc-800">Kursus Rekomendasi</h3>
+      <Reveal className="px-4 sm:px-8 md:px-12 flex items-center justify-between mb-5" amount={0.4}>
+        <h3 className="text-sm sm:text-base font-semibold text-zinc-800">Kursus Rekomendasi</h3>
         <button onClick={() => setShowModal(true)} className="flex items-center gap-1 text-xs font-medium text-[#A67C52] hover:text-[#6D4C41] transition-colors">
           Lihat semua <ChevronRight size={14} />
         </button>
@@ -412,7 +411,7 @@ export default function CourseRecommendation() {
           <div
             ref={trackRef}
             className="flex py-2"
-            style={{ gap: CARD_GAP, paddingLeft: "3rem", paddingRight: "3rem", willChange: "transform" }}
+            style={{ gap: CARD_GAP, paddingLeft: "1rem", paddingRight: "1rem", willChange: "transform" }}
           >
             {loopedCourses.map((course, idx) => (
               <CourseCard key={`${course.id}-${idx}`} course={course} onSelect={handleSelectCourse} />
@@ -420,13 +419,13 @@ export default function CourseRecommendation() {
           </div>
         </div>
 
-        <p className="text-[10px] text-zinc-400 text-center mt-1 mb-8">
+        <p className="text-[10px] text-zinc-400 text-center mt-1 mb-6 sm:mb-8">
           Arahkan kursor untuk menjeda
         </p>
       </Reveal>
 
       {/* Benefits */}
-      <RevealGroup className="px-12 grid grid-cols-4 gap-3" stagger={0.1} amount={0.2}>
+      <RevealGroup className="px-4 sm:px-8 md:px-12 grid grid-cols-2 lg:grid-cols-4 gap-3" stagger={0.1} amount={0.2}>
         {benefits.map((ben, i) => {
           const BIcon = ben.icon;
           return (
@@ -434,7 +433,7 @@ export default function CourseRecommendation() {
               key={i}
               variants={revealItem}
               whileHover={{ y: -2 }}
-              className={`rounded-2xl border p-4 cursor-default ${ben.color}`}
+              className={`rounded-2xl border p-3.5 sm:p-4 cursor-default ${ben.color}`}
             >
               <div className="w-9 h-9 rounded-xl bg-white/70 flex items-center justify-center mb-3">
                 <BIcon size={18} className={ben.iconColor} />
@@ -454,7 +453,7 @@ export default function CourseRecommendation() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-3 sm:px-4"
             onClick={() => setShowModal(false)}
           >
             <motion.div
@@ -462,10 +461,10 @@ export default function CourseRecommendation() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 16 }}
               transition={{ duration: 0.22 }}
-              className="bg-white rounded-3xl w-full max-w-3xl max-h-[85vh] flex flex-col overflow-hidden shadow-2xl"
+              className="bg-white rounded-2xl sm:rounded-3xl w-full max-w-3xl max-h-[85vh] flex flex-col overflow-hidden shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-100">
+              <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 sm:py-4 border-b border-zinc-100">
                 <h2 className="text-sm font-semibold text-zinc-800">Semua Kursus</h2>
                 <button
                   onClick={() => setShowModal(false)}
@@ -474,8 +473,8 @@ export default function CourseRecommendation() {
                   <X size={14} className="text-zinc-500" />
                 </button>
               </div>
-              <div className="overflow-y-auto p-6">
-                <div className="grid grid-cols-3 gap-4">
+              <div className="overflow-y-auto p-4 sm:p-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {courses.map((course) => (
                     <div key={course.id} className="cursor-pointer group">
                       <div className="relative h-[130px] rounded-2xl mb-3 overflow-hidden">
