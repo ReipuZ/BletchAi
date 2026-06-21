@@ -171,15 +171,17 @@ export default function SidebarLeft({ collapsed }) {
           />
         )}
 
-        {/* Sidebar overlay — fixed, mengambang di atas konten, tidak ada di flex layout */}
+        {/* Sidebar overlay — fixed, mengambang di atas konten (di bawah TopBar), tidak ada di flex layout */}
         <aside
           className={`
-            fixed inset-y-0 left-0 z-40 w-60
+            fixed left-0 top-14 z-40 w-60
             bg-white border-r border-zinc-100 shadow-2xl
             flex flex-col justify-between
+            overflow-y-auto
             transition-transform duration-300 ease-in-out
             ${effectiveCollapsed ? "-translate-x-full" : "translate-x-0"}
           `}
+          style={{ height: "calc(100vh - 3.5rem)" }}
         >
           <div>{renderMenu(false)}</div>
           {renderBottom(false)}
