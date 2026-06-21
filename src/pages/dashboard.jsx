@@ -10,7 +10,11 @@ import FaqSection from "../sections/faqSection";
 import AboutSection from "../sections/aboutSection";
 
 export default function Dashboard({ onLogout, onLogin, localUser, isLogin }) {
-  const [collapsed, setCollapsed] = useState(false);
+  // Desktop: sidebar default terbuka (collapsed=false), seperti semula.
+  // Mobile: sidebar default tertutup (collapsed=true), supaya tidak menutupi layar saat pertama dibuka.
+  const [collapsed, setCollapsed] = useState(
+    typeof window !== "undefined" ? window.innerWidth < 768 : false
+  );
 
   return (
     <div className="flex flex-col min-h-screen bg-[#F4F4F4]">

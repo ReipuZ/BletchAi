@@ -13,6 +13,7 @@ export default function SidebarLeft({ collapsed }) {
   const [active, setActive] = useState("home");
   const isClicking = useRef(false);
 
+  // ── Deteksi layar mobile ──
   const [isMobile, setIsMobile] = useState(
     typeof window !== "undefined" ? window.innerWidth < 768 : false
   );
@@ -24,7 +25,11 @@ export default function SidebarLeft({ collapsed }) {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const effectiveCollapsed = isMobile ? true : collapsed;
+  // Di desktop: collapsed mengikuti prop seperti biasa (push-layout, icon-only saat collapsed).
+  // Di mobile: collapsed=true berarti sidebar benar-benar hilang dari layout (hanya sisakan
+  // garis indikator di tepi kiri), collapsed=false berarti sidebar muncul sebagai overlay
+  // (fixed, mengambang di atas konten, TIDAK mendorong/mengecilkan area konten).
+  const effectiveCollapsed = collapsed;
 
   const menuItems = [
     { name: "Dashboard",    icon: House,       target: "home" },
@@ -65,6 +70,127 @@ export default function SidebarLeft({ collapsed }) {
     return () => observer.disconnect();
   }, [menuItems]);
 
+  // Isi menu — dipakai bersama oleh versi desktop dan versi overlay mobile,
+  // supaya tidak ada duplikasi logika tampilan tombol.
+  const renderMenu = (collapsedView) => (
+    <nav className={`mt-2 ${collapsedView ? "px-2 sm:px-2.5" : "px-2.5"} space-y-0.5`}>
+      {menuItems.map((item) => {
+        const Icon = item.icon;
+        const isActive = active === item.target;
+
+        return (
+          <button
+            key={item.name}
+            onClick={() => scrollToSection(item.target)}
+            title={collapsedView ? item.name : undefined}
+            className={`
+              group w-full flex items-center box-border
+              ${collapsedView ? "justify-center px-0" : "gap-3 px-3"}
+              py-2.5 rounded-xl
+              transition-all duration-150
+              ${isActive
+                ? "bg-[#FDF6EE] text-[#A67C52]"
+                : "text-zinc-500 hover:bg-[#FDF6EE]/60 hover:text-[#C49A5A]"
+              }
+            `}
+          >
+            {!collapsedView && (
+              <span className={`absolute left-0 w-[3px] h-6 rounded-r-full bg-[#A67C52] transition-all duration-200 ${isActive ? "opacity-100" : "opacity-0"}`} />
+            )}
+
+            <Icon
+              size={18}
+              strokeWidth={isActive ? 2.2 : 1.8}
+              className={`
+                transition-colors duration-150 flex-shrink-0
+                ${isActive ? "text-[#A67C52]" : "text-zinc-400 group-hover:text-[#C49A5A]"}
+              `}
+            />
+            {!collapsedView && (
+              <span className={`text-[13.5px] transition-colors duration-150 ${isActive ? "font-semibold text-[#A67C52]" : "font-normal group-hover:text-[#C49A5A]"}`}>
+                {item.name}
+              </span>
+            )}
+          </button>
+        );
+      })}
+    </nav>
+  );
+
+  const renderBottom = (collapsedView) => (
+    <div className={`${collapsedView ? "p-2 sm:p-3" : "p-3"} space-y-3`}>
+      {!collapsedView && (
+        <div className="rounded-2xl bg-[#FDF6EE] border border-[#EDD9BE]/60 p-4">
+          <div className="flex items-center gap-2 mb-1.5">
+            <div className="w-7 h-7 rounded-full bg-[#A67C52] flex items-center justify-center flex-shrink-0">
+              <Sparkles size={13} className="text-white" />
+            </div>
+            <p className="text-[13px] font-semibold text-zinc-800">AI Assistant</p>
+          </div>
+          <p className="text-[11px] text-zinc-500 leading-relaxed mb-3">
+            Butuh bantuan?<br />Tanya AI sekarang!
+          </p>
+          <button className="w-full flex items-center justify-center gap-1.5 bg-[#A67C52] hover:bg-[#8B6340] transition text-white text-xs font-medium py-2 rounded-xl">
+            Mulai Chat <ArrowRight size={12} />
+          </button>
+        </div>
+      )}
+
+      {collapsedView && (
+        <div className="flex justify-center">
+          <button
+            title="AI Assistant"
+            className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#FDF6EE] border border-[#EDD9BE]/60 flex items-center justify-center hover:bg-[#F5E8D0] transition"
+          >
+            <Sparkles size={16} className="text-[#A67C52]" />
+          </button>
+        </div>
+      )}
+
+      <div className="border-t border-zinc-100 pt-3 text-center">
+        {!collapsedView && (
+          <p className="text-[10px] font-medium text-zinc-400 uppercase tracking-[0.08em]">
+            v1.0.0
+          </p>
+        )}
+      </div>
+    </div>
+  );
+
+  // ══════════════════════════════════════════
+  // VERSI MOBILE — overlay drawer, tidak mendorong layout
+  // ══════════════════════════════════════════
+  if (isMobile) {
+    return (
+      <>
+        {/* Handle/garis indikator saat sidebar tertutup — nempel di tepi kiri layar */}
+        {effectiveCollapsed && (
+          <div
+            className="fixed left-0 top-1/2 -translate-y-1/2 z-30 w-1 h-16 rounded-r-full bg-[#A67C52]/40 pointer-events-none"
+            aria-hidden="true"
+          />
+        )}
+
+        {/* Sidebar overlay — fixed, mengambang di atas konten, tidak ada di flex layout */}
+        <aside
+          className={`
+            fixed inset-y-0 left-0 z-40 w-60
+            bg-white border-r border-zinc-100 shadow-2xl
+            flex flex-col justify-between
+            transition-transform duration-300 ease-in-out
+            ${effectiveCollapsed ? "-translate-x-full" : "translate-x-0"}
+          `}
+        >
+          <div>{renderMenu(false)}</div>
+          {renderBottom(false)}
+        </aside>
+      </>
+    );
+  }
+
+  // ══════════════════════════════════════════
+  // VERSI DESKTOP — perilaku asli, tidak diubah
+  // ══════════════════════════════════════════
   return (
     <aside
       className={`
@@ -73,96 +199,14 @@ export default function SidebarLeft({ collapsed }) {
         transition-all duration-300 ease-in-out
         flex flex-col justify-between
         flex-shrink-0
-        ${effectiveCollapsed ? "w-[60px] sm:w-[68px]" : "w-60"}
+        ${effectiveCollapsed ? "w-[68px]" : "w-60"}
       `}
     >
-      <div>
-        {/* Menu */}
-        <nav className="mt-2 px-2 sm:px-2.5 space-y-0.5">
-          {menuItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = active === item.target;
-
-            return (
-              <button
-                key={item.name}
-                onClick={() => scrollToSection(item.target)}
-                title={effectiveCollapsed ? item.name : undefined}
-                className={`
-                  group w-full flex items-center box-border
-                  ${effectiveCollapsed ? "justify-center px-0" : "gap-3 px-3"}
-                  py-2.5 rounded-xl
-                  transition-all duration-150
-                  ${isActive
-                    ? "bg-[#FDF6EE] text-[#A67C52]"
-                    : "text-zinc-500 hover:bg-[#FDF6EE]/60 hover:text-[#C49A5A]"
-                  }
-                `}
-              >
-                {!effectiveCollapsed && (
-                  <span className={`absolute left-0 w-[3px] h-6 rounded-r-full bg-[#A67C52] transition-all duration-200 ${isActive ? "opacity-100" : "opacity-0"}`} />
-                )}
-
-                <Icon
-                  size={18}
-                  strokeWidth={isActive ? 2.2 : 1.8}
-                  className={`
-                    transition-colors duration-150 flex-shrink-0
-                    ${isActive ? "text-[#A67C52]" : "text-zinc-400 group-hover:text-[#C49A5A]"}
-                  `}
-                />
-                {!effectiveCollapsed && (
-                  <span className={`text-[13.5px] transition-colors duration-150 ${isActive ? "font-semibold text-[#A67C52]" : "font-normal group-hover:text-[#C49A5A]"}`}>
-                    {item.name}
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </nav>
-      </div>
-
-      {/* Bottom */}
-      <div className="p-2 sm:p-3 space-y-3">
-        {!effectiveCollapsed && (
-          <div className="rounded-2xl bg-[#FDF6EE] border border-[#EDD9BE]/60 p-4">
-            <div className="flex items-center gap-2 mb-1.5">
-              <div className="w-7 h-7 rounded-full bg-[#A67C52] flex items-center justify-center flex-shrink-0">
-                <Sparkles size={13} className="text-white" />
-              </div>
-              <p className="text-[13px] font-semibold text-zinc-800">AI Assistant</p>
-            </div>
-            <p className="text-[11px] text-zinc-500 leading-relaxed mb-3">
-              Butuh bantuan?<br />Tanya AI sekarang!
-            </p>
-            <button className="w-full flex items-center justify-center gap-1.5 bg-[#A67C52] hover:bg-[#8B6340] transition text-white text-xs font-medium py-2 rounded-xl">
-              Mulai Chat <ArrowRight size={12} />
-            </button>
-          </div>
-        )}
-
-        {effectiveCollapsed && (
-          <div className="flex justify-center">
-            <button
-              title="AI Assistant"
-              className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#FDF6EE] border border-[#EDD9BE]/60 flex items-center justify-center hover:bg-[#F5E8D0] transition"
-            >
-              <Sparkles size={16} className="text-[#A67C52]" />
-            </button>
-          </div>
-        )}
-
-        <div className="border-t border-zinc-100 pt-3 text-center">
-          {!effectiveCollapsed && (
-            <p className="text-[10px] font-medium text-zinc-400 uppercase tracking-[0.08em]">
-              v1.0.0
-            </p>
-          )}
-        </div>
-      </div>
+      <div>{renderMenu(effectiveCollapsed)}</div>
+      {renderBottom(effectiveCollapsed)}
 
       <div
-        className="absolute top-0 right-0 h-full w-5 translate-x-full pointer-events-none hidden sm:block"
+        className="absolute top-0 right-0 h-full w-5 translate-x-full pointer-events-none"
         style={{ background: "linear-gradient(to right, rgba(255,255,255,0.15), rgba(255,255,255,0))" }}
       />
     </aside>
