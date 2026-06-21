@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X } from "lucide-react";
+import { X, Users, BookOpen, Star } from "lucide-react";
 import Login from "../pages/login.jsx";
 import Register from "../pages/register.jsx";
 
@@ -124,6 +124,64 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login", onSu
 
                 {/* Maskot — di tengah, mengintip di atas pinggir bubble */}
                 <div className="flex-1 flex items-end justify-center relative" style={{ marginBottom: -18 }}>
+                  {/* Stat bubbles — mengambang mengitari maskot, ganti dari baris stats di bawah */}
+                  <motion.div
+                    className="absolute z-20 flex items-center gap-1.5 rounded-full pointer-events-none"
+                    style={{
+                      top: "2px", left: "8%", padding: "5px 10px 5px 6px",
+                      background: "rgba(253, 246, 238, 0.95)",
+                      boxShadow: "0 4px 12px rgba(20,12,6,0.25)",
+                    }}
+                    animate={{ y: [0, -7, 0], rotate: [-3, 3, -3] }}
+                    transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
+                  >
+                    <span className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "rgba(166,124,82,0.18)" }}>
+                      <Users size={11} className="text-[#7A4A28]" />
+                    </span>
+                    <span className="leading-none">
+                      <span className="block text-[11px] font-bold text-[#2C1A0E]">50K+</span>
+                      <span className="block text-[8.5px] text-[#8A6A4A] -mt-0.5">Pelajar</span>
+                    </span>
+                  </motion.div>
+
+                  <motion.div
+                    className="absolute z-20 flex items-center gap-1.5 rounded-full pointer-events-none"
+                    style={{
+                      top: "-6px", right: "6%", padding: "5px 10px 5px 6px",
+                      background: "rgba(253, 246, 238, 0.95)",
+                      boxShadow: "0 4px 12px rgba(20,12,6,0.25)",
+                    }}
+                    animate={{ y: [0, -9, 0], rotate: [3, -3, 3] }}
+                    transition={{ duration: 5.5, delay: 0.6, repeat: Infinity, ease: "easeInOut" }}
+                  >
+                    <span className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "rgba(166,124,82,0.18)" }}>
+                      <BookOpen size={11} className="text-[#7A4A28]" />
+                    </span>
+                    <span className="leading-none">
+                      <span className="block text-[11px] font-bold text-[#2C1A0E]">200+</span>
+                      <span className="block text-[8.5px] text-[#8A6A4A] -mt-0.5">Kursus</span>
+                    </span>
+                  </motion.div>
+
+                  <motion.div
+                    className="absolute z-20 flex items-center gap-1.5 rounded-full pointer-events-none"
+                    style={{
+                      bottom: "26px", left: "2%", padding: "5px 10px 5px 6px",
+                      background: "rgba(253, 246, 238, 0.95)",
+                      boxShadow: "0 4px 12px rgba(20,12,6,0.25)",
+                    }}
+                    animate={{ y: [0, -6, 0], rotate: [-2, 2, -2] }}
+                    transition={{ duration: 5, delay: 1.1, repeat: Infinity, ease: "easeInOut" }}
+                  >
+                    <span className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "rgba(166,124,82,0.18)" }}>
+                      <Star size={11} className="text-[#7A4A28]" />
+                    </span>
+                    <span className="leading-none">
+                      <span className="block text-[11px] font-bold text-[#2C1A0E]">4.9</span>
+                      <span className="block text-[8.5px] text-[#8A6A4A] -mt-0.5">Rating</span>
+                    </span>
+                  </motion.div>
+
                   <motion.div
                     initial={{ opacity: 0, scale: 0.85 }}
                     animate={{ opacity: 1, scale: 1, y: [0, -8, 0] }}
@@ -228,16 +286,6 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login", onSu
                         </p>
                       </motion.div>
                     </AnimatePresence>
-
-                    {/* Stats row */}
-                    <div className="flex items-center justify-center gap-5 mt-3 pt-3 border-t border-[#A67C52]/15">
-                      {[["50K+", "Pelajar"], ["200+", "Kursus"], ["4.9", "Rating"]].map(([val, lbl]) => (
-                        <div key={lbl} className="text-center">
-                          <p className="text-[#2C1A0E] text-[13px] font-bold leading-tight">{val}</p>
-                          <p className="text-[#8A6A4A] text-[10px] leading-tight">{lbl}</p>
-                        </div>
-                      ))}
-                    </div>
                   </motion.div>
                 </div>
               </div>
@@ -258,11 +306,69 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login", onSu
 
                 {/* Ilustrasi SVG — orang duduk santai */}
                 <motion.div
-                  className="flex justify-center items-center flex-1"
+                  className="flex justify-center items-center flex-1 relative"
                   initial={{ opacity: 0, scale: 0.85 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.4, duration: 0.6 }}
                 >
+                  {/* Stat bubbles — mengambang mengitari maskot, ganti dari baris stats di bawah */}
+                  <motion.div
+                    className="absolute z-20 flex items-center gap-2 rounded-full pointer-events-none"
+                    style={{
+                      top: "6px", left: "8%", padding: "6px 12px 6px 7px",
+                      background: "rgba(253, 246, 238, 0.95)",
+                      boxShadow: "0 4px 12px rgba(20,12,6,0.25)",
+                    }}
+                    animate={{ y: [0, -9, 0], rotate: [-3, 3, -3] }}
+                    transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+                  >
+                    <span className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "rgba(166,124,82,0.18)" }}>
+                      <Users size={13} className="text-[#7A4A28]" />
+                    </span>
+                    <span className="leading-none">
+                      <span className="block text-[12.5px] font-bold text-[#2C1A0E]">50K+</span>
+                      <span className="block text-[9.5px] text-[#8A6A4A] -mt-0.5">Pelajar</span>
+                    </span>
+                  </motion.div>
+
+                  <motion.div
+                    className="absolute z-20 flex items-center gap-2 rounded-full pointer-events-none"
+                    style={{
+                      top: "-4px", right: "4%", padding: "6px 12px 6px 7px",
+                      background: "rgba(253, 246, 238, 0.95)",
+                      boxShadow: "0 4px 12px rgba(20,12,6,0.25)",
+                    }}
+                    animate={{ y: [0, -11, 0], rotate: [3, -3, 3] }}
+                    transition={{ duration: 6, delay: 0.7, repeat: Infinity, ease: "easeInOut" }}
+                  >
+                    <span className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "rgba(166,124,82,0.18)" }}>
+                      <BookOpen size={13} className="text-[#7A4A28]" />
+                    </span>
+                    <span className="leading-none">
+                      <span className="block text-[12.5px] font-bold text-[#2C1A0E]">200+</span>
+                      <span className="block text-[9.5px] text-[#8A6A4A] -mt-0.5">Kursus</span>
+                    </span>
+                  </motion.div>
+
+                  <motion.div
+                    className="absolute z-20 flex items-center gap-2 rounded-full pointer-events-none"
+                    style={{
+                      bottom: "18px", left: "2%", padding: "6px 12px 6px 7px",
+                      background: "rgba(253, 246, 238, 0.95)",
+                      boxShadow: "0 4px 12px rgba(20,12,6,0.25)",
+                    }}
+                    animate={{ y: [0, -7, 0], rotate: [-2, 2, -2] }}
+                    transition={{ duration: 5.5, delay: 1.3, repeat: Infinity, ease: "easeInOut" }}
+                  >
+                    <span className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "rgba(166,124,82,0.18)" }}>
+                      <Star size={13} className="text-[#7A4A28]" />
+                    </span>
+                    <span className="leading-none">
+                      <span className="block text-[12.5px] font-bold text-[#2C1A0E]">4.9</span>
+                      <span className="block text-[9.5px] text-[#8A6A4A] -mt-0.5">Rating</span>
+                    </span>
+                  </motion.div>
+
                   <motion.div
                     animate={{ y: [0, -10, 0] }}
                     transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
@@ -381,16 +487,6 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login", onSu
                       </p>
                     </motion.div>
                   </AnimatePresence>
-
-                  {/* Stats row */}
-                  <div className="flex gap-4 mt-5">
-                    {[["50K+", "Pelajar"], ["200+", "Kursus"], ["4.9", "Rating"]].map(([val, lbl]) => (
-                      <div key={lbl}>
-                        <p className="text-white text-sm font-bold">{val}</p>
-                        <p className="text-[11px]" style={{ color: "rgba(255,255,255,0.5)" }}>{lbl}</p>
-                      </div>
-                    ))}
-                  </div>
                 </div>
               </div>
             </div>
