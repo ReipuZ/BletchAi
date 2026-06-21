@@ -111,9 +111,10 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login", onSu
                 transition={{ duration: 11, repeat: Infinity, ease: "easeInOut" }}
               />
 
-              {/* ── Versi mobile: hanya maskot, dikecilkan, di tengah strip ── */}
-              <div className="md:hidden relative z-10 flex items-center justify-center h-full">
+              {/* ── Versi mobile: maskot + teks sambutan, layout horizontal di strip pendek ── */}
+              <div className="md:hidden relative z-10 flex items-center gap-4 h-full px-6">
                 <motion.div
+                  className="flex-shrink-0"
                   initial={{ opacity: 0, scale: 0.85 }}
                   animate={{ opacity: 1, scale: 1, y: [0, -8, 0] }}
                   transition={{
@@ -122,7 +123,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login", onSu
                     y: { duration: 4, repeat: Infinity, ease: "easeInOut" },
                   }}
                 >
-                  <svg width="110" height="110" viewBox="0 0 220 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <svg width="92" height="92" viewBox="0 0 220 220" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <ellipse cx="110" cy="205" rx="44" ry="8" fill="rgba(0,0,0,0.18)" />
                     <motion.g animate={{ rotate: [-8, 8, -8] }} style={{ transformOrigin: "96px 50px" }}
                       transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}>
@@ -184,7 +185,35 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login", onSu
                     <ellipse cx="100" cy="152" rx="7" ry="4" fill="rgba(255,255,255,0.08)" />
                   </svg>
                 </motion.div>
+
+                {/* Teks sambutan — versi ringkas untuk strip mobile */}
+                <div className="min-w-0 flex-1">
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={mode}
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -8 }}
+                      transition={{ duration: 0.25 }}
+                    >
+                      <p className="text-white text-base font-bold leading-snug mb-1">
+                        {mode === "login" ? "Selamat datang kembali!" : "Bergabunglah bersama kami!"}
+                      </p>
+                      <p className="text-[12px] leading-relaxed" style={{ color: "rgba(255,255,255,0.65)" }}>
+                        {mode === "login"
+                          ? "Lanjutkan perjalanan belajarmu."
+                          : "Mulai belajar bersama ribuan pelajar."}
+                      </p>
+                    </motion.div>
+                  </AnimatePresence>
+                </div>
               </div>
+
+              {/* Shadow transisi — memudarkan batas antara strip header dan form di bawahnya (mobile only) */}
+              <div
+                className="md:hidden pointer-events-none absolute left-0 right-0 bottom-0 h-10"
+                style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0), rgba(20,12,6,0.38))" }}
+              />
 
               {/* ── Versi desktop: konten penuh (logo, maskot besar, teks, stats) ── */}
               <div className="hidden md:flex relative z-10 flex-col h-full p-8 justify-between">
@@ -341,6 +370,12 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login", onSu
 
             {/* ── PANEL KANAN ── form */}
             <div className="relative flex-1 flex flex-col justify-center px-5 sm:px-8 py-8 sm:py-10 bg-white overflow-y-auto">
+              {/* Shadow fade dari atas — menyatukan transisi dengan strip header di mobile */}
+              <div
+                className="md:hidden pointer-events-none absolute left-0 right-0 top-0 h-6 z-[1]"
+                style={{ background: "linear-gradient(to bottom, rgba(20,12,6,0.08), rgba(20,12,6,0))" }}
+              />
+
               {/* Tombol close */}
               <motion.button
                 onClick={onClose}
