@@ -8,10 +8,9 @@ import InterviewSection from "../sections/interviewSection";
 import StatsSection from "../sections/statsSection";
 import FaqSection from "../sections/faqSection";
 import AboutSection from "../sections/aboutSection";
+import FloatingMascot from "../components/floatingMascot.jsx";
 
 export default function Dashboard({ onLogout, onLogin, localUser, isLogin }) {
-  // Desktop: sidebar default terbuka (collapsed=false), seperti semula.
-  // Mobile: sidebar default tertutup (collapsed=true), supaya tidak menutupi layar saat pertama dibuka.
   const [collapsed, setCollapsed] = useState(
     typeof window !== "undefined" ? window.innerWidth < 768 : false
   );
@@ -38,6 +37,8 @@ export default function Dashboard({ onLogout, onLogin, localUser, isLogin }) {
           <AboutSection />
         </main>
       </div>
+
+      <FloatingMascot />
     </div>
   );
 }
