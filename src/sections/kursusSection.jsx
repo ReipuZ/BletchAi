@@ -314,7 +314,7 @@ function PopupContent({ course, onSelect, onClose }) {
 }
 
 // ── CourseCard: beda behavior desktop vs mobile ──
-function CourseCard({ course, onSelect }) {
+function CourseCard({ course, onSelect, pausedRef }) {
   const [hovered, setHovered] = useState(false);
   const [anchorRect, setAnchorRect] = useState(null);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -343,9 +343,18 @@ function CourseCard({ course, onSelect }) {
     setHovered(true);
   };
 
-  // Untuk mobile: tap card buka modal, tapi juga izinkan scroll
+  // FIX: pause carousel saat modal mobile dibuka
   const handleTap = () => {
-    if (isTouch) setMobileOpen(true);
+    if (isTouch) {
+      pausedRef.current = true;
+      setMobileOpen(true);
+    }
+  };
+
+  // FIX: resume carousel saat modal mobile ditutup
+  const handleMobileClose = () => {
+    setMobileOpen(false);
+    pausedRef.current = false;
   };
 
   useEffect(() => {
@@ -399,7 +408,7 @@ function CourseCard({ course, onSelect }) {
           </div>
         </div>
 
-        {/* Desktop popup */}
+        {/* Desktop popup — tidak berubah sama sekali */}
         {!isTouch && hovered && (
           <CoursePopupDesktop
             course={course}
@@ -415,7 +424,7 @@ function CourseCard({ course, onSelect }) {
       {isTouch && mobileOpen && (
         <CoursePopupMobile
           course={course}
-          onClose={() => setMobileOpen(false)}
+          onClose={handleMobileClose}
           onSelect={onSelect}
         />
       )}
@@ -465,10 +474,11 @@ export default function CourseRecommendation() {
       </Reveal>
 
       <Reveal amount={0.1} duration={0.5}>
+        {/* FIX: hanya pause saat hover di non-touch device */}
         <div
           className="overflow-hidden"
-          onMouseEnter={() => (pausedRef.current = true)}
-          onMouseLeave={() => (pausedRef.current = false)}
+          onMouseEnter={() => { if (!isTouchDevice()) pausedRef.current = true; }}
+          onMouseLeave={() => { if (!isTouchDevice()) pausedRef.current = false; }}
         >
           <div
             ref={trackRef}
@@ -476,7 +486,12 @@ export default function CourseRecommendation() {
             style={{ gap: CARD_GAP, paddingLeft: "1rem", paddingRight: "1rem", willChange: "transform" }}
           >
             {loopedCourses.map((course, idx) => (
-              <CourseCard key={`${course.id}-${idx}`} course={course} onSelect={handleSelectCourse} />
+              <CourseCard
+                key={`${course.id}-${idx}`}
+                course={course}
+                onSelect={handleSelectCourse}
+                pausedRef={pausedRef}
+              />
             ))}
           </div>
         </div>
