@@ -38,16 +38,16 @@ export default function FaqSection() {
   };
 
   return (
-    <section id="faq" className="bg-[#F7F3EE] px-4 sm:px-6 md:px-8 py-12 sm:py-16">
+    <section id="faq" className="bg-[#F7F3EE] px-4 sm:px-6 md:px-8 py-10 sm:py-16">
 
       {/* Header */}
-      <div className="text-center mb-8 sm:mb-10">
+      <div className="text-center mb-6 sm:mb-10">
         <motion.h2
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className="text-3xl sm:text-4xl font-black text-zinc-900"
+          className="text-2xl sm:text-4xl font-black text-zinc-900"
         >
           FAQ
         </motion.h2>
@@ -56,14 +56,14 @@ export default function FaqSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.1 }}
-          className="mt-1.5 text-zinc-500 italic text-sm"
+          className="mt-1 sm:mt-1.5 text-zinc-500 italic text-xs sm:text-sm"
         >
           Pertanyaan umum
         </motion.p>
       </div>
 
       {/* FAQ list */}
-      <div className="max-w-3xl mx-auto space-y-3">
+      <div className="max-w-3xl mx-auto space-y-2 sm:space-y-3">
         {faqs.map((faq, index) => {
           const isOpen = activeIndex === index;
           return (
@@ -74,7 +74,7 @@ export default function FaqSection() {
               viewport={{ once: true, amount: 0.3 }}
               transition={{ duration: 0.4, delay: index * 0.07 }}
               className={`
-                relative rounded-2xl border overflow-hidden transition-colors duration-300
+                relative rounded-xl sm:rounded-2xl border overflow-hidden transition-colors duration-300
                 ${isOpen
                   ? "border-[#C49A5A] bg-white"
                   : "border-[#E2D5C3] bg-white hover:border-[#C49A5A]"}
@@ -109,9 +109,9 @@ export default function FaqSection() {
               {/* Tombol */}
               <button
                 onClick={() => handleToggle(index)}
-                className="relative z-10 w-full flex justify-between items-center px-4 sm:px-6 py-3.5 sm:py-4 text-left gap-3 sm:gap-4"
+                className="relative z-10 w-full flex justify-between items-center px-3.5 sm:px-6 py-3 sm:py-4 text-left gap-2.5 sm:gap-4"
               >
-                <span className={`text-sm sm:text-base font-semibold transition-colors duration-200 ${isOpen ? "text-[#7A5230]" : "text-zinc-800"}`}>
+                <span className={`text-xs sm:text-base font-semibold transition-colors duration-200 leading-snug ${isOpen ? "text-[#7A5230]" : "text-zinc-800"}`}>
                   {faq.question}
                 </span>
 
@@ -119,11 +119,12 @@ export default function FaqSection() {
                   animate={{ rotate: isOpen ? 180 : 0 }}
                   transition={{ duration: 0.3, ease: "easeInOut" }}
                   className={`
-                    w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-colors duration-300
+                    w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-colors duration-300
                     ${isOpen ? "bg-[#A67C52] text-white" : "bg-[#EDE5D8] text-[#A67C52]"}
                   `}
                 >
-                  <ChevronDown size={16} />
+                  <ChevronDown size={13} className="sm:hidden" />
+                  <ChevronDown size={16} className="hidden sm:block" />
                 </motion.div>
               </button>
 
@@ -138,10 +139,10 @@ export default function FaqSection() {
                     transition={{ duration: 0.32, ease: [0.4, 0, 0.2, 1] }}
                     className="relative z-10 overflow-hidden"
                   >
-                    <div className="px-4 sm:px-6 pb-4 sm:pb-5 pt-0">
+                    <div className="px-3.5 sm:px-6 pb-3.5 sm:pb-5 pt-0">
                       {/* divider tipis */}
-                      <div className="h-px bg-[#E8D8C4] mb-4" />
-                      <p className="text-[13px] sm:text-sm text-zinc-600 leading-relaxed">
+                      <div className="h-px bg-[#E8D8C4] mb-3 sm:mb-4" />
+                      <p className="text-[11px] sm:text-sm text-zinc-600 leading-relaxed">
                         {faq.answer}
                       </p>
                     </div>
