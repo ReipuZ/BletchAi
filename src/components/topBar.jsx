@@ -11,6 +11,7 @@ export default function TopBar({ onLogout, onLogin, activePage = "Home", collaps
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const dropdownRef = useRef(null);
   const searchRef = useRef(null);
+  const mobileSearchRef = useRef(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -26,6 +27,9 @@ export default function TopBar({ onLogout, onLogin, activePage = "Home", collaps
       }
       if (searchRef.current && !searchRef.current.contains(event.target)) {
         setSearchFocus(false);
+      }
+      if (mobileSearchRef.current && !mobileSearchRef.current.contains(event.target)) {
+        setMobileSearchOpen(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -107,8 +111,10 @@ export default function TopBar({ onLogout, onLogin, activePage = "Home", collaps
         <span className="text-[14px] sm:text-[15px] font-semibold text-zinc-800 truncate">Bletch AI</span>
       </div>
 
+      {/* Kanan: Search + Notif + Avatar */}
       <div className="flex items-center gap-1.5 sm:gap-3">
 
+        {/* Search — versi desktop (input langsung terlihat) */}
         <div className="relative hidden sm:block" ref={searchRef}>
           <div className="relative">
             <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
@@ -146,13 +152,49 @@ export default function TopBar({ onLogout, onLogin, activePage = "Home", collaps
           </div>
         </div>
 
-        <button
-          onClick={() => setMobileSearchOpen(true)}
-          className="sm:hidden w-9 h-9 rounded-xl hover:bg-zinc-100 flex items-center justify-center transition text-zinc-500 hover:text-zinc-700 flex-shrink-0"
-          aria-label="Cari"
-        >
-          <Search size={18} />
-        </button>
+        {/* Search — versi mobile (dropdown kecil, sama pola seperti dropdown akun) */}
+        <div className="relative sm:hidden flex-shrink-0" ref={mobileSearchRef}>
+          <button
+            onClick={() => setMobileSearchOpen((v) => !v)}
+            className="w-9 h-9 rounded-xl hover:bg-zinc-100 flex items-center justify-center transition text-zinc-500 hover:text-zinc-700"
+            aria-label="Cari"
+          >
+            <Search size={18} />
+          </button>
+
+          <div className={`absolute right-0 top-11 w-[min(85vw,17rem)] bg-white border border-zinc-100 rounded-2xl shadow-lg overflow-hidden transition-all duration-200 ${
+            mobileSearchOpen ? "opacity-100 translate-y-0 scale-100" : "opacity-0 pointer-events-none -translate-y-2 scale-95"
+          }`}>
+            <div className="relative px-3 pt-3 pb-2 border-b border-zinc-100">
+              <Search size={14} className="absolute left-6 top-1/2 -translate-y-1/2 text-zinc-400" />
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Cari kursus atau topik..."
+                className="w-full bg-zinc-50 border border-zinc-200 text-zinc-800 placeholder-zinc-400 text-sm rounded-xl py-2 pl-8 pr-3 focus:outline-none focus:border-[#A67C52]/60 focus:bg-white transition"
+              />
+            </div>
+            <p className="text-zinc-400 text-xs px-4 pt-2 pb-1">
+              {search.trim() ? "Hasil pencarian" : "Menu cepat"}
+            </p>
+            {filteredMenus.length > 0 ? filteredMenus.map((menu, i) => (
+              <button key={i} onClick={menu.action}
+                className="w-full flex items-center gap-2.5 px-4 py-2 hover:bg-zinc-50 transition text-left">
+                <div className="w-6 h-6 rounded-md bg-zinc-100 flex items-center justify-center flex-shrink-0">
+                  {menu.icon}
+                </div>
+                <div className="min-w-0">
+                  <p className="text-zinc-700 text-xs font-medium truncate">{menu.label}</p>
+                  <p className="text-zinc-400 text-[11px] truncate">{menu.desc}</p>
+                </div>
+              </button>
+            )) : (
+              <p className="text-zinc-400 text-xs px-4 py-2">Tidak ditemukan</p>
+            )}
+            <div className="h-2" />
+          </div>
+        </div>
 
         {/* Notif */}
         <button className="relative w-9 h-9 rounded-xl hover:bg-zinc-100 flex items-center justify-center transition text-zinc-500 hover:text-zinc-700 flex-shrink-0">
@@ -248,44 +290,6 @@ export default function TopBar({ onLogout, onLogin, activePage = "Home", collaps
           </div>
         </div>
       </div>
-
-      {mobileSearchOpen && (
-        <div className="sm:hidden fixed inset-0 z-[60] bg-white flex flex-col">
-          <div className="flex items-center gap-2 px-4 h-14 border-b border-zinc-100">
-            <Search size={16} className="text-zinc-400 flex-shrink-0" />
-            <input
-              autoFocus
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Cari kursus atau topik..."
-              className="flex-1 text-sm outline-none placeholder-zinc-400 text-zinc-800"
-            />
-            <button onClick={() => setMobileSearchOpen(false)} className="text-zinc-400 p-1">
-              <X size={18} />
-            </button>
-          </div>
-          <div className="flex-1 overflow-y-auto">
-            <p className="text-zinc-400 text-xs px-4 pt-3 pb-1">
-              {search.trim() ? "Hasil pencarian" : "Menu cepat"}
-            </p>
-            {filteredMenus.length > 0 ? filteredMenus.map((menu, i) => (
-              <button key={i} onClick={menu.action}
-                className="w-full flex items-center gap-3 px-4 py-3 hover:bg-zinc-50 transition text-left">
-                <div className="w-8 h-8 rounded-md bg-zinc-100 flex items-center justify-center flex-shrink-0">
-                  {menu.icon}
-                </div>
-                <div>
-                  <p className="text-zinc-700 text-sm font-medium">{menu.label}</p>
-                  <p className="text-zinc-400 text-xs">{menu.desc}</p>
-                </div>
-              </button>
-            )) : (
-              <p className="text-zinc-400 text-sm px-4 py-2">Tidak ditemukan</p>
-            )}
-          </div>
-        </div>
-      )}
 
       <div className="absolute left-0 bottom-0 w-full h-6 translate-y-full pointer-events-none"
         style={{ background: "linear-gradient(to bottom, rgba(255,255,255,0.15), rgba(255,255,255,0) 100%)" }} />
