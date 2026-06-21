@@ -49,7 +49,7 @@ export default function HomeSection() {
   ];
 
   return (
-    <section id="home" className="min-h-screen bg-[#F5F3F0] pb-16">
+    <section id="home" className="bg-[#F5F3F0] pb-6">
 
       {/* ── Hero ── */}
       <div className="px-3 md:px-12 pt-3 md:pt-8">
@@ -141,8 +141,8 @@ export default function HomeSection() {
                   <button
                     key={cat}
                     onClick={() => setActiveCategory(cat)}
-                    onMouseEnter={() => setHoveredCategory(cat)}
-                    onMouseLeave={() => setHoveredCategory(null)}
+                    onPointerEnter={() => setHoveredCategory(cat)}
+                    onPointerLeave={() => setHoveredCategory(null)}
                     className={`
                       relative shrink-0 overflow-hidden text-[11px] md:text-xs font-medium px-3 py-1 md:px-4 md:py-2 rounded-full whitespace-nowrap transition-colors duration-300 ease-out border
                       ${isActive
