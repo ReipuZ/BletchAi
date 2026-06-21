@@ -48,7 +48,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login", onSu
                  Mobile: strip header dengan logo, maskot, dan bubble teks mengambang
                  Desktop: panel penuh di samping, seperti semula */}
             <div
-              className="flex flex-col w-full md:w-[380px] h-[260px] sm:h-[280px] md:h-auto flex-shrink-0 relative overflow-hidden"
+              className="flex flex-col w-full md:w-[380px] h-[165px] sm:h-[175px] md:h-auto flex-shrink-0 relative overflow-hidden"
               style={{
                 background: "linear-gradient(135deg, #2C1A0E 0%, #4A2C1A 40%, #7A4A28 80%, #A67C52 100%)",
               }}
@@ -117,68 +117,68 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login", onSu
                   initial={{ opacity: 0, y: -8 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1, duration: 0.35 }}
-                  className="px-5 pt-4"
+                  className="px-4 pt-2.5"
                 >
                   <span className="text-white font-bold text-sm tracking-wide">Bletch AI</span>
                 </motion.div>
 
                 {/* Maskot — di tengah, mengintip di atas pinggir bubble */}
-                <div className="flex-1 flex items-end justify-center relative" style={{ marginBottom: -18 }}>
+                <div className="flex-1 flex items-end justify-center relative" style={{ marginBottom: -10 }}>
                   {/* Stat bubbles — mengambang mengitari maskot, ganti dari baris stats di bawah */}
                   <motion.div
-                    className="absolute z-20 flex items-center gap-1.5 rounded-full pointer-events-none"
+                    className="absolute z-20 flex items-center gap-1 rounded-full pointer-events-none"
                     style={{
-                      top: "2px", left: "8%", padding: "5px 10px 5px 6px",
+                      top: "0px", left: "6%", padding: "3px 7px 3px 4px",
                       background: "rgba(253, 246, 238, 0.95)",
-                      boxShadow: "0 4px 12px rgba(20,12,6,0.25)",
+                      boxShadow: "0 3px 8px rgba(20,12,6,0.25)",
                     }}
-                    animate={{ y: [0, -7, 0], rotate: [-3, 3, -3] }}
+                    animate={{ y: [0, -5, 0], rotate: [-3, 3, -3] }}
                     transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
                   >
-                    <span className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "rgba(166,124,82,0.18)" }}>
-                      <Users size={11} className="text-[#7A4A28]" />
+                    <span className="w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "rgba(166,124,82,0.18)" }}>
+                      <Users size={9} className="text-[#7A4A28]" />
                     </span>
                     <span className="leading-none">
-                      <span className="block text-[11px] font-bold text-[#2C1A0E]">50K+</span>
-                      <span className="block text-[8.5px] text-[#8A6A4A] -mt-0.5">Pelajar</span>
+                      <span className="block text-[9.5px] font-bold text-[#2C1A0E]">50K+</span>
+                      <span className="block text-[7px] text-[#8A6A4A] -mt-0.5">Pelajar</span>
                     </span>
                   </motion.div>
 
                   <motion.div
-                    className="absolute z-20 flex items-center gap-1.5 rounded-full pointer-events-none"
+                    className="absolute z-20 flex items-center gap-1 rounded-full pointer-events-none"
                     style={{
-                      top: "-6px", right: "6%", padding: "5px 10px 5px 6px",
+                      top: "-4px", right: "4%", padding: "3px 7px 3px 4px",
                       background: "rgba(253, 246, 238, 0.95)",
-                      boxShadow: "0 4px 12px rgba(20,12,6,0.25)",
+                      boxShadow: "0 3px 8px rgba(20,12,6,0.25)",
                     }}
-                    animate={{ y: [0, -9, 0], rotate: [3, -3, 3] }}
+                    animate={{ y: [0, -6, 0], rotate: [3, -3, 3] }}
                     transition={{ duration: 5.5, delay: 0.6, repeat: Infinity, ease: "easeInOut" }}
                   >
-                    <span className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "rgba(166,124,82,0.18)" }}>
-                      <BookOpen size={11} className="text-[#7A4A28]" />
+                    <span className="w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "rgba(166,124,82,0.18)" }}>
+                      <BookOpen size={9} className="text-[#7A4A28]" />
                     </span>
                     <span className="leading-none">
-                      <span className="block text-[11px] font-bold text-[#2C1A0E]">200+</span>
-                      <span className="block text-[8.5px] text-[#8A6A4A] -mt-0.5">Kursus</span>
+                      <span className="block text-[9.5px] font-bold text-[#2C1A0E]">200+</span>
+                      <span className="block text-[7px] text-[#8A6A4A] -mt-0.5">Kursus</span>
                     </span>
                   </motion.div>
 
                   <motion.div
-                    className="absolute z-20 flex items-center gap-1.5 rounded-full pointer-events-none"
+                    className="absolute z-20 flex items-center gap-1 rounded-full pointer-events-none"
                     style={{
-                      bottom: "26px", left: "2%", padding: "5px 10px 5px 6px",
+                      bottom: "14px", left: "0%", padding: "3px 7px 3px 4px",
                       background: "rgba(253, 246, 238, 0.95)",
-                      boxShadow: "0 4px 12px rgba(20,12,6,0.25)",
+                      boxShadow: "0 3px 8px rgba(20,12,6,0.25)",
                     }}
-                    animate={{ y: [0, -6, 0], rotate: [-2, 2, -2] }}
+                    animate={{ y: [0, -4, 0], rotate: [-2, 2, -2] }}
                     transition={{ duration: 5, delay: 1.1, repeat: Infinity, ease: "easeInOut" }}
                   >
-                    <span className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "rgba(166,124,82,0.18)" }}>
-                      <Star size={11} className="text-[#7A4A28]" />
+                    <span className="w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "rgba(166,124,82,0.18)" }}>
+                      <Star size={9} className="text-[#7A4A28]" />
                     </span>
                     <span className="leading-none">
-                      <span className="block text-[11px] font-bold text-[#2C1A0E]">4.9</span>
-                      <span className="block text-[8.5px] text-[#8A6A4A] -mt-0.5">Rating</span>
+                      <span className="block text-[9.5px] font-bold text-[#2C1A0E]">4.9</span>
+                      <span className="block text-[7px] text-[#8A6A4A] -mt-0.5">Rating</span>
                     </span>
                   </motion.div>
 
@@ -192,7 +192,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login", onSu
                     }}
                     className="relative z-10"
                   >
-                    <svg width="104" height="104" viewBox="0 0 220 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <svg width="68" height="68" viewBox="0 0 220 220" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <ellipse cx="110" cy="205" rx="44" ry="8" fill="rgba(0,0,0,0.18)" />
                       <motion.g animate={{ rotate: [-8, 8, -8] }} style={{ transformOrigin: "96px 50px" }}
                         transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}>
@@ -257,15 +257,15 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login", onSu
                 </div>
 
                 {/* Bubble teks + stats — mengambang, warna cream */}
-                <div className="px-5 pb-5 relative z-0">
+                <div className="px-4 pb-3 relative z-0">
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2, duration: 0.4 }}
-                    className="rounded-2xl px-4 pt-6 pb-3.5 text-center"
+                    className="rounded-xl px-3.5 pt-3 pb-2.5 text-center"
                     style={{
                       background: "rgba(253, 246, 238, 0.95)",
-                      boxShadow: "0 8px 20px rgba(20,12,6,0.25)",
+                      boxShadow: "0 6px 14px rgba(20,12,6,0.22)",
                     }}
                   >
                     <AnimatePresence mode="wait">
@@ -276,10 +276,10 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login", onSu
                         exit={{ opacity: 0, y: -6 }}
                         transition={{ duration: 0.25 }}
                       >
-                        <p className="text-[#2C1A0E] text-[15px] font-bold leading-snug mb-0.5">
+                        <p className="text-[#2C1A0E] text-[13px] font-bold leading-snug mb-0.5">
                           {mode === "login" ? "Selamat datang kembali!" : "Bergabunglah bersama kami!"}
                         </p>
-                        <p className="text-[#6D4C41] text-[11.5px] leading-relaxed">
+                        <p className="text-[#6D4C41] text-[10px] leading-snug">
                           {mode === "login"
                             ? "Lanjutkan perjalanan belajarmu."
                             : "Mulai belajar bersama ribuan pelajar."}
