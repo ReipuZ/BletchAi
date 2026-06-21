@@ -10,6 +10,11 @@ import KursusTataboga from "../assets/image/kursusTataboga.jpg";
 import KursusEditting from "../assets/image/kursusEditting.jpg";
 import Reveal, { RevealGroup, revealItem } from "../components/Reveal.jsx";
 
+// Deteksi apakah perangkat touch (mobile)
+const isTouchDevice = () =>
+  typeof window !== "undefined" &&
+  ("ontouchstart" in window || navigator.maxTouchPoints > 0);
+
 const benefits = [
   {
     icon: Award,
@@ -171,15 +176,13 @@ const CARD_W = 220;
 const CARD_GAP = 14;
 const STEP = CARD_W + CARD_GAP;
 
-function CoursePopup({ course, anchorRect, onMouseEnter, onMouseLeave, onSelect }) {
+// ── Popup desktop (floating di atas card) ──
+function CoursePopupDesktop({ course, anchorRect, onMouseEnter, onMouseLeave, onSelect }) {
   if (!anchorRect) return null;
 
   const POPUP_W = 260;
   const POPUP_MARGIN = 10;
-
-
   const top = anchorRect.top + window.scrollY - POPUP_MARGIN;
-
   let left = anchorRect.left + window.scrollX;
   if (left + POPUP_W > window.innerWidth - 12) {
     left = anchorRect.right + window.scrollX - POPUP_W;
@@ -193,89 +196,131 @@ function CoursePopup({ course, anchorRect, onMouseEnter, onMouseLeave, onSelect 
         exit={{ opacity: 0, scale: 0.93, y: 10 }}
         transition={{ duration: 0.18, ease: "easeOut" }}
         className="fixed bg-white rounded-2xl shadow-2xl border border-zinc-100 overflow-hidden"
-        style={{
-          zIndex: 9999,
-          width: POPUP_W,
-          top: top,
-          left: left,
-          transform: "translateY(-100%)",
-        }}
+        style={{ zIndex: 9999, width: POPUP_W, top, left, transform: "translateY(-100%)" }}
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}
       >
-        {/* Gambar header */}
-        <div className="relative h-[120px] w-full overflow-hidden">
-          <img src={course.image} alt={course.title} className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-          <div className="absolute top-2.5 left-2.5 flex gap-1.5">
-            {course.online && (
-              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500 text-white">
-                Online
-              </span>
-            )}
-            {course.badge && (
-              <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full text-white ${course.badgeColor}`}>
-                {course.badge}
-              </span>
-            )}
-          </div>
-        </div>
-
-        {/* Konten */}
-        <div className="p-3.5">
-          <div className="flex items-center gap-1.5 mb-2">
-            <div
-              className="w-5 h-5 rounded-full flex items-center justify-center text-white text-[9px] font-bold flex-shrink-0"
-              style={{ background: course.accent }}
-            >
-              {course.mentor[0]}
-            </div>
-            <span className="text-[11px] text-zinc-500">{course.mentor}</span>
-          </div>
-
-          <p className="text-xs font-bold text-zinc-800 leading-snug mb-1.5">{course.title}</p>
-          <p className="text-[10px] text-zinc-400 leading-relaxed mb-2.5 line-clamp-2">{course.desc}</p>
-
-          <div className="flex items-center gap-2 text-[10px] text-zinc-400 mb-2.5">
-            <span className="flex items-center gap-1"><Clock size={9} />{course.duration}</span>
-            <span className="text-zinc-200">·</span>
-            <span>{course.sessions}</span>
-            <span className="text-zinc-200">·</span>
-            <span>{course.ageRange}</span>
-          </div>
-
-          <div className="flex items-center gap-1 mb-3">
-            <Star size={10} className="fill-amber-400 text-amber-400" />
-            <span className="text-[11px] font-semibold text-zinc-700">{course.rating}</span>
-            <span className="text-[10px] text-zinc-400">· {course.students} siswa</span>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-bold text-zinc-800">{course.price}</p>
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                onSelect?.(course);
-              }}
-              className="text-[11px] font-semibold text-white px-3 py-1.5 rounded-xl flex items-center gap-1 cursor-pointer hover:brightness-110 active:scale-95 transition"
-              style={{ background: course.accent }}
-            >
-              Lihat Detail <ChevronRight size={11} />
-            </button>
-          </div>
-        </div>
+        <PopupContent course={course} onSelect={onSelect} />
       </motion.div>
     </AnimatePresence>,
     document.body
   );
 }
 
+// ── Popup mobile (modal di tengah layar) ──
+function CoursePopupMobile({ course, onClose, onSelect }) {
+  return createPortal(
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.18 }}
+        className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm px-4 pb-6 sm:pb-0"
+        onClick={onClose}
+      >
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 40 }}
+          transition={{ duration: 0.22, ease: "easeOut" }}
+          className="bg-white rounded-2xl shadow-2xl border border-zinc-100 overflow-hidden w-full max-w-sm"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Tombol tutup */}
+          <div className="flex justify-end px-3 pt-3">
+            <button
+              onClick={onClose}
+              className="w-7 h-7 rounded-full flex items-center justify-center bg-zinc-100 hover:bg-zinc-200 transition-colors"
+            >
+              <X size={13} className="text-zinc-500" />
+            </button>
+          </div>
+          <PopupContent course={course} onSelect={onSelect} onClose={onClose} />
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>,
+    document.body
+  );
+}
+
+// ── Konten popup (dipakai oleh desktop & mobile) ──
+function PopupContent({ course, onSelect, onClose }) {
+  return (
+    <>
+      <div className="relative h-[120px] w-full overflow-hidden">
+        <img src={course.image} alt={course.title} className="w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+        <div className="absolute top-2.5 left-2.5 flex gap-1.5">
+          {course.online && (
+            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500 text-white">
+              Online
+            </span>
+          )}
+          {course.badge && (
+            <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full text-white ${course.badgeColor}`}>
+              {course.badge}
+            </span>
+          )}
+        </div>
+      </div>
+
+      <div className="p-3.5">
+        <div className="flex items-center gap-1.5 mb-2">
+          <div
+            className="w-5 h-5 rounded-full flex items-center justify-center text-white text-[9px] font-bold flex-shrink-0"
+            style={{ background: course.accent }}
+          >
+            {course.mentor[0]}
+          </div>
+          <span className="text-[11px] text-zinc-500">{course.mentor}</span>
+        </div>
+
+        <p className="text-xs font-bold text-zinc-800 leading-snug mb-1.5">{course.title}</p>
+        <p className="text-[10px] text-zinc-400 leading-relaxed mb-2.5 line-clamp-2">{course.desc}</p>
+
+        <div className="flex items-center gap-2 text-[10px] text-zinc-400 mb-2.5">
+          <span className="flex items-center gap-1"><Clock size={9} />{course.duration}</span>
+          <span className="text-zinc-200">·</span>
+          <span>{course.sessions}</span>
+          <span className="text-zinc-200">·</span>
+          <span>{course.ageRange}</span>
+        </div>
+
+        <div className="flex items-center gap-1 mb-3">
+          <Star size={10} className="fill-amber-400 text-amber-400" />
+          <span className="text-[11px] font-semibold text-zinc-700">{course.rating}</span>
+          <span className="text-[10px] text-zinc-400">· {course.students} siswa</span>
+        </div>
+
+        <div className="flex items-center justify-between">
+          <p className="text-sm font-bold text-zinc-800">{course.price}</p>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onSelect?.(course);
+              onClose?.();
+            }}
+            className="text-[11px] font-semibold text-white px-3 py-1.5 rounded-xl flex items-center gap-1 cursor-pointer hover:brightness-110 active:scale-95 transition"
+            style={{ background: course.accent }}
+          >
+            Lihat Detail <ChevronRight size={11} />
+          </button>
+        </div>
+      </div>
+    </>
+  );
+}
+
+// ── CourseCard: beda behavior desktop vs mobile ──
 function CourseCard({ course, onSelect }) {
   const [hovered, setHovered] = useState(false);
   const [anchorRect, setAnchorRect] = useState(null);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const cardRef = useRef(null);
   const closeTimerRef = useRef(null);
+  const isTouch = isTouchDevice();
 
   const cancelClose = () => {
     if (closeTimerRef.current) {
@@ -294,10 +339,13 @@ function CourseCard({ course, onSelect }) {
 
   const handleCardEnter = () => {
     cancelClose();
-    if (cardRef.current) {
-      setAnchorRect(cardRef.current.getBoundingClientRect());
-    }
+    if (cardRef.current) setAnchorRect(cardRef.current.getBoundingClientRect());
     setHovered(true);
+  };
+
+  // Untuk mobile: tap card buka modal, tapi juga izinkan scroll
+  const handleTap = () => {
+    if (isTouch) setMobileOpen(true);
   };
 
   useEffect(() => {
@@ -305,58 +353,73 @@ function CourseCard({ course, onSelect }) {
   }, []);
 
   return (
-    <div
-      ref={cardRef}
-      className="flex-shrink-0 cursor-pointer group relative"
-      style={{ width: CARD_W }}
-      onMouseEnter={handleCardEnter}
-      onMouseLeave={scheduleClose}
-    >
-      {/* Gambar card */}
-      <div className="relative h-[130px] rounded-2xl mb-3 overflow-hidden">
-        {course.image ? (
-          <img src={course.image} alt={course.title} className="w-full h-full object-cover" />
-        ) : (
-          <div className="w-full h-full bg-gradient-to-br from-zinc-100 to-zinc-200 flex items-center justify-center">
-            <span className="text-5xl select-none">📚</span>
+    <>
+      <div
+        ref={cardRef}
+        className="flex-shrink-0 cursor-pointer group relative"
+        style={{ width: CARD_W }}
+        // Desktop: hover
+        onMouseEnter={!isTouch ? handleCardEnter : undefined}
+        onMouseLeave={!isTouch ? scheduleClose : undefined}
+        // Mobile: tap
+        onClick={isTouch ? handleTap : undefined}
+      >
+        {/* Gambar card */}
+        <div className="relative h-[130px] rounded-2xl mb-3 overflow-hidden">
+          {course.image ? (
+            <img src={course.image} alt={course.title} className="w-full h-full object-cover" />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-zinc-100 to-zinc-200 flex items-center justify-center">
+              <span className="text-5xl select-none">📚</span>
+            </div>
+          )}
+          <div className="absolute top-2.5 left-2.5">
+            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-black/25 text-white/90 backdrop-blur-sm">
+              {course.level}
+            </span>
           </div>
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/15 transition-colors duration-200 rounded-2xl" />
+        </div>
+
+        {/* Info singkat */}
+        <div className="px-0.5">
+          <p className="text-[10px] font-semibold mb-0.5 uppercase tracking-wide" style={{ color: course.accent }}>
+            {course.category}
+          </p>
+          <p className="text-xs font-semibold text-zinc-800 leading-snug mb-2 line-clamp-2">
+            {course.title}
+          </p>
+          <div className="flex items-center gap-1.5 text-[10px] text-zinc-400">
+            <Star size={9} className="fill-amber-400 text-amber-400 flex-shrink-0" />
+            <span className="text-zinc-600 font-medium">{course.rating}</span>
+            <span className="text-zinc-300">·</span>
+            <span>{course.students} siswa</span>
+            <span className="text-zinc-300">·</span>
+            <span>{course.duration}</span>
+          </div>
+        </div>
+
+        {/* Desktop popup */}
+        {!isTouch && hovered && (
+          <CoursePopupDesktop
+            course={course}
+            anchorRect={anchorRect}
+            onMouseEnter={cancelClose}
+            onMouseLeave={scheduleClose}
+            onSelect={onSelect}
+          />
         )}
-        <div className="absolute top-2.5 left-2.5">
-          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-black/25 text-white/90 backdrop-blur-sm">
-            {course.level}
-          </span>
-        </div>
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/15 transition-colors duration-200 rounded-2xl" />
       </div>
 
-      {/* Info singkat */}
-      <div className="px-0.5">
-        <p className="text-[10px] font-semibold mb-0.5 uppercase tracking-wide" style={{ color: course.accent }}>
-          {course.category}
-        </p>
-        <p className="text-xs font-semibold text-zinc-800 leading-snug mb-2 line-clamp-2">
-          {course.title}
-        </p>
-        <div className="flex items-center gap-1.5 text-[10px] text-zinc-400">
-          <Star size={9} className="fill-amber-400 text-amber-400 flex-shrink-0" />
-          <span className="text-zinc-600 font-medium">{course.rating}</span>
-          <span className="text-zinc-300">·</span>
-          <span>{course.students} siswa</span>
-          <span className="text-zinc-300">·</span>
-          <span>{course.duration}</span>
-        </div>
-      </div>
-
-      {hovered && (
-        <CoursePopup
+      {/* Mobile popup modal */}
+      {isTouch && mobileOpen && (
+        <CoursePopupMobile
           course={course}
-          anchorRect={anchorRect}
-          onMouseEnter={cancelClose}
-          onMouseLeave={scheduleClose}
+          onClose={() => setMobileOpen(false)}
           onSelect={onSelect}
         />
       )}
-    </div>
+    </>
   );
 }
 
@@ -388,12 +451,11 @@ export default function CourseRecommendation() {
   }, []);
 
   const handleSelectCourse = (course) => {
-
     console.log("Lihat detail kursus:", course.title);
   };
 
   return (
-    <div id="kursus" className="mt-8 sm:mt-10 bg-white border-t border-zinc-100 pt-8 sm:pt-10 pb-10 sm:pb-12">
+    <div id="kursus" className="bg-white border-t border-zinc-100 pt-6 sm:pt-8 pb-10 sm:pb-12">
 
       <Reveal className="px-4 sm:px-8 md:px-12 flex items-center justify-between mb-5" amount={0.4}>
         <h3 className="text-sm sm:text-base font-semibold text-zinc-800">Kursus Rekomendasi</h3>
@@ -420,7 +482,7 @@ export default function CourseRecommendation() {
         </div>
 
         <p className="text-[10px] text-zinc-400 text-center mt-1 mb-6 sm:mb-8">
-          Arahkan kursor untuk menjeda
+          {isTouchDevice() ? "Ketuk kartu untuk melihat detail" : "Arahkan kursor untuk menjeda"}
         </p>
       </Reveal>
 
