@@ -39,14 +39,16 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login", onSu
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.93, y: 28 }}
             transition={{ type: "spring", stiffness: 280, damping: 26 }}
-            className="relative w-full max-w-[860px] overflow-hidden shadow-2xl flex rounded-3xl"
+            className="relative w-full max-w-[860px] overflow-hidden shadow-2xl flex flex-col md:flex-row rounded-3xl"
             style={{ maxHeight: "calc(100vh - 3rem)" }}
             onClick={(e) => e.stopPropagation()}
           >
 
-            {/* ── PANEL KIRI ── ilustrasi + bubbles (disembunyikan di mobile) */}
+            {/* ── PANEL KIRI ── ilustrasi + bubbles
+                 Mobile: strip pendek di atas form, cuma maskot (tanpa teks/stats agar tidak makan tempat)
+                 Desktop: panel penuh di samping, seperti semula */}
             <div
-              className="hidden md:flex flex-col w-[380px] flex-shrink-0 relative overflow-hidden"
+              className="flex flex-col w-full md:w-[380px] h-[150px] sm:h-[170px] md:h-auto flex-shrink-0 relative overflow-hidden"
               style={{
                 background: "linear-gradient(135deg, #2C1A0E 0%, #4A2C1A 40%, #7A4A28 80%, #A67C52 100%)",
               }}
@@ -109,8 +111,83 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login", onSu
                 transition={{ duration: 11, repeat: Infinity, ease: "easeInOut" }}
               />
 
-              {/* Konten teks */}
-              <div className="relative z-10 flex flex-col h-full p-8 justify-between">
+              {/* ── Versi mobile: hanya maskot, dikecilkan, di tengah strip ── */}
+              <div className="md:hidden relative z-10 flex items-center justify-center h-full">
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.85 }}
+                  animate={{ opacity: 1, scale: 1, y: [0, -8, 0] }}
+                  transition={{
+                    opacity: { delay: 0.15, duration: 0.4 },
+                    scale: { delay: 0.15, duration: 0.4 },
+                    y: { duration: 4, repeat: Infinity, ease: "easeInOut" },
+                  }}
+                >
+                  <svg width="110" height="110" viewBox="0 0 220 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <ellipse cx="110" cy="205" rx="44" ry="8" fill="rgba(0,0,0,0.18)" />
+                    <motion.g animate={{ rotate: [-8, 8, -8] }} style={{ transformOrigin: "96px 50px" }}
+                      transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}>
+                      <line x1="96" y1="50" x2="74" y2="24" stroke="rgba(255,204,128,0.9)" strokeWidth="3" strokeLinecap="round" />
+                      <circle cx="73" cy="22" r="4.5" fill="rgba(255,204,128,0.9)" />
+                    </motion.g>
+                    <motion.g animate={{ rotate: [8, -8, 8] }} style={{ transformOrigin: "124px 50px" }}
+                      transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}>
+                      <line x1="124" y1="50" x2="146" y2="24" stroke="rgba(255,204,128,0.9)" strokeWidth="3" strokeLinecap="round" />
+                      <circle cx="147" cy="22" r="4.5" fill="rgba(255,204,128,0.9)" />
+                    </motion.g>
+                    <circle cx="110" cy="60" r="24" fill="rgba(166,124,82,0.95)" />
+                    <circle cx="100" cy="57" r="5.5" fill="rgba(255,255,255,0.92)" />
+                    <circle cx="101" cy="58" r="2.8" fill="rgba(30,15,5,0.95)" />
+                    <circle cx="102" cy="57" r="1.1" fill="white" />
+                    <circle cx="120" cy="57" r="5.5" fill="rgba(255,255,255,0.92)" />
+                    <circle cx="121" cy="58" r="2.8" fill="rgba(30,15,5,0.95)" />
+                    <circle cx="122" cy="57" r="1.1" fill="white" />
+                    <path d="M102 67 Q110 75 118 67" stroke="rgba(50,25,8,0.85)" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+                    <circle cx="96" cy="66" r="5" fill="rgba(220,140,80,0.35)" />
+                    <circle cx="124" cy="66" r="5" fill="rgba(220,140,80,0.35)" />
+                    <rect x="106" y="82" width="8" height="9" rx="4" fill="rgba(120,75,30,0.85)" />
+                    <ellipse cx="110" cy="107" rx="21" ry="19" fill="rgba(139,94,60,0.95)" />
+                    <motion.g animate={{ rotate: [-15, 15, -15] }} style={{ transformOrigin: "91px 100px" }}
+                      transition={{ duration: 0.85, repeat: Infinity, ease: "easeInOut" }}>
+                      <line x1="91" y1="100" x2="58" y2="86" stroke="rgba(166,124,82,0.92)" strokeWidth="4.5" strokeLinecap="round" />
+                      <line x1="58" y1="86" x2="38" y2="103" stroke="rgba(166,124,82,0.92)" strokeWidth="4" strokeLinecap="round" />
+                    </motion.g>
+                    <motion.g animate={{ rotate: [15, -15, 15] }} style={{ transformOrigin: "129px 100px" }}
+                      transition={{ duration: 0.85, repeat: Infinity, ease: "easeInOut" }}>
+                      <line x1="129" y1="100" x2="162" y2="86" stroke="rgba(166,124,82,0.92)" strokeWidth="4.5" strokeLinecap="round" />
+                      <line x1="162" y1="86" x2="182" y2="103" stroke="rgba(166,124,82,0.92)" strokeWidth="4" strokeLinecap="round" />
+                    </motion.g>
+                    <motion.g animate={{ rotate: [12, -12, 12] }} style={{ transformOrigin: "90px 109px" }}
+                      transition={{ duration: 0.85, delay: 0.28, repeat: Infinity, ease: "easeInOut" }}>
+                      <line x1="90" y1="109" x2="56" y2="112" stroke="rgba(166,124,82,0.92)" strokeWidth="4.5" strokeLinecap="round" />
+                      <line x1="56" y1="112" x2="35" y2="130" stroke="rgba(166,124,82,0.92)" strokeWidth="4" strokeLinecap="round" />
+                    </motion.g>
+                    <motion.g animate={{ rotate: [-12, 12, -12] }} style={{ transformOrigin: "130px 109px" }}
+                      transition={{ duration: 0.85, delay: 0.28, repeat: Infinity, ease: "easeInOut" }}>
+                      <line x1="130" y1="109" x2="164" y2="112" stroke="rgba(166,124,82,0.92)" strokeWidth="4.5" strokeLinecap="round" />
+                      <line x1="164" y1="112" x2="185" y2="130" stroke="rgba(166,124,82,0.92)" strokeWidth="4" strokeLinecap="round" />
+                    </motion.g>
+                    <motion.g animate={{ rotate: [-15, 15, -15] }} style={{ transformOrigin: "92px 120px" }}
+                      transition={{ duration: 0.85, delay: 0.56, repeat: Infinity, ease: "easeInOut" }}>
+                      <line x1="92" y1="120" x2="60" y2="136" stroke="rgba(166,124,82,0.92)" strokeWidth="4.5" strokeLinecap="round" />
+                      <line x1="60" y1="136" x2="42" y2="156" stroke="rgba(166,124,82,0.92)" strokeWidth="4" strokeLinecap="round" />
+                    </motion.g>
+                    <motion.g animate={{ rotate: [15, -15, 15] }} style={{ transformOrigin: "128px 120px" }}
+                      transition={{ duration: 0.85, delay: 0.56, repeat: Infinity, ease: "easeInOut" }}>
+                      <line x1="128" y1="120" x2="160" y2="136" stroke="rgba(166,124,82,0.92)" strokeWidth="4.5" strokeLinecap="round" />
+                      <line x1="160" y1="136" x2="178" y2="156" stroke="rgba(166,124,82,0.92)" strokeWidth="4" strokeLinecap="round" />
+                    </motion.g>
+                    <rect x="106" y="124" width="8" height="11" rx="4" fill="rgba(80,45,15,0.85)" />
+                    <ellipse cx="110" cy="163" rx="28" ry="34" fill="rgba(101,65,30,0.97)" />
+                    <path d="M86 152 Q110 147 134 152" stroke="rgba(166,124,82,0.25)" strokeWidth="1.5" fill="none" />
+                    <path d="M84 163 Q110 157 136 163" stroke="rgba(166,124,82,0.25)" strokeWidth="1.5" fill="none" />
+                    <path d="M86 174 Q110 168 134 174" stroke="rgba(166,124,82,0.25)" strokeWidth="1.5" fill="none" />
+                    <ellipse cx="100" cy="152" rx="7" ry="4" fill="rgba(255,255,255,0.08)" />
+                  </svg>
+                </motion.div>
+              </div>
+
+              {/* ── Versi desktop: konten penuh (logo, maskot besar, teks, stats) ── */}
+              <div className="hidden md:flex relative z-10 flex-col h-full p-8 justify-between">
                 {/* Logo */}
                 <div>
                   <motion.div
