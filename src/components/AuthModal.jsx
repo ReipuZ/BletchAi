@@ -45,15 +45,14 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login", onSu
           >
 
             {/* ── PANEL KIRI ── ilustrasi + bubbles
-                 Mobile: strip pendek di atas form, cuma maskot (tanpa teks/stats agar tidak makan tempat)
+                 Mobile: strip header dengan logo, maskot, dan bubble teks mengambang
                  Desktop: panel penuh di samping, seperti semula */}
             <div
-              className="flex flex-col w-full md:w-[380px] h-[150px] sm:h-[170px] md:h-auto flex-shrink-0 relative overflow-hidden"
+              className="flex flex-col w-full md:w-[380px] h-[260px] sm:h-[280px] md:h-auto flex-shrink-0 relative overflow-hidden"
               style={{
                 background: "linear-gradient(135deg, #2C1A0E 0%, #4A2C1A 40%, #7A4A28 80%, #A67C52 100%)",
               }}
-            >
-              {/* Glassmorphism overlay */}
+            >              {/* Glassmorphism overlay */}
               <div className="absolute inset-0 pointer-events-none"
                 style={{ background: "rgba(255,255,255,0.04)" }} />
 
@@ -112,108 +111,136 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login", onSu
               />
 
               {/* ── Versi mobile: maskot + teks sambutan, layout horizontal di strip pendek ── */}
-              <div className="md:hidden relative z-10 flex items-center gap-4 h-full px-6">
+              <div className="md:hidden relative z-10 h-full flex flex-col">
+                {/* Logo — pojok kiri atas */}
                 <motion.div
-                  className="flex-shrink-0"
-                  initial={{ opacity: 0, scale: 0.85 }}
-                  animate={{ opacity: 1, scale: 1, y: [0, -8, 0] }}
-                  transition={{
-                    opacity: { delay: 0.15, duration: 0.4 },
-                    scale: { delay: 0.15, duration: 0.4 },
-                    y: { duration: 4, repeat: Infinity, ease: "easeInOut" },
-                  }}
+                  initial={{ opacity: 0, y: -8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1, duration: 0.35 }}
+                  className="px-5 pt-4"
                 >
-                  <svg width="92" height="92" viewBox="0 0 220 220" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <ellipse cx="110" cy="205" rx="44" ry="8" fill="rgba(0,0,0,0.18)" />
-                    <motion.g animate={{ rotate: [-8, 8, -8] }} style={{ transformOrigin: "96px 50px" }}
-                      transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}>
-                      <line x1="96" y1="50" x2="74" y2="24" stroke="rgba(255,204,128,0.9)" strokeWidth="3" strokeLinecap="round" />
-                      <circle cx="73" cy="22" r="4.5" fill="rgba(255,204,128,0.9)" />
-                    </motion.g>
-                    <motion.g animate={{ rotate: [8, -8, 8] }} style={{ transformOrigin: "124px 50px" }}
-                      transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}>
-                      <line x1="124" y1="50" x2="146" y2="24" stroke="rgba(255,204,128,0.9)" strokeWidth="3" strokeLinecap="round" />
-                      <circle cx="147" cy="22" r="4.5" fill="rgba(255,204,128,0.9)" />
-                    </motion.g>
-                    <circle cx="110" cy="60" r="24" fill="rgba(166,124,82,0.95)" />
-                    <circle cx="100" cy="57" r="5.5" fill="rgba(255,255,255,0.92)" />
-                    <circle cx="101" cy="58" r="2.8" fill="rgba(30,15,5,0.95)" />
-                    <circle cx="102" cy="57" r="1.1" fill="white" />
-                    <circle cx="120" cy="57" r="5.5" fill="rgba(255,255,255,0.92)" />
-                    <circle cx="121" cy="58" r="2.8" fill="rgba(30,15,5,0.95)" />
-                    <circle cx="122" cy="57" r="1.1" fill="white" />
-                    <path d="M102 67 Q110 75 118 67" stroke="rgba(50,25,8,0.85)" strokeWidth="2.5" strokeLinecap="round" fill="none" />
-                    <circle cx="96" cy="66" r="5" fill="rgba(220,140,80,0.35)" />
-                    <circle cx="124" cy="66" r="5" fill="rgba(220,140,80,0.35)" />
-                    <rect x="106" y="82" width="8" height="9" rx="4" fill="rgba(120,75,30,0.85)" />
-                    <ellipse cx="110" cy="107" rx="21" ry="19" fill="rgba(139,94,60,0.95)" />
-                    <motion.g animate={{ rotate: [-15, 15, -15] }} style={{ transformOrigin: "91px 100px" }}
-                      transition={{ duration: 0.85, repeat: Infinity, ease: "easeInOut" }}>
-                      <line x1="91" y1="100" x2="58" y2="86" stroke="rgba(166,124,82,0.92)" strokeWidth="4.5" strokeLinecap="round" />
-                      <line x1="58" y1="86" x2="38" y2="103" stroke="rgba(166,124,82,0.92)" strokeWidth="4" strokeLinecap="round" />
-                    </motion.g>
-                    <motion.g animate={{ rotate: [15, -15, 15] }} style={{ transformOrigin: "129px 100px" }}
-                      transition={{ duration: 0.85, repeat: Infinity, ease: "easeInOut" }}>
-                      <line x1="129" y1="100" x2="162" y2="86" stroke="rgba(166,124,82,0.92)" strokeWidth="4.5" strokeLinecap="round" />
-                      <line x1="162" y1="86" x2="182" y2="103" stroke="rgba(166,124,82,0.92)" strokeWidth="4" strokeLinecap="round" />
-                    </motion.g>
-                    <motion.g animate={{ rotate: [12, -12, 12] }} style={{ transformOrigin: "90px 109px" }}
-                      transition={{ duration: 0.85, delay: 0.28, repeat: Infinity, ease: "easeInOut" }}>
-                      <line x1="90" y1="109" x2="56" y2="112" stroke="rgba(166,124,82,0.92)" strokeWidth="4.5" strokeLinecap="round" />
-                      <line x1="56" y1="112" x2="35" y2="130" stroke="rgba(166,124,82,0.92)" strokeWidth="4" strokeLinecap="round" />
-                    </motion.g>
-                    <motion.g animate={{ rotate: [-12, 12, -12] }} style={{ transformOrigin: "130px 109px" }}
-                      transition={{ duration: 0.85, delay: 0.28, repeat: Infinity, ease: "easeInOut" }}>
-                      <line x1="130" y1="109" x2="164" y2="112" stroke="rgba(166,124,82,0.92)" strokeWidth="4.5" strokeLinecap="round" />
-                      <line x1="164" y1="112" x2="185" y2="130" stroke="rgba(166,124,82,0.92)" strokeWidth="4" strokeLinecap="round" />
-                    </motion.g>
-                    <motion.g animate={{ rotate: [-15, 15, -15] }} style={{ transformOrigin: "92px 120px" }}
-                      transition={{ duration: 0.85, delay: 0.56, repeat: Infinity, ease: "easeInOut" }}>
-                      <line x1="92" y1="120" x2="60" y2="136" stroke="rgba(166,124,82,0.92)" strokeWidth="4.5" strokeLinecap="round" />
-                      <line x1="60" y1="136" x2="42" y2="156" stroke="rgba(166,124,82,0.92)" strokeWidth="4" strokeLinecap="round" />
-                    </motion.g>
-                    <motion.g animate={{ rotate: [15, -15, 15] }} style={{ transformOrigin: "128px 120px" }}
-                      transition={{ duration: 0.85, delay: 0.56, repeat: Infinity, ease: "easeInOut" }}>
-                      <line x1="128" y1="120" x2="160" y2="136" stroke="rgba(166,124,82,0.92)" strokeWidth="4.5" strokeLinecap="round" />
-                      <line x1="160" y1="136" x2="178" y2="156" stroke="rgba(166,124,82,0.92)" strokeWidth="4" strokeLinecap="round" />
-                    </motion.g>
-                    <rect x="106" y="124" width="8" height="11" rx="4" fill="rgba(80,45,15,0.85)" />
-                    <ellipse cx="110" cy="163" rx="28" ry="34" fill="rgba(101,65,30,0.97)" />
-                    <path d="M86 152 Q110 147 134 152" stroke="rgba(166,124,82,0.25)" strokeWidth="1.5" fill="none" />
-                    <path d="M84 163 Q110 157 136 163" stroke="rgba(166,124,82,0.25)" strokeWidth="1.5" fill="none" />
-                    <path d="M86 174 Q110 168 134 174" stroke="rgba(166,124,82,0.25)" strokeWidth="1.5" fill="none" />
-                    <ellipse cx="100" cy="152" rx="7" ry="4" fill="rgba(255,255,255,0.08)" />
-                  </svg>
+                  <span className="text-white font-bold text-sm tracking-wide">Bletch AI</span>
                 </motion.div>
 
-                {/* Teks sambutan — versi ringkas untuk strip mobile */}
-                <div className="min-w-0 flex-1">
-                  <AnimatePresence mode="wait">
-                    <motion.div
-                      key={mode}
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -8 }}
-                      transition={{ duration: 0.25 }}
-                    >
-                      <p className="text-white text-base font-bold leading-snug mb-1">
-                        {mode === "login" ? "Selamat datang kembali!" : "Bergabunglah bersama kami!"}
-                      </p>
-                      <p className="text-[12px] leading-relaxed" style={{ color: "rgba(255,255,255,0.65)" }}>
-                        {mode === "login"
-                          ? "Lanjutkan perjalanan belajarmu."
-                          : "Mulai belajar bersama ribuan pelajar."}
-                      </p>
-                    </motion.div>
-                  </AnimatePresence>
+                {/* Maskot — di tengah, mengintip di atas pinggir bubble */}
+                <div className="flex-1 flex items-end justify-center relative" style={{ marginBottom: -18 }}>
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.85 }}
+                    animate={{ opacity: 1, scale: 1, y: [0, -8, 0] }}
+                    transition={{
+                      opacity: { delay: 0.15, duration: 0.4 },
+                      scale: { delay: 0.15, duration: 0.4 },
+                      y: { duration: 4, repeat: Infinity, ease: "easeInOut" },
+                    }}
+                    className="relative z-10"
+                  >
+                    <svg width="104" height="104" viewBox="0 0 220 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <ellipse cx="110" cy="205" rx="44" ry="8" fill="rgba(0,0,0,0.18)" />
+                      <motion.g animate={{ rotate: [-8, 8, -8] }} style={{ transformOrigin: "96px 50px" }}
+                        transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}>
+                        <line x1="96" y1="50" x2="74" y2="24" stroke="rgba(255,204,128,0.9)" strokeWidth="3" strokeLinecap="round" />
+                        <circle cx="73" cy="22" r="4.5" fill="rgba(255,204,128,0.9)" />
+                      </motion.g>
+                      <motion.g animate={{ rotate: [8, -8, 8] }} style={{ transformOrigin: "124px 50px" }}
+                        transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}>
+                        <line x1="124" y1="50" x2="146" y2="24" stroke="rgba(255,204,128,0.9)" strokeWidth="3" strokeLinecap="round" />
+                        <circle cx="147" cy="22" r="4.5" fill="rgba(255,204,128,0.9)" />
+                      </motion.g>
+                      <circle cx="110" cy="60" r="24" fill="rgba(166,124,82,0.95)" />
+                      <circle cx="100" cy="57" r="5.5" fill="rgba(255,255,255,0.92)" />
+                      <circle cx="101" cy="58" r="2.8" fill="rgba(30,15,5,0.95)" />
+                      <circle cx="102" cy="57" r="1.1" fill="white" />
+                      <circle cx="120" cy="57" r="5.5" fill="rgba(255,255,255,0.92)" />
+                      <circle cx="121" cy="58" r="2.8" fill="rgba(30,15,5,0.95)" />
+                      <circle cx="122" cy="57" r="1.1" fill="white" />
+                      <path d="M102 67 Q110 75 118 67" stroke="rgba(50,25,8,0.85)" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+                      <circle cx="96" cy="66" r="5" fill="rgba(220,140,80,0.35)" />
+                      <circle cx="124" cy="66" r="5" fill="rgba(220,140,80,0.35)" />
+                      <rect x="106" y="82" width="8" height="9" rx="4" fill="rgba(120,75,30,0.85)" />
+                      <ellipse cx="110" cy="107" rx="21" ry="19" fill="rgba(139,94,60,0.95)" />
+                      <motion.g animate={{ rotate: [-15, 15, -15] }} style={{ transformOrigin: "91px 100px" }}
+                        transition={{ duration: 0.85, repeat: Infinity, ease: "easeInOut" }}>
+                        <line x1="91" y1="100" x2="58" y2="86" stroke="rgba(166,124,82,0.92)" strokeWidth="4.5" strokeLinecap="round" />
+                        <line x1="58" y1="86" x2="38" y2="103" stroke="rgba(166,124,82,0.92)" strokeWidth="4" strokeLinecap="round" />
+                      </motion.g>
+                      <motion.g animate={{ rotate: [15, -15, 15] }} style={{ transformOrigin: "129px 100px" }}
+                        transition={{ duration: 0.85, repeat: Infinity, ease: "easeInOut" }}>
+                        <line x1="129" y1="100" x2="162" y2="86" stroke="rgba(166,124,82,0.92)" strokeWidth="4.5" strokeLinecap="round" />
+                        <line x1="162" y1="86" x2="182" y2="103" stroke="rgba(166,124,82,0.92)" strokeWidth="4" strokeLinecap="round" />
+                      </motion.g>
+                      <motion.g animate={{ rotate: [12, -12, 12] }} style={{ transformOrigin: "90px 109px" }}
+                        transition={{ duration: 0.85, delay: 0.28, repeat: Infinity, ease: "easeInOut" }}>
+                        <line x1="90" y1="109" x2="56" y2="112" stroke="rgba(166,124,82,0.92)" strokeWidth="4.5" strokeLinecap="round" />
+                        <line x1="56" y1="112" x2="35" y2="130" stroke="rgba(166,124,82,0.92)" strokeWidth="4" strokeLinecap="round" />
+                      </motion.g>
+                      <motion.g animate={{ rotate: [-12, 12, -12] }} style={{ transformOrigin: "130px 109px" }}
+                        transition={{ duration: 0.85, delay: 0.28, repeat: Infinity, ease: "easeInOut" }}>
+                        <line x1="130" y1="109" x2="164" y2="112" stroke="rgba(166,124,82,0.92)" strokeWidth="4.5" strokeLinecap="round" />
+                        <line x1="164" y1="112" x2="185" y2="130" stroke="rgba(166,124,82,0.92)" strokeWidth="4" strokeLinecap="round" />
+                      </motion.g>
+                      <motion.g animate={{ rotate: [-15, 15, -15] }} style={{ transformOrigin: "92px 120px" }}
+                        transition={{ duration: 0.85, delay: 0.56, repeat: Infinity, ease: "easeInOut" }}>
+                        <line x1="92" y1="120" x2="60" y2="136" stroke="rgba(166,124,82,0.92)" strokeWidth="4.5" strokeLinecap="round" />
+                        <line x1="60" y1="136" x2="42" y2="156" stroke="rgba(166,124,82,0.92)" strokeWidth="4" strokeLinecap="round" />
+                      </motion.g>
+                      <motion.g animate={{ rotate: [15, -15, 15] }} style={{ transformOrigin: "128px 120px" }}
+                        transition={{ duration: 0.85, delay: 0.56, repeat: Infinity, ease: "easeInOut" }}>
+                        <line x1="128" y1="120" x2="160" y2="136" stroke="rgba(166,124,82,0.92)" strokeWidth="4.5" strokeLinecap="round" />
+                        <line x1="160" y1="136" x2="178" y2="156" stroke="rgba(166,124,82,0.92)" strokeWidth="4" strokeLinecap="round" />
+                      </motion.g>
+                      <rect x="106" y="124" width="8" height="11" rx="4" fill="rgba(80,45,15,0.85)" />
+                      <ellipse cx="110" cy="163" rx="28" ry="34" fill="rgba(101,65,30,0.97)" />
+                      <path d="M86 152 Q110 147 134 152" stroke="rgba(166,124,82,0.25)" strokeWidth="1.5" fill="none" />
+                      <path d="M84 163 Q110 157 136 163" stroke="rgba(166,124,82,0.25)" strokeWidth="1.5" fill="none" />
+                      <path d="M86 174 Q110 168 134 174" stroke="rgba(166,124,82,0.25)" strokeWidth="1.5" fill="none" />
+                      <ellipse cx="100" cy="152" rx="7" ry="4" fill="rgba(255,255,255,0.08)" />
+                    </svg>
+                  </motion.div>
+                </div>
+
+                {/* Bubble teks + stats — mengambang, warna cream */}
+                <div className="px-5 pb-5 relative z-0">
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2, duration: 0.4 }}
+                    className="rounded-2xl px-4 pt-6 pb-3.5 text-center"
+                    style={{
+                      background: "rgba(253, 246, 238, 0.95)",
+                      boxShadow: "0 8px 20px rgba(20,12,6,0.25)",
+                    }}
+                  >
+                    <AnimatePresence mode="wait">
+                      <motion.div
+                        key={mode}
+                        initial={{ opacity: 0, y: 6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -6 }}
+                        transition={{ duration: 0.25 }}
+                      >
+                        <p className="text-[#2C1A0E] text-[15px] font-bold leading-snug mb-0.5">
+                          {mode === "login" ? "Selamat datang kembali!" : "Bergabunglah bersama kami!"}
+                        </p>
+                        <p className="text-[#6D4C41] text-[11.5px] leading-relaxed">
+                          {mode === "login"
+                            ? "Lanjutkan perjalanan belajarmu."
+                            : "Mulai belajar bersama ribuan pelajar."}
+                        </p>
+                      </motion.div>
+                    </AnimatePresence>
+
+                    {/* Stats row */}
+                    <div className="flex items-center justify-center gap-5 mt-3 pt-3 border-t border-[#A67C52]/15">
+                      {[["50K+", "Pelajar"], ["200+", "Kursus"], ["4.9", "Rating"]].map(([val, lbl]) => (
+                        <div key={lbl} className="text-center">
+                          <p className="text-[#2C1A0E] text-[13px] font-bold leading-tight">{val}</p>
+                          <p className="text-[#8A6A4A] text-[10px] leading-tight">{lbl}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </motion.div>
                 </div>
               </div>
-
-              {/* Shadow transisi — memudarkan batas antara strip header dan form di bawahnya (mobile only) */}
-              <div
-                className="md:hidden pointer-events-none absolute left-0 right-0 bottom-0 h-10"
-                style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0), rgba(20,12,6,0.38))" }}
-              />
 
               {/* ── Versi desktop: konten penuh (logo, maskot besar, teks, stats) ── */}
               <div className="hidden md:flex relative z-10 flex-col h-full p-8 justify-between">
@@ -369,7 +396,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login", onSu
             </div>
 
             {/* ── PANEL KANAN ── form */}
-            <div className="relative flex-1 flex flex-col justify-center px-5 sm:px-8 py-8 sm:py-10 bg-white overflow-y-auto">
+            <div className="relative flex-1 flex flex-col px-5 sm:px-8 py-10 bg-white overflow-y-auto">
               {/* Shadow fade dari atas — menyatukan transisi dengan strip header di mobile */}
               <div
                 className="md:hidden pointer-events-none absolute left-0 right-0 top-0 h-6 z-[1]"
@@ -391,6 +418,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login", onSu
                 {mode === "login" ? (
                   <motion.div
                     key="login"
+                    className="w-full m-auto"
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -20 }}
@@ -401,6 +429,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login", onSu
                 ) : (
                   <motion.div
                     key="register"
+                    className="w-full m-auto"
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -20 }}
