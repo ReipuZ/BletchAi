@@ -22,46 +22,46 @@ const socials = [
 
 export default function FooterSection() {
   return (
-    <footer className="bg-[#1E1A16] text-white pt-12 sm:pt-16 pb-8">
+    <footer className="bg-[#1E1A16] text-white pt-10 sm:pt-16 pb-6 sm:pb-8">
       <div className="max-w-6xl mx-auto px-5 sm:px-8 md:px-10">
 
         {/* Main grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-[1.8fr_1fr_1fr] gap-8 sm:gap-10 md:gap-16 pb-10 sm:pb-12 border-b border-white/10">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-[1.8fr_1fr_1fr] gap-6 sm:gap-10 md:gap-16 pb-8 sm:pb-12 border-b border-white/10">
 
-          {/* Brand col */}
+          {/* Brand col — full width di mobile */}
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
-            className="sm:col-span-2 md:col-span-1"
+            className="col-span-2 md:col-span-1"
           >
             {/* Logo text */}
-            <div className="flex items-center gap-2.5 mb-4">
-              <div className="w-8 h-8 rounded-lg bg-[#A67C52] flex items-center justify-center flex-shrink-0">
-                <span className="text-white font-black text-sm">B</span>
+            <div className="flex items-center gap-2 mb-3 sm:mb-4">
+              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-[#A67C52] flex items-center justify-center flex-shrink-0">
+                <span className="text-white font-black text-xs sm:text-sm">B</span>
               </div>
-              <span className="text-xl font-black tracking-wide text-white">BLETCHAI</span>
+              <span className="text-lg sm:text-xl font-black tracking-wide text-white">BLETCHAI</span>
             </div>
 
-            <p className="text-[#C49A5A] text-sm font-medium mb-3">
+            <p className="text-[#C49A5A] text-xs sm:text-sm font-medium mb-2 sm:mb-3">
               Platform Persiapan Karier untuk SMK
             </p>
 
-            <p className="text-white/50 text-sm leading-relaxed max-w-xs">
+            <p className="text-white/50 text-xs sm:text-sm leading-relaxed max-w-xs">
               Membantu lulusan SMK mempersiapkan karier melalui AI Interview, Skill Academy, dan Career Recommendation.
             </p>
 
             {/* Socials */}
-            <div className="flex gap-2.5 mt-6">
+            <div className="flex gap-2 mt-4 sm:mt-6">
               {socials.map((s) => (
                 <a
                   key={s.label}
                   href={s.href}
                   aria-label={s.label}
-                  className="w-8 h-8 rounded-full border border-white/20 flex items-center justify-center text-white/50 hover:border-[#C49A5A] hover:text-[#C49A5A] transition-colors duration-200"
+                  className="w-7 h-7 sm:w-8 sm:h-8 rounded-full border border-white/20 flex items-center justify-center text-white/50 hover:border-[#C49A5A] hover:text-[#C49A5A] transition-colors duration-200"
                 >
-                  <svg viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5">
+                  <svg viewBox="0 0 24 24" fill="currentColor" className="w-3 h-3 sm:w-3.5 sm:h-3.5">
                     <path d={s.icon} />
                   </svg>
                 </a>
@@ -76,16 +76,16 @@ export default function FooterSection() {
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.1 }}
           >
-            <p className="text-xs font-bold tracking-widest text-[#C49A5A] uppercase mb-5">
+            <p className="text-[10px] sm:text-xs font-bold tracking-widest text-[#C49A5A] uppercase mb-3 sm:mb-5">
               Navigasi
             </p>
-            <div className="h-[2px] w-8 bg-[#A67C52] rounded mb-5" />
-            <ul className="space-y-3">
+            <div className="h-[2px] w-6 sm:w-8 bg-[#A67C52] rounded mb-3 sm:mb-5" />
+            <ul className="space-y-2.5 sm:space-y-3">
               {navLinks.map((link) => (
                 <li key={link.label}>
                   <a
                     href={link.href}
-                    className="text-sm text-white/60 hover:text-[#C49A5A] transition-colors duration-200"
+                    className="text-xs sm:text-sm text-white/60 hover:text-[#C49A5A] transition-colors duration-200"
                   >
                     {link.label}
                   </a>
@@ -94,21 +94,23 @@ export default function FooterSection() {
             </ul>
           </motion.div>
 
+          {/* Contact col */}
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            <p className="text-xs font-bold tracking-widest text-[#C49A5A] uppercase mb-5">
+            <p className="text-[10px] sm:text-xs font-bold tracking-widest text-[#C49A5A] uppercase mb-3 sm:mb-5">
               Hubungi Kami
             </p>
-            <div className="h-[2px] w-8 bg-[#A67C52] rounded mb-5" />
-            <ul className="space-y-4">
+            <div className="h-[2px] w-6 sm:w-8 bg-[#A67C52] rounded mb-3 sm:mb-5" />
+            <ul className="space-y-3 sm:space-y-4">
               {contacts.map(({ icon: Icon, text }) => (
-                <li key={text} className="flex items-start gap-3">
-                  <Icon size={14} className="text-[#C49A5A] mt-0.5 flex-shrink-0" />
-                  <span className="text-sm text-white/60 leading-snug">{text}</span>
+                <li key={text} className="flex items-start gap-2 sm:gap-3">
+                  <Icon size={12} className="text-[#C49A5A] mt-0.5 flex-shrink-0 sm:hidden" />
+                  <Icon size={14} className="text-[#C49A5A] mt-0.5 flex-shrink-0 hidden sm:block" />
+                  <span className="text-xs sm:text-sm text-white/60 leading-snug">{text}</span>
                 </li>
               ))}
             </ul>
@@ -116,11 +118,11 @@ export default function FooterSection() {
         </div>
 
         {/* Bottom bar */}
-        <div className="pt-6 flex flex-col sm:flex-row gap-2 sm:gap-0 justify-between items-center text-center sm:text-left">
-          <p className="text-xs text-white/30">
+        <div className="pt-5 sm:pt-6 flex flex-col sm:flex-row gap-1.5 sm:gap-0 justify-between items-center text-center sm:text-left">
+          <p className="text-[10px] sm:text-xs text-white/30">
             © 2026 <span className="text-white/50 font-semibold">BletchAI</span>. All rights reserved.
           </p>
-          <p className="text-xs text-white/30 italic">
+          <p className="text-[10px] sm:text-xs text-white/30 italic">
             Built with ❤️ by Team BletchAI
           </p>
         </div>
