@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import AuthModal from "./components/AuthModal";
 import Dashboard from "./pages/dashboard";
-import TopBar from "./components/topBar";
+import Navbar from "./components/navbar";
 
 export default function App() {
   const [isLogin, setIsLogin] = useState(false);

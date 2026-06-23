@@ -1,7 +1,5 @@
-import { useState } from "react";
-import SidebarLeft from "../components/sidebarLeft";
-import TopBar from "../components/topBar";
-
+// src/pages/Dashboard.jsx
+import Navbar from "../components/Navbar";
 import HomeSection from "../sections/homeSection";
 import KursusSection from "../sections/kursusSection";
 import InterviewSection from "../sections/interviewSection";
@@ -11,34 +9,26 @@ import AboutSection from "../sections/aboutSection";
 import FloatingMascot from "../components/floatingMascot.jsx";
 
 export default function Dashboard({ onLogout, onLogin, localUser, isLogin }) {
-  const [collapsed, setCollapsed] = useState(
-    typeof window !== "undefined" ? window.innerWidth < 768 : false
-  );
-
   return (
-    <div className="flex flex-col min-h-screen bg-[#F4F4F4]">
-      <TopBar
+    /* ✦ Background utama — hitam solid */
+    <div className="min-h-screen" style={{ background: "#000000" }}>
+      <Navbar
         onLogout={onLogout}
         onLogin={onLogin}
-        collapsed={collapsed}
-        setCollapsed={setCollapsed}
         localUser={localUser}
         isLogin={isLogin}
       />
 
-      <div className="flex flex-1 overflow-hidden min-w-0">
-        <SidebarLeft collapsed={collapsed} />
-        <main className="flex-1 min-w-0 h-[calc(100vh-56px)] overflow-y-auto overflow-x-hidden scroll-smooth">
-          <HomeSection />
-          <KursusSection />
-          <InterviewSection />
-          <StatsSection />
-          <FaqSection />
-          <AboutSection />
-        </main>
-      </div>
+      <main className="pt-20 pb-24 md:pb-0 overflow-x-hidden">
+        <HomeSection />
+        <KursusSection />
+        <InterviewSection />
+        <StatsSection />
+        <FaqSection />
+        <AboutSection />
+      </main>
 
-      <FloatingMascot />
+      
     </div>
   );
 }

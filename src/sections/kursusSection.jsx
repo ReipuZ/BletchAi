@@ -1,5 +1,4 @@
-import { useState, useEffect, useRef } from "react";
-import { createPortal } from "react-dom";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronRight, Star, Users, Clock, Award, X } from "lucide-react";
 import KursusRPL from "../assets/image/kursusRPL.jpg";
@@ -10,7 +9,6 @@ import KursusTataboga from "../assets/image/kursusTataboga.jpg";
 import KursusEditting from "../assets/image/kursusEditting.jpg";
 import Reveal, { RevealGroup, revealItem } from "../components/Reveal.jsx";
 
-// Deteksi apakah perangkat touch (mobile)
 const isTouchDevice = () =>
   typeof window !== "undefined" &&
   ("ontouchstart" in window || navigator.maxTouchPoints > 0);
@@ -20,37 +18,33 @@ const benefits = [
     icon: Award,
     title: "Kurikulum Industri",
     desc: "Materi disusun bersama praktisi HR dan perusahaan mitra agar relevan dengan kebutuhan dunia kerja nyata.",
-    color: "bg-blue-50 border-blue-100",
-    iconColor: "text-blue-500",
-    textColor: "text-blue-800",
-    subColor: "text-blue-500",
+    accent: "rgba(59,130,246,0.10)",
+    border: "rgba(59,130,246,0.18)",
+    iconColor: "#3B82F6",
   },
   {
     icon: Users,
     title: "Mentor Berpengalaman",
     desc: "Dibimbing langsung oleh mentor aktif di industri dengan rata-rata 5+ tahun pengalaman di bidangnya.",
-    color: "bg-amber-50 border-amber-100",
-    iconColor: "text-amber-500",
-    textColor: "text-amber-800",
-    subColor: "text-amber-500",
+    accent: "rgba(251,191,36,0.08)",
+    border: "rgba(251,191,36,0.16)",
+    iconColor: "#FBBF24",
   },
   {
     icon: Clock,
     title: "Belajar Fleksibel",
     desc: "Akses materi kapan saja dan di mana saja. Cocok untuk siswa SMK yang punya jadwal padat.",
-    color: "bg-emerald-50 border-emerald-100",
-    iconColor: "text-emerald-500",
-    textColor: "text-emerald-800",
-    subColor: "text-emerald-500",
+    accent: "rgba(6,182,212,0.08)",
+    border: "rgba(6,182,212,0.16)",
+    iconColor: "#06B6D4",
   },
   {
     icon: Star,
     title: "Sertifikat Resmi",
     desc: "Dapatkan sertifikat yang diakui industri setelah menyelesaikan kursus. Nilai tambah untuk CV-mu.",
-    color: "bg-purple-50 border-purple-100",
-    iconColor: "text-purple-500",
-    textColor: "text-purple-800",
-    subColor: "text-purple-500",
+    accent: "rgba(139,92,246,0.08)",
+    border: "rgba(139,92,246,0.16)",
+    iconColor: "#8B5CF6",
   },
 ];
 
@@ -69,7 +63,6 @@ const courses = [
     mentor: "Budi Santoso",
     price: "Rp 180.000",
     badge: "Terlaris",
-    badgeColor: "bg-red-500",
     online: true,
     image: KursusRPL,
     accent: "#185FA5",
@@ -88,7 +81,6 @@ const courses = [
     mentor: "Sari Dewi",
     price: "Rp 150.000",
     badge: "Populer",
-    badgeColor: "bg-pink-500",
     online: true,
     image: KursusDesain,
     accent: "#993356",
@@ -107,7 +99,6 @@ const courses = [
     mentor: "Rina Marlina",
     price: "Rp 120.000",
     badge: "Terlaris",
-    badgeColor: "bg-red-500",
     online: true,
     image: KursusAkuntansi,
     accent: "#0F6E56",
@@ -126,7 +117,6 @@ const courses = [
     mentor: "Doni Prasetyo",
     price: "Rp 200.000",
     badge: "Baru",
-    badgeColor: "bg-blue-500",
     online: false,
     image: KursusOtomotif,
     accent: "#854F0B",
@@ -145,7 +135,6 @@ const courses = [
     mentor: "Fajar Nugroho",
     price: "Rp 165.000",
     badge: "Populer",
-    badgeColor: "bg-pink-500",
     online: true,
     image: KursusEditting,
     accent: "#534AB7",
@@ -164,7 +153,6 @@ const courses = [
     mentor: "Chef Maya",
     price: "Rp 135.000",
     badge: "Online",
-    badgeColor: "bg-emerald-500",
     online: true,
     image: KursusTataboga,
     accent: "#993C1D",
@@ -176,264 +164,381 @@ const CARD_W = 220;
 const CARD_GAP = 14;
 const STEP = CARD_W + CARD_GAP;
 
-// ── Popup desktop (floating di atas card) ──
-function CoursePopupDesktop({ course, anchorRect, onMouseEnter, onMouseLeave, onSelect }) {
-  if (!anchorRect) return null;
-
-  const POPUP_W = 260;
-  const POPUP_MARGIN = 10;
-  const top = anchorRect.top + window.scrollY - POPUP_MARGIN;
-  let left = anchorRect.left + window.scrollX;
-  if (left + POPUP_W > window.innerWidth - 12) {
-    left = anchorRect.right + window.scrollX - POPUP_W;
-  }
-
-  return createPortal(
+// ── Panel detail di bawah carousel ──
+function CourseDetailPanel({ course, onClose }) {
+  return (
     <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0, scale: 0.93, y: 10 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.93, y: 10 }}
-        transition={{ duration: 0.18, ease: "easeOut" }}
-        className="fixed bg-white rounded-2xl shadow-2xl border border-zinc-100 overflow-hidden"
-        style={{ zIndex: 9999, width: POPUP_W, top, left, transform: "translateY(-100%)" }}
-        onMouseEnter={onMouseEnter}
-        onMouseLeave={onMouseLeave}
-      >
-        <PopupContent course={course} onSelect={onSelect} />
-      </motion.div>
-    </AnimatePresence>,
-    document.body
-  );
-}
-
-// ── Popup mobile (modal di tengah layar) ──
-function CoursePopupMobile({ course, onClose, onSelect }) {
-  return createPortal(
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.18 }}
-        className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm px-4 pb-6 sm:pb-0"
-        onClick={onClose}
-      >
+      {course && (
         <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 40 }}
-          transition={{ duration: 0.22, ease: "easeOut" }}
-          className="bg-white rounded-2xl shadow-2xl border border-zinc-100 overflow-hidden w-full max-w-sm"
-          onClick={(e) => e.stopPropagation()}
+          key={course.id}
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: "auto" }}
+          exit={{ opacity: 0, height: 0 }}
+          transition={{ duration: 0.3, ease: "easeInOut" }}
+          style={{ overflow: "hidden" }}
         >
-          {/* Tombol tutup */}
-          <div className="flex justify-end px-3 pt-3">
-            <button
-              onClick={onClose}
-              className="w-7 h-7 rounded-full flex items-center justify-center bg-zinc-100 hover:bg-zinc-200 transition-colors"
-            >
-              <X size={13} className="text-zinc-500" />
-            </button>
-          </div>
-          <PopupContent course={course} onSelect={onSelect} onClose={onClose} />
-        </motion.div>
-      </motion.div>
-    </AnimatePresence>,
-    document.body
-  );
-}
-
-// ── Konten popup (dipakai oleh desktop & mobile) ──
-function PopupContent({ course, onSelect, onClose }) {
-  return (
-    <>
-      <div className="relative h-[120px] w-full overflow-hidden">
-        <img src={course.image} alt={course.title} className="w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-        <div className="absolute top-2.5 left-2.5 flex gap-1.5">
-          {course.online && (
-            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500 text-white">
-              Online
-            </span>
-          )}
-          {course.badge && (
-            <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full text-white ${course.badgeColor}`}>
-              {course.badge}
-            </span>
-          )}
-        </div>
-      </div>
-
-      <div className="p-3.5">
-        <div className="flex items-center gap-1.5 mb-2">
           <div
-            className="w-5 h-5 rounded-full flex items-center justify-center text-white text-[9px] font-bold flex-shrink-0"
-            style={{ background: course.accent }}
-          >
-            {course.mentor[0]}
-          </div>
-          <span className="text-[11px] text-zinc-500">{course.mentor}</span>
-        </div>
-
-        <p className="text-xs font-bold text-zinc-800 leading-snug mb-1.5">{course.title}</p>
-        <p className="text-[10px] text-zinc-400 leading-relaxed mb-2.5 line-clamp-2">{course.desc}</p>
-
-        <div className="flex items-center gap-2 text-[10px] text-zinc-400 mb-2.5">
-          <span className="flex items-center gap-1"><Clock size={9} />{course.duration}</span>
-          <span className="text-zinc-200">·</span>
-          <span>{course.sessions}</span>
-          <span className="text-zinc-200">·</span>
-          <span>{course.ageRange}</span>
-        </div>
-
-        <div className="flex items-center gap-1 mb-3">
-          <Star size={10} className="fill-amber-400 text-amber-400" />
-          <span className="text-[11px] font-semibold text-zinc-700">{course.rating}</span>
-          <span className="text-[10px] text-zinc-400">· {course.students} siswa</span>
-        </div>
-
-        <div className="flex items-center justify-between">
-          <p className="text-sm font-bold text-zinc-800">{course.price}</p>
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              onSelect?.(course);
-              onClose?.();
+            className="mx-4 sm:mx-8 md:mx-12 rounded-2xl overflow-hidden mb-4"
+            style={{
+              background: "rgba(255,255,255,0.05)",
+              backdropFilter: "blur(24px)",
+              WebkitBackdropFilter: "blur(24px)",
+              border: "1px solid rgba(255,255,255,0.10)",
+              boxShadow: "0 8px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08)",
             }}
-            className="text-[11px] font-semibold text-white px-3 py-1.5 rounded-xl flex items-center gap-1 cursor-pointer hover:brightness-110 active:scale-95 transition"
-            style={{ background: course.accent }}
           >
-            Lihat Detail <ChevronRight size={11} />
-          </button>
-        </div>
-      </div>
-    </>
+            <div className="flex flex-col sm:flex-row">
+              {/* Gambar — lebih pendek di mobile */}
+              <div className="relative sm:w-56 flex-shrink-0 h-36 sm:h-auto overflow-hidden">
+                <img
+                  src={course.image}
+                  alt={course.title}
+                  className="w-full h-full object-cover"
+                />
+                <div
+                  className="absolute inset-0"
+                  style={{
+                    background:
+                      "linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.85)), linear-gradient(to right, transparent 60%, rgba(0,0,0,0.85))",
+                  }}
+                />
+                <div className="absolute top-3 left-3 flex gap-1.5">
+                  {course.online && (
+                    <span
+                      className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
+                      style={{
+                        background: "rgba(6,182,212,0.15)",
+                        color: "#06B6D4",
+                        border: "1px solid rgba(6,182,212,0.25)",
+                        backdropFilter: "blur(6px)",
+                        WebkitBackdropFilter: "blur(6px)",
+                      }}
+                    >
+                      Online
+                    </span>
+                  )}
+                  {course.badge && (
+                    <span
+                      className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
+                      style={{
+                        background: "rgba(255,255,255,0.08)",
+                        color: "#AAAAAA",
+                        border: "1px solid rgba(255,255,255,0.12)",
+                        backdropFilter: "blur(6px)",
+                        WebkitBackdropFilter: "blur(6px)",
+                      }}
+                    >
+                      {course.badge}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Konten */}
+              <div className="flex-1 p-4 sm:p-5 flex flex-col justify-between">
+                <div>
+                  {/* Mentor */}
+                  <div className="flex items-center gap-2 mb-2">
+                    <div
+                      className="w-5 h-5 rounded-full flex items-center justify-center text-white text-[9px] font-bold flex-shrink-0"
+                      style={{ background: course.accent }}
+                    >
+                      {course.mentor[0]}
+                    </div>
+                    <span className="text-[11px]" style={{ color: "#555555" }}>
+                      {course.mentor}
+                    </span>
+                  </div>
+
+                  <p
+                    className="text-[10px] font-semibold uppercase tracking-wide mb-0.5"
+                    style={{ color: "#555555" }}
+                  >
+                    {course.category}
+                  </p>
+                  <p
+                    className="text-sm font-semibold leading-snug mb-2"
+                    style={{ color: "#E0E0E0" }}
+                  >
+                    {course.title}
+                  </p>
+                  <p
+                    className="text-[11px] leading-relaxed mb-3 line-clamp-2 sm:line-clamp-none"
+                    style={{ color: "#666666" }}
+                  >
+                    {course.desc}
+                  </p>
+
+                  {/* Meta — wrap di mobile */}
+                  <div
+                    className="flex flex-wrap gap-x-3 gap-y-1.5 text-[11px] mb-3"
+                    style={{ color: "#555555" }}
+                  >
+                    <span className="flex items-center gap-1">
+                      <Clock size={10} /> {course.duration}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Users size={10} /> {course.sessions}
+                    </span>
+                    <span>{course.ageRange}</span>
+                  </div>
+
+                  {/* Rating */}
+                  <div className="flex items-center gap-1.5 mb-4">
+                    <Star size={11} className="fill-amber-400 text-amber-400" />
+                    <span className="text-xs font-semibold" style={{ color: "#BBBBBB" }}>
+                      {course.rating}
+                    </span>
+                    <span className="text-[11px]" style={{ color: "#555555" }}>
+                      · {course.students} siswa
+                    </span>
+                  </div>
+                </div>
+
+                {/* Harga & CTA — full width di mobile */}
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-base font-bold" style={{ color: "#F0F0F5" }}>
+                    {course.price}
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={onClose}
+                      className="w-8 h-8 rounded-full flex items-center justify-center transition-colors flex-shrink-0"
+                      style={{
+                        background: "rgba(255,255,255,0.05)",
+                        border: "1px solid rgba(255,255,255,0.09)",
+                        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.07)",
+                      }}
+                      onMouseEnter={(e) =>
+                        (e.currentTarget.style.background = "rgba(255,255,255,0.10)")
+                      }
+                      onMouseLeave={(e) =>
+                        (e.currentTarget.style.background = "rgba(255,255,255,0.05)")
+                      }
+                    >
+                      <X size={13} style={{ color: "#666666" }} />
+                    </button>
+                    <button
+                      className="text-xs font-semibold px-4 py-2.5 rounded-xl flex items-center gap-1.5 transition-all active:scale-95 flex-shrink-0"
+                      style={{
+                        background: "rgba(59,130,246,0.15)",
+                        backdropFilter: "blur(8px)",
+                        WebkitBackdropFilter: "blur(8px)",
+                        color: "#93C5FD",
+                        border: "1px solid rgba(59,130,246,0.28)",
+                        boxShadow: "inset 0 1px 0 rgba(59,130,246,0.20)",
+                        minHeight: "40px",
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = "rgba(59,130,246,0.25)";
+                        e.currentTarget.style.boxShadow =
+                          "inset 0 1px 0 rgba(59,130,246,0.25), 0 0 12px rgba(59,130,246,0.12)";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = "rgba(59,130,246,0.15)";
+                        e.currentTarget.style.boxShadow =
+                          "inset 0 1px 0 rgba(59,130,246,0.20)";
+                      }}
+                    >
+                      Daftar Sekarang <ChevronRight size={12} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
 
-// ── CourseCard: beda behavior desktop vs mobile ──
-function CourseCard({ course, onSelect, pausedRef }) {
+// ── CourseCard ──
+function CourseCard({ course, isSelected, onSelect, pausedRef }) {
   const [hovered, setHovered] = useState(false);
-  const [anchorRect, setAnchorRect] = useState(null);
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const cardRef = useRef(null);
-  const closeTimerRef = useRef(null);
-  const isTouch = isTouchDevice();
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const wrapperRef = useRef(null);
+  const isTouch = useRef(isTouchDevice());
 
-  const cancelClose = () => {
-    if (closeTimerRef.current) {
-      clearTimeout(closeTimerRef.current);
-      closeTimerRef.current = null;
+  // Deteksi swipe vs tap di mobile
+  const touchStartRef = useRef(null);
+
+  const handleMouseMove = (e) => {
+    if (isTouch.current || !wrapperRef.current) return;
+    const rect = wrapperRef.current.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width - 0.5) * 2;
+    const y = ((e.clientY - rect.top) / rect.height - 0.5) * 2;
+    setMousePos({ x, y });
+  };
+
+  const handleTouchStart = (e) => {
+    touchStartRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+  };
+
+  const handleTouchEnd = (e) => {
+    if (!touchStartRef.current) return;
+    const dx = Math.abs(e.changedTouches[0].clientX - touchStartRef.current.x);
+    const dy = Math.abs(e.changedTouches[0].clientY - touchStartRef.current.y);
+    // Hanya trigger select jika bukan swipe (gerakan < 8px)
+    if (dx < 8 && dy < 8) {
+      onSelect(course);
     }
+    touchStartRef.current = null;
   };
-
-  const scheduleClose = () => {
-    cancelClose();
-    closeTimerRef.current = setTimeout(() => {
-      setHovered(false);
-      setAnchorRect(null);
-    }, 120);
-  };
-
-  const handleCardEnter = () => {
-    cancelClose();
-    if (cardRef.current) setAnchorRect(cardRef.current.getBoundingClientRect());
-    setHovered(true);
-  };
-
-  // FIX: pause carousel saat modal mobile dibuka
-  const handleTap = () => {
-    if (isTouch) {
-      pausedRef.current = true;
-      setMobileOpen(true);
-    }
-  };
-
-  // FIX: resume carousel saat modal mobile ditutup
-  const handleMobileClose = () => {
-    setMobileOpen(false);
-    pausedRef.current = false;
-  };
-
-  useEffect(() => {
-    return () => cancelClose();
-  }, []);
 
   return (
-    <>
-      <div
-        ref={cardRef}
-        className="flex-shrink-0 cursor-pointer group relative"
-        style={{ width: CARD_W }}
-        // Desktop: hover
-        onMouseEnter={!isTouch ? handleCardEnter : undefined}
-        onMouseLeave={!isTouch ? scheduleClose : undefined}
-        // Mobile: tap
-        onClick={isTouch ? handleTap : undefined}
+    <div
+      ref={wrapperRef}
+      className="flex-shrink-0 relative"
+      style={{ width: CARD_W, perspective: "800px" }}
+      onMouseEnter={
+        !isTouch.current
+          ? () => { setHovered(true); pausedRef.current = true; }
+          : undefined
+      }
+      onMouseLeave={
+        !isTouch.current
+          ? () => {
+              setHovered(false);
+              setMousePos({ x: 0, y: 0 });
+              if (!isSelected) pausedRef.current = false;
+            }
+          : undefined
+      }
+      onMouseMove={!isTouch.current ? handleMouseMove : undefined}
+      onClick={!isTouch.current ? () => onSelect(course) : undefined}
+      onTouchStart={isTouch.current ? handleTouchStart : undefined}
+      onTouchEnd={isTouch.current ? handleTouchEnd : undefined}
+    >
+      <motion.div
+        className="cursor-pointer rounded-2xl overflow-hidden w-full"
+        style={{
+          background: isSelected
+            ? "rgba(59,130,246,0.10)"
+            : "rgba(255,255,255,0.05)",
+          backdropFilter: "blur(20px)",
+          WebkitBackdropFilter: "blur(20px)",
+          border: isSelected
+            ? "1px solid rgba(59,130,246,0.28)"
+            : "1px solid rgba(255,255,255,0.09)",
+          boxShadow: isSelected
+            ? "0 4px 20px rgba(0,0,0,0.4), inset 0 1px 0 rgba(59,130,246,0.15)"
+            : "0 4px 20px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08)",
+        }}
+        animate={
+          !isTouch.current && hovered
+            ? {
+                rotateX: -mousePos.y * 6,
+                rotateY: mousePos.x * 6,
+                scale: 1.04,
+              }
+            : {
+                rotateX: 0,
+                rotateY: 0,
+                scale: 1,
+              }
+        }
+        transition={{ type: "spring", stiffness: 300, damping: 25 }}
+        // Feedback tap di mobile
+        whileTap={isTouch.current ? { scale: 0.97 } : undefined}
       >
-        {/* Gambar card */}
-        <div className="relative h-[130px] rounded-2xl mb-3 overflow-hidden">
+        {/* Gambar + parallax (desktop only) */}
+        <div className="relative h-[130px] overflow-hidden">
           {course.image ? (
-            <img src={course.image} alt={course.title} className="w-full h-full object-cover" />
+            <motion.img
+              src={course.image}
+              alt={course.title}
+              className="w-full h-full object-cover"
+              animate={
+                !isTouch.current && hovered
+                  ? { scale: 1.08, x: mousePos.x * -6, y: mousePos.y * -6 }
+                  : { scale: 1, x: 0, y: 0 }
+              }
+              transition={{ type: "spring", stiffness: 200, damping: 25 }}
+            />
           ) : (
-            <div className="w-full h-full bg-gradient-to-br from-zinc-100 to-zinc-200 flex items-center justify-center">
+            <div
+              className="w-full h-full flex items-center justify-center"
+              style={{ background: "rgba(255,255,255,0.03)" }}
+            >
               <span className="text-5xl select-none">📚</span>
             </div>
           )}
+
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                "linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 55%)",
+            }}
+          />
+
           <div className="absolute top-2.5 left-2.5">
-            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-black/25 text-white/90 backdrop-blur-sm">
+            <span
+              className="text-[10px] font-medium px-2 py-0.5 rounded-full"
+              style={{
+                background: "rgba(0,0,0,0.45)",
+                color: "rgba(255,255,255,0.75)",
+                backdropFilter: "blur(8px)",
+                WebkitBackdropFilter: "blur(8px)",
+                border: "1px solid rgba(255,255,255,0.12)",
+              }}
+            >
               {course.level}
             </span>
           </div>
-          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/15 transition-colors duration-200 rounded-2xl" />
+
+          {/* Shimmer — desktop only */}
+          {!isTouch.current && (
+            <motion.div
+              className="absolute inset-0 pointer-events-none"
+              animate={{ opacity: hovered ? 1 : 0 }}
+              transition={{ duration: 0.2 }}
+              style={{
+                background: `radial-gradient(circle at ${50 + mousePos.x * 35}% ${
+                  50 + mousePos.y * 35
+                }%, rgba(255,255,255,0.07) 0%, transparent 65%)`,
+              }}
+            />
+          )}
         </div>
 
-        {/* Info singkat */}
-        <div className="px-0.5">
-          <p className="text-[10px] font-semibold mb-0.5 uppercase tracking-wide" style={{ color: course.accent }}>
+        {/* Info */}
+        <div className="px-3 py-2.5">
+          <p
+            className="text-[10px] font-semibold mb-0.5 uppercase tracking-wide"
+            style={{ color: "#555555" }}
+          >
             {course.category}
           </p>
-          <p className="text-xs font-semibold text-zinc-800 leading-snug mb-2 line-clamp-2">
+          <p
+            className="text-xs font-medium leading-snug mb-2 line-clamp-2"
+            style={{ color: "#BBBBBB" }}
+          >
             {course.title}
           </p>
-          <div className="flex items-center gap-1.5 text-[10px] text-zinc-400">
+          <div
+            className="flex items-center gap-1.5 text-[10px]"
+            style={{ color: "#444444" }}
+          >
             <Star size={9} className="fill-amber-400 text-amber-400 flex-shrink-0" />
-            <span className="text-zinc-600 font-medium">{course.rating}</span>
-            <span className="text-zinc-300">·</span>
+            <span className="font-medium" style={{ color: "#666666" }}>
+              {course.rating}
+            </span>
+            <span style={{ color: "#333333" }}>·</span>
             <span>{course.students} siswa</span>
-            <span className="text-zinc-300">·</span>
+            <span style={{ color: "#333333" }}>·</span>
             <span>{course.duration}</span>
           </div>
         </div>
-
-        {/* Desktop popup — tidak berubah sama sekali */}
-        {!isTouch && hovered && (
-          <CoursePopupDesktop
-            course={course}
-            anchorRect={anchorRect}
-            onMouseEnter={cancelClose}
-            onMouseLeave={scheduleClose}
-            onSelect={onSelect}
-          />
-        )}
-      </div>
-
-      {/* Mobile popup modal */}
-      {isTouch && mobileOpen && (
-        <CoursePopupMobile
-          course={course}
-          onClose={handleMobileClose}
-          onSelect={onSelect}
-        />
-      )}
-    </>
+      </motion.div>
+    </div>
   );
 }
 
 export default function CourseRecommendation() {
-  const [showModal, setShowModal] = useState(false);
+  const [showAllModal, setShowAllModal] = useState(false);
+  const [selectedCourse, setSelectedCourse] = useState(null);
   const trackRef = useRef(null);
   const animRef = useRef(null);
   const posRef = useRef(0);
@@ -459,36 +564,82 @@ export default function CourseRecommendation() {
     return () => cancelAnimationFrame(animRef.current);
   }, []);
 
-  const handleSelectCourse = (course) => {
-    console.log("Lihat detail kursus:", course.title);
-  };
+  const handleSelectCourse = useCallback((course) => {
+    setSelectedCourse((prev) => {
+      const next = prev?.id === course.id ? null : course;
+      pausedRef.current = !!next;
+      return next;
+    });
+  }, []);
+
+  const handleCloseDetail = useCallback(() => {
+    setSelectedCourse(null);
+    pausedRef.current = false;
+  }, []);
 
   return (
-    <div id="kursus" className="bg-white border-t border-zinc-100 pt-6 sm:pt-8 pb-10 sm:pb-12">
-
-      <Reveal className="px-4 sm:px-8 md:px-12 flex items-center justify-between mb-5" amount={0.4}>
-        <h3 className="text-sm sm:text-base font-semibold text-zinc-800">Kursus Rekomendasi</h3>
-        <button onClick={() => setShowModal(true)} className="flex items-center gap-1 text-xs font-medium text-[#A67C52] hover:text-[#6D4C41] transition-colors">
+    <div
+      id="kursus"
+      className="pt-6 sm:pt-8 pb-10 sm:pb-12"
+      style={{
+        background: "#000000",
+        borderTop: "1px solid rgba(255,255,255,0.06)",
+      }}
+    >
+      <Reveal
+        className="px-4 sm:px-8 md:px-12 flex items-center justify-between mb-5"
+        amount={0.4}
+      >
+        <h3 className="text-sm sm:text-base font-medium" style={{ color: "#555555" }}>
+          Kursus Rekomendasi
+        </h3>
+        <button
+          onClick={() => setShowAllModal(true)}
+          className="flex items-center gap-1 text-xs font-medium transition-all duration-200 px-2.5 py-1 rounded-full"
+          style={{
+            color: "#555555",
+            background: "rgba(255,255,255,0.04)",
+            backdropFilter: "blur(8px)",
+            WebkitBackdropFilter: "blur(8px)",
+            border: "1px solid rgba(255,255,255,0.07)",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.color = "#AAAAAA";
+            e.currentTarget.style.background = "rgba(255,255,255,0.08)";
+            e.currentTarget.style.borderColor = "rgba(255,255,255,0.12)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.color = "#555555";
+            e.currentTarget.style.background = "rgba(255,255,255,0.04)";
+            e.currentTarget.style.borderColor = "rgba(255,255,255,0.07)";
+          }}
+        >
           Lihat semua <ChevronRight size={14} />
         </button>
       </Reveal>
 
       <Reveal amount={0.1} duration={0.5}>
-        {/* FIX: hanya pause saat hover di non-touch device */}
+        {/* Carousel — pause saat hover desktop */}
         <div
           className="overflow-hidden"
           onMouseEnter={() => { if (!isTouchDevice()) pausedRef.current = true; }}
-          onMouseLeave={() => { if (!isTouchDevice()) pausedRef.current = false; }}
+          onMouseLeave={() => { if (!isTouchDevice() && !selectedCourse) pausedRef.current = false; }}
         >
           <div
             ref={trackRef}
-            className="flex py-2"
-            style={{ gap: CARD_GAP, paddingLeft: "1rem", paddingRight: "1rem", willChange: "transform" }}
+            className="flex py-3"
+            style={{
+              gap: CARD_GAP,
+              paddingLeft: "1rem",
+              paddingRight: "1rem",
+              willChange: "transform",
+            }}
           >
             {loopedCourses.map((course, idx) => (
               <CourseCard
                 key={`${course.id}-${idx}`}
                 course={course}
+                isSelected={selectedCourse?.id === course.id}
                 onSelect={handleSelectCourse}
                 pausedRef={pausedRef}
               />
@@ -496,92 +647,212 @@ export default function CourseRecommendation() {
           </div>
         </div>
 
-        <p className="text-[10px] text-zinc-400 text-center mt-1 mb-6 sm:mb-8">
-          {isTouchDevice() ? "Ketuk kartu untuk melihat detail" : "Arahkan kursor untuk menjeda"}
+        {/* Panel detail */}
+        <CourseDetailPanel course={selectedCourse} onClose={handleCloseDetail} />
+
+        <p
+          className="text-[10px] text-center mt-1 mb-6 sm:mb-8"
+          style={{ color: "#333333" }}
+        >
+          {isTouchDevice() ? "Ketuk kartu untuk melihat detail" : "Klik kartu untuk melihat detail"}
         </p>
       </Reveal>
 
       {/* Benefits */}
-      <RevealGroup className="px-4 sm:px-8 md:px-12 grid grid-cols-2 lg:grid-cols-4 gap-3" stagger={0.1} amount={0.2}>
+      <RevealGroup
+        className="px-4 sm:px-8 md:px-12 grid grid-cols-2 lg:grid-cols-4 gap-3"
+        stagger={0.1}
+        amount={0.2}
+      >
         {benefits.map((ben, i) => {
           const BIcon = ben.icon;
           return (
             <motion.div
               key={i}
               variants={revealItem}
-              whileHover={{ y: -2 }}
-              className={`rounded-2xl border p-3.5 sm:p-4 cursor-default ${ben.color}`}
+              whileHover={{ y: -3, scale: 1.008 }}
+              className="rounded-2xl p-3.5 sm:p-4 cursor-default relative overflow-hidden"
+              style={{
+                background: ben.accent,
+                backdropFilter: "blur(20px)",
+                WebkitBackdropFilter: "blur(20px)",
+                border: `1px solid ${ben.border}`,
+                boxShadow: "0 4px 20px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.07)",
+              }}
             >
-              <div className="w-9 h-9 rounded-xl bg-white/70 flex items-center justify-center mb-3">
-                <BIcon size={18} className={ben.iconColor} />
+              <div
+                className="w-9 h-9 rounded-xl flex items-center justify-center mb-3"
+                style={{
+                  background: "rgba(255,255,255,0.05)",
+                  backdropFilter: "blur(8px)",
+                  WebkitBackdropFilter: "blur(8px)",
+                  border: "1px solid rgba(255,255,255,0.09)",
+                  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08)",
+                }}
+              >
+                <BIcon size={18} style={{ color: ben.iconColor }} />
               </div>
-              <p className={`text-xs font-semibold mb-1.5 ${ben.textColor}`}>{ben.title}</p>
-              <p className={`text-[11px] leading-relaxed ${ben.subColor} opacity-80`}>{ben.desc}</p>
+              <p className="text-xs font-medium mb-1.5" style={{ color: "#BBBBBB" }}>
+                {ben.title}
+              </p>
+              <p className="text-[11px] leading-relaxed" style={{ color: "#555555" }}>
+                {ben.desc}
+              </p>
             </motion.div>
           );
         })}
       </RevealGroup>
 
-      {/* Modal Semua Kursus */}
+      {/* Modal semua kursus */}
       <AnimatePresence>
-        {showModal && (
+        {showAllModal && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-3 sm:px-4"
-            onClick={() => setShowModal(false)}
+            className="fixed inset-0 z-50 flex items-center justify-center px-3 sm:px-4"
+            style={{
+              background: "rgba(0,0,0,0.75)",
+              backdropFilter: "blur(8px)",
+              WebkitBackdropFilter: "blur(8px)",
+            }}
+            onClick={() => setShowAllModal(false)}
           >
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 16 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 16 }}
               transition={{ duration: 0.22 }}
-              className="bg-white rounded-2xl sm:rounded-3xl w-full max-w-3xl max-h-[85vh] flex flex-col overflow-hidden shadow-2xl"
+              className="w-full max-w-3xl max-h-[85vh] flex flex-col overflow-hidden rounded-2xl sm:rounded-3xl"
+              style={{
+                background: "rgba(255,255,255,0.05)",
+                backdropFilter: "blur(24px)",
+                WebkitBackdropFilter: "blur(24px)",
+                border: "1px solid rgba(255,255,255,0.10)",
+                boxShadow:
+                  "0 32px 80px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.10)",
+              }}
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 sm:py-4 border-b border-zinc-100">
-                <h2 className="text-sm font-semibold text-zinc-800">Semua Kursus</h2>
+              <div
+                className="flex items-center justify-between px-4 sm:px-6 py-3.5 sm:py-4"
+                style={{ borderBottom: "1px solid rgba(255,255,255,0.07)" }}
+              >
+                <h2 className="text-sm font-medium" style={{ color: "#BBBBBB" }}>
+                  Semua Kursus
+                </h2>
                 <button
-                  onClick={() => setShowModal(false)}
-                  className="w-7 h-7 rounded-full flex items-center justify-center bg-zinc-100 hover:bg-zinc-200 transition-colors"
+                  onClick={() => setShowAllModal(false)}
+                  className="w-8 h-8 rounded-full flex items-center justify-center transition-colors"
+                  style={{
+                    background: "rgba(255,255,255,0.05)",
+                    border: "1px solid rgba(255,255,255,0.09)",
+                    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.07)",
+                  }}
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.background = "rgba(255,255,255,0.10)")
+                  }
+                  onMouseLeave={(e) =>
+                    (e.currentTarget.style.background = "rgba(255,255,255,0.05)")
+                  }
                 >
-                  <X size={14} className="text-zinc-500" />
+                  <X size={14} style={{ color: "#666666" }} />
                 </button>
               </div>
               <div className="overflow-y-auto p-4 sm:p-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                   {courses.map((course) => (
-                    <div key={course.id} className="cursor-pointer group">
-                      <div className="relative h-[130px] rounded-2xl mb-3 overflow-hidden">
+                    <div
+                      key={course.id}
+                      className="cursor-pointer group rounded-2xl overflow-hidden transition-all duration-200 active:scale-[0.98]"
+                      style={{
+                        background: "rgba(255,255,255,0.04)",
+                        border: "1px solid rgba(255,255,255,0.07)",
+                        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.06)",
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.border = "1px solid rgba(255,255,255,0.12)";
+                        e.currentTarget.style.background = "rgba(255,255,255,0.08)";
+                        e.currentTarget.style.boxShadow =
+                          "0 4px 20px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.10)";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.border = "1px solid rgba(255,255,255,0.07)";
+                        e.currentTarget.style.background = "rgba(255,255,255,0.04)";
+                        e.currentTarget.style.boxShadow =
+                          "inset 0 1px 0 rgba(255,255,255,0.06)";
+                      }}
+                      onClick={() => {
+                        setShowAllModal(false);
+                        setSelectedCourse(course);
+                        pausedRef.current = true;
+                      }}
+                    >
+                      <div className="relative h-[120px] sm:h-[130px] overflow-hidden">
                         {course.image ? (
-                          <img src={course.image} alt={course.title} className="w-full h-full object-cover" />
+                          <img
+                            src={course.image}
+                            alt={course.title}
+                            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                          />
                         ) : (
-                          <div className="w-full h-full bg-gradient-to-br from-zinc-100 to-zinc-200 flex items-center justify-center">
+                          <div
+                            className="w-full h-full flex items-center justify-center"
+                            style={{ background: "rgba(255,255,255,0.03)" }}
+                          >
                             <span className="text-5xl select-none">📚</span>
                           </div>
                         )}
+                        <div
+                          className="absolute inset-0"
+                          style={{
+                            background:
+                              "linear-gradient(to top, rgba(0,0,0,0.80) 0%, transparent 55%)",
+                          }}
+                        />
                         <div className="absolute top-2.5 left-2.5">
-                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-black/25 text-white/90 backdrop-blur-sm">
+                          <span
+                            className="text-[10px] font-medium px-2 py-0.5 rounded-full"
+                            style={{
+                              background: "rgba(0,0,0,0.45)",
+                              color: "rgba(255,255,255,0.70)",
+                              backdropFilter: "blur(8px)",
+                              WebkitBackdropFilter: "blur(8px)",
+                              border: "1px solid rgba(255,255,255,0.12)",
+                            }}
+                          >
                             {course.level}
                           </span>
                         </div>
-                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-200 rounded-2xl" />
                       </div>
-                      <div className="px-0.5">
-                        <p className="text-[10px] font-semibold mb-0.5 uppercase tracking-wide" style={{ color: course.accent }}>
+                      <div className="px-3 py-2.5">
+                        <p
+                          className="text-[10px] font-semibold mb-0.5 uppercase tracking-wide"
+                          style={{ color: "#555555" }}
+                        >
                           {course.category}
                         </p>
-                        <p className="text-xs font-semibold text-zinc-800 leading-snug mb-2 line-clamp-2">
+                        <p
+                          className="text-xs font-medium leading-snug mb-2 line-clamp-2"
+                          style={{ color: "#BBBBBB" }}
+                        >
                           {course.title}
                         </p>
-                        <div className="flex items-center gap-1.5 text-[10px] text-zinc-400">
-                          <Star size={9} className="fill-amber-400 text-amber-400 flex-shrink-0" />
-                          <span className="text-zinc-600 font-medium">{course.rating}</span>
-                          <span className="text-zinc-300">·</span>
+                        <div
+                          className="flex items-center gap-1.5 text-[10px]"
+                          style={{ color: "#444444" }}
+                        >
+                          <Star
+                            size={9}
+                            className="fill-amber-400 text-amber-400 flex-shrink-0"
+                          />
+                          <span className="font-medium" style={{ color: "#666666" }}>
+                            {course.rating}
+                          </span>
+                          <span style={{ color: "#333333" }}>·</span>
                           <span>{course.students} siswa</span>
-                          <span className="text-zinc-300">·</span>
+                          <span style={{ color: "#333333" }}>·</span>
                           <span>{course.duration}</span>
                         </div>
                       </div>
