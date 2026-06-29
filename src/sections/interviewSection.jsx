@@ -72,21 +72,23 @@ function hexToRgb(hex) {
   return `${parseInt(hex.slice(1,3),16)},${parseInt(hex.slice(3,5),16)},${parseInt(hex.slice(5,7),16)}`;
 }
 
-/* ─── Design tokens ──────────────────────────────────────────── */
+/* ─── Design tokens — adaptive light/dark ───────────────────── */
 const glass = {
   card: {
-    background: "rgba(255,255,255,0.05)",
+    background: "var(--bg-surface)",
     backdropFilter: "blur(20px)",
     WebkitBackdropFilter: "blur(20px)",
-    border: "1px solid rgba(255,255,255,0.10)",
-    boxShadow: "0 4px 24px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08)",
+    border: "1px solid var(--border-strong)",
+    // ✅ shadow adaptif
+    boxShadow: "0 4px 24px var(--shadow-card), inset 0 1px 0 var(--card-inset)",
   },
   panel: {
-    background: "rgba(10,10,10,0.88)",
+    background: "var(--bg-card)",
     backdropFilter: "blur(28px)",
     WebkitBackdropFilter: "blur(28px)",
-    border: "1px solid rgba(255,255,255,0.09)",
-    boxShadow: "0 20px 60px rgba(0,0,0,0.70), inset 0 1px 0 rgba(255,255,255,0.07)",
+    border: "1px solid var(--border-md)",
+    // ✅ shadow adaptif
+    boxShadow: "0 20px 60px var(--shadow-card-lg), inset 0 1px 0 var(--card-inset)",
   },
 };
 
@@ -102,20 +104,19 @@ const IconTrophy = () => <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h
 
 /* ─── TimerBar ───────────────────────────────────────────────── */
 function TimerBar({ seconds, total }) {
-  const pct   = (seconds / total) * 100;
+  const pct    = (seconds / total) * 100;
   const isCrit = seconds <= 5;
   const isUrg  = seconds <= 15;
   const color  = isCrit ? "#EF4444" : isUrg ? "#F59E0B" : "#3B82F6";
   return (
     <div className="flex items-center gap-2">
-      <span style={{ color: isCrit ? "#EF4444" : isUrg ? "#F59E0B" : "#555" }}><IconClock /></span>
-      <div className="flex-1 h-[3px] rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
-        <div
-          className="h-full rounded-full transition-all duration-1000 ease-linear"
-          style={{ width: `${pct}%`, background: color, boxShadow: isCrit ? `0 0 6px ${color}` : "none" }}
-        />
+      <span style={{ color: isCrit ? "#EF4444" : isUrg ? "#F59E0B" : "var(--text-muted)" }}><IconClock /></span>
+      <div className="flex-1 h-[3px] rounded-full overflow-hidden" style={{ background: "var(--bg-surface-md)" }}>
+        <div className="h-full rounded-full transition-all duration-1000 ease-linear"
+          style={{ width: `${pct}%`, background: color, boxShadow: isCrit ? `0 0 6px ${color}` : "none" }} />
       </div>
-      <span className={`text-[11px] font-mono font-semibold w-7 text-right tabular-nums ${isCrit ? "text-red-400" : isUrg ? "text-amber-400" : "text-[#444]"}`}>
+      <span className={`text-[11px] font-mono font-semibold w-7 text-right tabular-nums ${isCrit ? "text-red-400" : isUrg ? "text-amber-400" : ""}`}
+        style={!isCrit && !isUrg ? { color: "var(--text-muted)" } : {}}>
         {seconds}s
       </span>
     </div>
@@ -127,41 +128,30 @@ function AIChatBubble({ children, typing = false }) {
   return (
     <div className="flex items-start gap-2.5">
       <div className="relative shrink-0">
-        <div
-          className="w-7 h-7 rounded-full flex items-center justify-center text-[#3B82F6]"
-          style={{
-            background: "rgba(59,130,246,0.12)",
-            border: "1px solid rgba(59,130,246,0.22)",
-            boxShadow: "0 0 0 3px rgba(59,130,246,0.05)",
-          }}
-        >
+        <div className="w-7 h-7 rounded-full flex items-center justify-center text-[#3B82F6]"
+          style={{ background: "rgba(59,130,246,0.12)", border: "1px solid rgba(59,130,246,0.22)", boxShadow: "0 0 0 3px rgba(59,130,246,0.05)" }}>
           <IconBot />
         </div>
-        <span
-          className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full border border-black"
-          style={{ background: "#22D47A" }}
-        />
+        {/* ✅ border-black → var(--avatar-border) supaya adaptif */}
+        <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full"
+          style={{ background: "#22D47A", border: "1.5px solid var(--avatar-border)" }} />
       </div>
-      <div
-        className="rounded-2xl rounded-tl-sm px-3.5 py-2.5 max-w-[85%]"
+      <div className="rounded-2xl rounded-tl-sm px-3.5 py-2.5 max-w-[85%]"
         style={{
-          background: "rgba(255,255,255,0.06)",
-          border: "1px solid rgba(255,255,255,0.09)",
-          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.06)",
-        }}
-      >
+          background: "var(--bg-surface-md)",
+          border: "1px solid var(--border-md)",
+          // ✅ inset highlight adaptif
+          boxShadow: "inset 0 1px 0 var(--card-inset)",
+        }}>
         {typing ? (
           <div className="flex gap-1 items-center py-0.5">
             {[0, 0.2, 0.4].map((d, i) => (
-              <span
-                key={i}
-                className="w-1.5 h-1.5 rounded-full bg-[#444] animate-bounce"
-                style={{ animationDelay: `${d}s`, animationDuration: "1s" }}
-              />
+              <span key={i} className="w-1.5 h-1.5 rounded-full animate-bounce"
+                style={{ background: "var(--text-muted)", animationDelay: `${d}s`, animationDuration: "1s" }} />
             ))}
           </div>
         ) : (
-          <p className="text-xs text-[#C0C0D0] leading-[1.75]">{children}</p>
+          <p className="text-xs leading-[1.75]" style={{ color: "var(--text-secondary)" }}>{children}</p>
         )}
       </div>
     </div>
@@ -171,37 +161,22 @@ function AIChatBubble({ children, typing = false }) {
 /* ─── UserChatBubble ─────────────────────────────────────────── */
 function UserChatBubble({ text, point, label }) {
   const pointColor =
-    point >= 5 ? "#3B82F6"
-    : point >= 4 ? "#06B6D4"
-    : point >= 3 ? "#F59E0B"
-    : point >= 2 ? "#F97316"
-    : "#EF4444";
+    point >= 5 ? "#3B82F6" : point >= 4 ? "#06B6D4" : point >= 3 ? "#F59E0B" : point >= 2 ? "#F97316" : "#EF4444";
   return (
     <div className="flex items-start gap-2.5 justify-end">
       <div className="flex flex-col items-end gap-1 max-w-[85%]">
-        <div
-          className="rounded-2xl rounded-tr-sm px-3.5 py-2.5"
-          style={{
-            background: "rgba(59,130,246,0.14)",
-            border: "1px solid rgba(59,130,246,0.22)",
-            boxShadow: "inset 0 1px 0 rgba(59,130,246,0.15)",
-          }}
-        >
-          <span className="text-[11px] font-semibold text-[#93C5FD] block mb-0.5">{label}</span>
-          <p className="text-xs text-[#DBEAFE] leading-[1.6]">{text}</p>
+        <div className="rounded-2xl rounded-tr-sm px-3.5 py-2.5"
+          style={{ background: "var(--accent-bg)", border: "1px solid var(--accent-border)", boxShadow: "inset 0 1px 0 rgba(59,130,246,0.15)" }}>
+          <span className="text-[11px] font-semibold block mb-0.5" style={{ color: "var(--accent-light)" }}>{label}</span>
+          <p className="text-xs leading-[1.6]" style={{ color: "var(--text-primary)" }}>{text}</p>
         </div>
         <div className="flex items-center gap-1.5 pr-1">
           <span className="text-[10px] font-semibold" style={{ color: pointColor }}>+{point} poin</span>
           <span style={{ color: pointColor }}><IconCheck /></span>
         </div>
       </div>
-      <div
-        className="w-7 h-7 rounded-full shrink-0 flex items-center justify-center text-[#666]"
-        style={{
-          background: "rgba(255,255,255,0.05)",
-          border: "1px solid rgba(255,255,255,0.09)",
-        }}
-      >
+      <div className="w-7 h-7 rounded-full shrink-0 flex items-center justify-center"
+        style={{ background: "var(--bg-surface)", border: "1px solid var(--border-md)", color: "var(--text-muted)" }}>
         <IconUser />
       </div>
     </div>
@@ -224,46 +199,34 @@ function AnswerOverlay({ answers, timer, onAnswer, onHeightChange }) {
   }, [onHeightChange]);
 
   return (
-    <div
-      ref={overlayRef}
-      className="absolute inset-x-0 bottom-0 flex flex-col justify-end rounded-b-2xl overflow-hidden"
-      style={{ zIndex: 20 }}
-    >
-      <div
-        className="absolute inset-0"
-        style={{ background: "linear-gradient(to top, rgba(0,0,0,0.97) 60%, rgba(0,0,0,0.0) 100%)" }}
-      />
+    <div ref={overlayRef} className="absolute inset-x-0 bottom-0 flex flex-col justify-end rounded-b-2xl overflow-hidden" style={{ zIndex: 20 }}>
+      {/* ✅ Gradient overlay adaptif: dark mode tetap sangat gelap, light mode pakai bg-card */}
+      <div className="absolute inset-0" style={{ background: "linear-gradient(to top, var(--bg-card) 55%, transparent 100%)" }} />
       <div className="relative z-10 px-3 pb-3 pt-8 flex flex-col gap-1.5">
         <div className="px-1 pb-2">
           <TimerBar seconds={timer} total={TIMER_SECONDS} />
         </div>
         {answers.map((ans, i) => (
-          <button
-            key={i}
-            onClick={() => onAnswer(i)}
+          <button key={i} onClick={() => onAnswer(i)}
             className="w-full text-left flex items-start gap-2.5 rounded-xl px-3 py-2 transition-all duration-150 group"
-            style={{
-              background: "rgba(12,12,20,0.85)",
-              border: "1px solid rgba(255,255,255,0.08)",
-            }}
+            // ✅ Ganti hardcode rgba(12,12,20,0.85) → bg-surface adaptif
+            style={{ background: "var(--bg-surface)", border: "1px solid var(--border-md)" }}
             onMouseEnter={e => {
-              e.currentTarget.style.background = "rgba(59,130,246,0.12)";
-              e.currentTarget.style.borderColor = "rgba(59,130,246,0.28)";
+              e.currentTarget.style.background = "var(--accent-bg)";
+              e.currentTarget.style.borderColor = "var(--accent-border)";
               e.currentTarget.style.boxShadow = "inset 0 1px 0 rgba(59,130,246,0.15)";
             }}
             onMouseLeave={e => {
-              e.currentTarget.style.background = "rgba(12,12,20,0.85)";
-              e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)";
+              // ✅ Kembali ke bg-surface bukan hardcode dark color
+              e.currentTarget.style.background = "var(--bg-surface)";
+              e.currentTarget.style.borderColor = "var(--border-md)";
               e.currentTarget.style.boxShadow = "none";
-            }}
-          >
-            <span
-              className="text-[10px] font-bold rounded-md w-5 h-5 flex items-center justify-center shrink-0 mt-px"
-              style={{ background: "rgba(255,255,255,0.06)", color: "#555", border: "1px solid rgba(255,255,255,0.08)" }}
-            >
+            }}>
+            <span className="text-[10px] font-bold rounded-md w-5 h-5 flex items-center justify-center shrink-0 mt-px"
+              style={{ background: "var(--bg-surface-md)", color: "var(--text-muted)", border: "1px solid var(--border-md)" }}>
               {labels[i]}
             </span>
-            <span className="text-xs leading-[1.55] text-[#888]">{ans.text}</span>
+            <span className="text-xs leading-[1.55]" style={{ color: "var(--text-secondary)" }}>{ans.text}</span>
           </button>
         ))}
       </div>
@@ -274,45 +237,29 @@ function AnswerOverlay({ answers, timer, onAnswer, onHeightChange }) {
 /* ─── IdlePanel ──────────────────────────────────────────────── */
 function IdlePanel({ bidangList, activeBidang, onSelectBidang, onStart }) {
   return (
-    <div
-      className="flex flex-col rounded-2xl overflow-hidden relative"
-      style={{ ...glass.panel, height: "520px" }}
-    >
-      <div
-        className="pointer-events-none absolute -top-20 -right-20 w-48 h-48 rounded-full opacity-[0.07] blur-[80px]"
-        style={{ background: "radial-gradient(circle, #3B82F6, transparent 70%)" }}
-      />
+    <div className="flex flex-col rounded-2xl overflow-hidden relative" style={{ ...glass.panel, height: "520px" }}>
+      <div className="pointer-events-none absolute -top-20 -right-20 w-48 h-48 rounded-full opacity-[0.07] blur-[80px]"
+        style={{ background: "radial-gradient(circle, #3B82F6, transparent 70%)" }} />
 
-      <div
-        className="flex items-center gap-3 px-4 py-3 shrink-0"
-        style={{ borderBottom: "1px solid rgba(255,255,255,0.07)" }}
-      >
-        <div
-          className="relative w-8 h-8 rounded-full flex items-center justify-center text-[#3B82F6] shrink-0"
-          style={{ background: "rgba(59,130,246,0.12)", border: "1px solid rgba(59,130,246,0.22)" }}
-        >
+      <div className="flex items-center gap-3 px-4 py-3 shrink-0" style={{ borderBottom: "1px solid var(--border-soft)" }}>
+        <div className="relative w-8 h-8 rounded-full flex items-center justify-center text-[#3B82F6] shrink-0"
+          style={{ background: "rgba(59,130,246,0.12)", border: "1px solid rgba(59,130,246,0.22)" }}>
           <IconBot />
-          <span
-            className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full border border-black"
-            style={{ background: "#22D47A" }}
-          />
+          {/* ✅ border adaptif */}
+          <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full"
+            style={{ background: "#22D47A", border: "1.5px solid var(--avatar-border)" }} />
         </div>
         <div>
-          <p className="text-xs font-semibold text-[#E0E0E0]">Anty AI</p>
+          <p className="text-xs font-semibold" style={{ color: "var(--text-primary)" }}>Anty AI</p>
           <div className="flex items-center gap-1.5 mt-px">
             <span className="w-[5px] h-[5px] rounded-full bg-[#22D47A]" />
-            <span className="text-[10px] text-[#444]">Online · HRD Evaluator</span>
+            {/* ✅ text-faint → text-muted supaya terbaca di light */}
+            <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>Online · HRD Evaluator</span>
           </div>
         </div>
         <div className="ml-auto">
-          <span
-            className="text-[10px] font-medium px-2.5 py-1 rounded-full"
-            style={{
-              background: "rgba(59,130,246,0.10)",
-              color: "#3B82F6",
-              border: "1px solid rgba(59,130,246,0.18)",
-            }}
-          >
+          <span className="text-[10px] font-medium px-2.5 py-1 rounded-full"
+            style={{ background: "var(--accent-bg)", color: "var(--accent)", border: "1px solid var(--accent-border)" }}>
             Simulasi
           </span>
         </div>
@@ -322,7 +269,7 @@ function IdlePanel({ bidangList, activeBidang, onSelectBidang, onStart }) {
         <AIChatBubble>Halo! Saya Anty, asisten virtual BletchAI. Saya akan memandu sesi simulasi wawancara HRD kamu.</AIChatBubble>
         <AIChatBubble>
           Pilih bidang keahlian kamu di bawah ini, lalu kita mulai{" "}
-          <strong className="text-[#93C5FD]">15 pertanyaan acak</strong> dengan timer 60 detik per soal.
+          <strong style={{ color: "var(--accent-light)" }}>15 pertanyaan acak</strong> dengan timer 60 detik per soal.
         </AIChatBubble>
 
         <div className="grid grid-cols-2 gap-2 mt-1">
@@ -330,45 +277,17 @@ function IdlePanel({ bidangList, activeBidang, onSelectBidang, onStart }) {
             const isActive = activeBidang === b.name;
             const rgb = hexToRgb(b.color);
             return (
-              <button
-                key={b.name}
-                onClick={() => onSelectBidang(b.name)}
+              <button key={b.name} onClick={() => onSelectBidang(b.name)}
                 className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-left transition-all duration-150 relative overflow-hidden"
-                style={
-                  isActive
-                    ? {
-                        background: `rgba(${rgb},0.10)`,
-                        border: `1px solid rgba(${rgb},0.28)`,
-                        boxShadow: `inset 0 1px 0 rgba(${rgb},0.15)`,
-                      }
-                    : {
-                        background: "rgba(255,255,255,0.03)",
-                        border: "1px solid rgba(255,255,255,0.07)",
-                      }
-                }
-                onMouseEnter={e => {
-                  if (!isActive) {
-                    e.currentTarget.style.background = "rgba(255,255,255,0.06)";
-                    e.currentTarget.style.borderColor = "rgba(255,255,255,0.12)";
-                  }
-                }}
-                onMouseLeave={e => {
-                  if (!isActive) {
-                    e.currentTarget.style.background = "rgba(255,255,255,0.03)";
-                    e.currentTarget.style.borderColor = "rgba(255,255,255,0.07)";
-                  }
-                }}
-              >
-                {isActive && (
-                  <div
-                    className="absolute left-0 top-0 bottom-0 w-[2px] rounded-l-xl"
-                    style={{ background: b.color }}
-                  />
-                )}
-                <span style={{ color: isActive ? b.color : "#555" }}>{b.icon}</span>
-                <span
-                  className={`text-[11px] font-medium leading-[1.3] ${isActive ? "text-[#E0E0E0]" : "text-[#555]"}`}
-                >
+                style={isActive
+                  ? { background: `rgba(${rgb},0.10)`, border: `1px solid rgba(${rgb},0.28)`, boxShadow: `inset 0 1px 0 rgba(${rgb},0.15)` }
+                  : { background: "var(--bg-surface)", border: "1px solid var(--border-soft)" }}
+                onMouseEnter={e => { if (!isActive) { e.currentTarget.style.background = "var(--bg-surface-md)"; e.currentTarget.style.borderColor = "var(--border-strong)"; } }}
+                onMouseLeave={e => { if (!isActive) { e.currentTarget.style.background = "var(--bg-surface)"; e.currentTarget.style.borderColor = "var(--border-soft)"; } }}>
+                {isActive && <div className="absolute left-0 top-0 bottom-0 w-[2px] rounded-l-xl" style={{ background: b.color }} />}
+                <span style={{ color: isActive ? b.color : "var(--text-muted)" }}>{b.icon}</span>
+                <span className="text-[11px] font-medium leading-[1.3]"
+                  style={{ color: isActive ? "var(--text-primary)" : "var(--text-muted)" }}>
                   {b.name}
                 </span>
               </button>
@@ -377,42 +296,14 @@ function IdlePanel({ bidangList, activeBidang, onSelectBidang, onStart }) {
         </div>
       </div>
 
-      <div
-        className="shrink-0 px-4 pb-4 pt-3"
-        style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
-      >
-        <button
-          onClick={onStart}
-          disabled={!activeBidang}
+      <div className="shrink-0 px-4 pb-4 pt-3" style={{ borderTop: "1px solid var(--border-soft)" }}>
+        <button onClick={onStart} disabled={!activeBidang}
           className="w-full flex items-center justify-center gap-2 rounded-xl py-2.5 text-xs font-semibold transition-all duration-200"
-          style={
-            activeBidang
-              ? {
-                  background: "rgba(59,130,246,0.16)",
-                  border: "1px solid rgba(59,130,246,0.30)",
-                  color: "#93C5FD",
-                  boxShadow: "inset 0 1px 0 rgba(59,130,246,0.20), 0 0 16px rgba(59,130,246,0.06)",
-                }
-              : {
-                  background: "rgba(255,255,255,0.03)",
-                  border: "1px solid rgba(255,255,255,0.06)",
-                  color: "#2E2E2E",
-                  cursor: "not-allowed",
-                }
-          }
-          onMouseEnter={e => {
-            if (activeBidang) {
-              e.currentTarget.style.background = "rgba(59,130,246,0.24)";
-              e.currentTarget.style.boxShadow = "inset 0 1px 0 rgba(59,130,246,0.25), 0 0 20px rgba(59,130,246,0.12)";
-            }
-          }}
-          onMouseLeave={e => {
-            if (activeBidang) {
-              e.currentTarget.style.background = "rgba(59,130,246,0.16)";
-              e.currentTarget.style.boxShadow = "inset 0 1px 0 rgba(59,130,246,0.20), 0 0 16px rgba(59,130,246,0.06)";
-            }
-          }}
-        >
+          style={activeBidang
+            ? { background: "var(--accent-bg)", border: "1px solid var(--accent-border)", color: "var(--accent-light)", boxShadow: "inset 0 1px 0 rgba(59,130,246,0.20), 0 0 16px rgba(59,130,246,0.06)" }
+            : { background: "var(--bg-surface)", border: "1px solid var(--border-soft)", color: "var(--text-muted)", cursor: "not-allowed" }}
+          onMouseEnter={e => { if (activeBidang) { e.currentTarget.style.background = "rgba(59,130,246,0.24)"; e.currentTarget.style.boxShadow = "inset 0 1px 0 rgba(59,130,246,0.25), 0 0 20px rgba(59,130,246,0.12)"; } }}
+          onMouseLeave={e => { if (activeBidang) { e.currentTarget.style.background = "var(--accent-bg)"; e.currentTarget.style.boxShadow = "inset 0 1px 0 rgba(59,130,246,0.20), 0 0 16px rgba(59,130,246,0.06)"; } }}>
           {activeBidang ? `Mulai Interview · ${activeBidang.split(" ")[0]}` : "Pilih bidang dulu"}
           {activeBidang && <IconArrow />}
         </button>
@@ -435,61 +326,47 @@ function ActivePanel({ question, answers, currentIdx, totalQ, timer, chatHistory
   const progressPct = ((currentIdx + (isAnswered ? 1 : 0)) / totalQ) * 100;
 
   return (
-    <div
-      className="flex flex-col rounded-2xl overflow-hidden relative"
-      style={{ ...glass.panel, height: "520px" }}
-    >
+    <div className="flex flex-col rounded-2xl overflow-hidden relative" style={{ ...glass.panel, height: "520px" }}>
       <div className="absolute inset-x-0 top-0 h-[2px] z-30">
-        <div
-          className="h-full transition-all duration-500 ease-out"
-          style={{
-            width: `${progressPct}%`,
-            background: "linear-gradient(to right, #3B82F6, #8B5CF6)",
-          }}
-        />
+        <div className="h-full transition-all duration-500 ease-out"
+          style={{ width: `${progressPct}%`, background: "linear-gradient(to right, #3B82F6, #8B5CF6)" }} />
       </div>
 
-      <div
-        className="flex items-center justify-between px-4 py-3 shrink-0 mt-[2px]"
-        style={{ borderBottom: "1px solid rgba(255,255,255,0.07)" }}
-      >
+      <div className="flex items-center justify-between px-4 py-3 shrink-0 mt-[2px]"
+        style={{ borderBottom: "1px solid var(--border-soft)" }}>
         <div className="flex items-center gap-2.5">
-          <div
-            className="relative w-7 h-7 rounded-full flex items-center justify-center text-[#3B82F6] shrink-0"
-            style={{ background: "rgba(59,130,246,0.12)", border: "1px solid rgba(59,130,246,0.22)" }}
-          >
+          <div className="relative w-7 h-7 rounded-full flex items-center justify-center text-[#3B82F6] shrink-0"
+            style={{ background: "rgba(59,130,246,0.12)", border: "1px solid rgba(59,130,246,0.22)" }}>
             <IconBot />
-            <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full border border-black" style={{ background: "#22D47A" }} />
+            {/* ✅ border adaptif */}
+            <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full"
+              style={{ background: "#22D47A", border: "1.5px solid var(--avatar-border)" }} />
           </div>
           <div>
-            <p className="text-[11px] font-semibold text-[#C8C8D8]">Anty AI — Pewawancara</p>
-            <p className="text-[10px] text-[#3E3E4A]">Sesi aktif</p>
+            <p className="text-[11px] font-semibold" style={{ color: "var(--text-secondary)" }}>Anty AI — Pewawancara</p>
+            {/* ✅ text-faint → text-muted */}
+            <p className="text-[10px]" style={{ color: "var(--text-muted)" }}>Sesi aktif</p>
           </div>
         </div>
 
         <div className="flex items-center gap-3">
           <div className="text-right">
             <p className="text-xs font-bold text-[#3B82F6]">{score} poin</p>
-            <p className="text-[10px] text-[#3E3E4A]">{currentIdx + 1}/{totalQ}</p>
+            {/* ✅ text-faint → text-muted */}
+            <p className="text-[10px]" style={{ color: "var(--text-muted)" }}>{currentIdx + 1}/{totalQ}</p>
           </div>
           <svg viewBox="0 0 32 32" className="w-7 h-7 -rotate-90">
-            <circle cx="16" cy="16" r="13" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="3"/>
-            <circle
-              cx="16" cy="16" r="13" fill="none"
-              stroke="#3B82F6" strokeWidth="3" strokeLinecap="round"
+            <circle cx="16" cy="16" r="13" fill="none" stroke="var(--bg-surface-md)" strokeWidth="3"/>
+            <circle cx="16" cy="16" r="13" fill="none" stroke="#3B82F6" strokeWidth="3" strokeLinecap="round"
               strokeDasharray={`${2 * Math.PI * 13}`}
               strokeDashoffset={`${2 * Math.PI * 13 * (1 - progressPct / 100)}`}
-              style={{ transition: "stroke-dashoffset 0.5s ease" }}
-            />
+              style={{ transition: "stroke-dashoffset 0.5s ease" }} />
           </svg>
         </div>
       </div>
 
-      <div
-        ref={chatFeedRef}
-        className="flex-1 overflow-y-auto px-4 py-3 flex flex-col gap-3 min-h-0"
-        style={{ paddingBottom: !isAnswered && overlayHeight > 0 ? `${overlayHeight + 8}px` : "12px" }}
-      >
+      <div ref={chatFeedRef} className="flex-1 overflow-y-auto px-4 py-3 flex flex-col gap-3 min-h-0"
+        style={{ paddingBottom: !isAnswered && overlayHeight > 0 ? `${overlayHeight + 8}px` : "12px" }}>
         {chatHistory.map((msg, i) =>
           msg.role === "ai"
             ? <AIChatBubble key={i}>{msg.text}</AIChatBubble>
@@ -499,43 +376,24 @@ function ActivePanel({ question, answers, currentIdx, totalQ, timer, chatHistory
       </div>
 
       {!isAnswered && (
-        <AnswerOverlay
-          answers={answers}
-          timer={timer}
-          onAnswer={onAnswer}
-          onHeightChange={setOverlayHeight}
-        />
+        <AnswerOverlay answers={answers} timer={timer} onAnswer={onAnswer} onHeightChange={setOverlayHeight} />
       )}
 
       {isAnswered && (
-        <div
-          className="shrink-0 flex items-center justify-between px-4 py-3"
-          style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
-        >
-          <button
-            onClick={onBack}
-            className="flex items-center gap-1.5 text-[11px] text-[#3A3A4A] hover:text-[#666] transition-colors"
-          >
+        <div className="shrink-0 flex items-center justify-between px-4 py-3"
+          style={{ borderTop: "1px solid var(--border-soft)" }}>
+          <button onClick={onBack} className="flex items-center gap-1.5 text-[11px] transition-colors"
+            // ✅ text-faint → text-muted
+            style={{ color: "var(--text-muted)" }}
+            onMouseEnter={e => e.currentTarget.style.color = "var(--text-secondary)"}
+            onMouseLeave={e => e.currentTarget.style.color = "var(--text-muted)"}>
             <IconBack /> Keluar sesi
           </button>
-          <button
-            onClick={onNext}
+          <button onClick={onNext}
             className="flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-semibold transition-all duration-200"
-            style={{
-              background: "rgba(59,130,246,0.16)",
-              border: "1px solid rgba(59,130,246,0.28)",
-              color: "#93C5FD",
-              boxShadow: "inset 0 1px 0 rgba(59,130,246,0.18)",
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.background = "rgba(59,130,246,0.24)";
-              e.currentTarget.style.boxShadow = "inset 0 1px 0 rgba(59,130,246,0.25), 0 0 14px rgba(59,130,246,0.10)";
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.background = "rgba(59,130,246,0.16)";
-              e.currentTarget.style.boxShadow = "inset 0 1px 0 rgba(59,130,246,0.18)";
-            }}
-          >
+            style={{ background: "var(--accent-bg)", border: "1px solid var(--accent-border)", color: "var(--accent-light)", boxShadow: "inset 0 1px 0 rgba(59,130,246,0.18)" }}
+            onMouseEnter={e => { e.currentTarget.style.background = "rgba(59,130,246,0.24)"; e.currentTarget.style.boxShadow = "inset 0 1px 0 rgba(59,130,246,0.25), 0 0 14px rgba(59,130,246,0.10)"; }}
+            onMouseLeave={e => { e.currentTarget.style.background = "var(--accent-bg)"; e.currentTarget.style.boxShadow = "inset 0 1px 0 rgba(59,130,246,0.18)"; }}>
             {isLast ? "Lihat Hasil" : "Lanjut"} <IconArrow />
           </button>
         </div>
@@ -554,59 +412,45 @@ function ResultPanel({ score, maxScore, bidang, totalQ, onRetry, onHome }) {
                 { label: "Perlu Latihan",  color: "#F97316"  };
 
   return (
-    <div
-      className="flex flex-col rounded-2xl overflow-y-auto p-5 gap-5 relative"
-      style={{ ...glass.panel, height: "520px" }}
-    >
-      <div
-        className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 w-64 h-32 rounded-full opacity-[0.10] blur-[80px]"
-        style={{ background: `radial-gradient(circle, ${grade.color}, transparent 70%)` }}
-      />
+    <div className="flex flex-col rounded-2xl overflow-y-auto p-5 gap-5 relative" style={{ ...glass.panel, height: "520px" }}>
+      <div className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 w-64 h-32 rounded-full opacity-[0.10] blur-[80px]"
+        style={{ background: `radial-gradient(circle, ${grade.color}, transparent 70%)` }} />
 
       <div className="flex flex-col items-center gap-2 pt-2">
         <div className="relative w-24 h-24">
           <svg viewBox="0 0 96 96" className="w-full h-full -rotate-90">
-            <circle cx="48" cy="48" r="38" fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth="7"/>
-            <circle
-              cx="48" cy="48" r="38" fill="none"
-              stroke={grade.color} strokeWidth="7" strokeLinecap="round"
+            <circle cx="48" cy="48" r="38" fill="none" stroke="var(--bg-surface-md)" strokeWidth="7"/>
+            <circle cx="48" cy="48" r="38" fill="none" stroke={grade.color} strokeWidth="7" strokeLinecap="round"
               strokeDasharray={`${2 * Math.PI * 38}`}
               strokeDashoffset={`${2 * Math.PI * 38 * (1 - pct / 100)}`}
-              style={{ transition: "stroke-dashoffset 1s ease", filter: `drop-shadow(0 0 6px ${grade.color}55)` }}
-            />
+              style={{ transition: "stroke-dashoffset 1s ease", filter: `drop-shadow(0 0 6px ${grade.color}55)` }} />
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-2xl font-black text-[#E8E8F0]">{pct}%</span>
-            <span className="text-[9px] text-[#333]">skor</span>
+            <span className="text-2xl font-black" style={{ color: "var(--text-primary)" }}>{pct}%</span>
+            {/* ✅ text-faint → text-muted */}
+            <span className="text-[9px]" style={{ color: "var(--text-muted)" }}>skor</span>
           </div>
         </div>
 
-        <span
-          className="text-sm font-bold px-3 py-1 rounded-full"
-          style={{
-            background: `rgba(${hexToRgb(grade.color)},0.12)`,
-            color: grade.color,
-            border: `1px solid rgba(${hexToRgb(grade.color)},0.25)`,
-          }}
-        >
+        <span className="text-sm font-bold px-3 py-1 rounded-full"
+          style={{ background: `rgba(${hexToRgb(grade.color)},0.12)`, color: grade.color, border: `1px solid rgba(${hexToRgb(grade.color)},0.25)` }}>
           {grade.label}
         </span>
-        <p className="text-[11px] text-[#3A3A4A]">Sesi {bidang} selesai</p>
+        {/* ✅ text-faint → text-muted */}
+        <p className="text-[11px]" style={{ color: "var(--text-muted)" }}>Sesi {bidang} selesai</p>
       </div>
 
       <div className="grid grid-cols-3 gap-2">
         {[
-          { val: score,   label: "Poin",  color: "#3B82F6" },
-          { val: maxScore, label: "Maks", color: "#444"    },
-          { val: totalQ,  label: "Soal",  color: "#06B6D4" },
+          { val: score,    label: "Poin",  color: "#3B82F6" },
+          { val: maxScore, label: "Maks",  color: "var(--text-muted)" },
+          { val: totalQ,   label: "Soal",  color: "#06B6D4" },
         ].map(({ val, label, color }) => (
-          <div
-            key={label}
-            className="rounded-xl p-3 text-center"
-            style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}
-          >
+          <div key={label} className="rounded-xl p-3 text-center"
+            style={{ background: "var(--bg-surface)", border: "1px solid var(--border-soft)" }}>
             <p className="text-lg font-black" style={{ color }}>{val}</p>
-            <p className="text-[10px] text-[#3A3A4A] mt-0.5">{label}</p>
+            {/* ✅ text-faint → text-muted */}
+            <p className="text-[10px] mt-0.5" style={{ color: "var(--text-muted)" }}>{label}</p>
           </div>
         ))}
       </div>
@@ -622,31 +466,16 @@ function ResultPanel({ score, maxScore, bidang, totalQ, onRetry, onHome }) {
       </AIChatBubble>
 
       <div className="flex gap-2 mt-auto">
-        <button
-          onClick={onRetry}
-          className="flex-1 rounded-xl py-2.5 text-xs font-semibold transition-all duration-200"
-          style={{
-            background: "rgba(59,130,246,0.15)",
-            border: "1px solid rgba(59,130,246,0.28)",
-            color: "#93C5FD",
-            boxShadow: "inset 0 1px 0 rgba(59,130,246,0.18)",
-          }}
+        <button onClick={onRetry} className="flex-1 rounded-xl py-2.5 text-xs font-semibold transition-all duration-200"
+          style={{ background: "var(--accent-bg)", border: "1px solid var(--accent-border)", color: "var(--accent-light)", boxShadow: "inset 0 1px 0 rgba(59,130,246,0.18)" }}
           onMouseEnter={e => { e.currentTarget.style.background = "rgba(59,130,246,0.24)"; }}
-          onMouseLeave={e => { e.currentTarget.style.background = "rgba(59,130,246,0.15)"; }}
-        >
+          onMouseLeave={e => { e.currentTarget.style.background = "var(--accent-bg)"; }}>
           Coba Lagi
         </button>
-        <button
-          onClick={onHome}
-          className="flex-1 rounded-xl py-2.5 text-xs font-semibold transition-all duration-200"
-          style={{
-            background: "rgba(255,255,255,0.04)",
-            border: "1px solid rgba(255,255,255,0.08)",
-            color: "#666",
-          }}
-          onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,255,255,0.08)"; e.currentTarget.style.color = "#999"; }}
-          onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,0.04)"; e.currentTarget.style.color = "#666"; }}
-        >
+        <button onClick={onHome} className="flex-1 rounded-xl py-2.5 text-xs font-semibold transition-all duration-200"
+          style={{ background: "var(--bg-surface)", border: "1px solid var(--border-md)", color: "var(--text-muted)" }}
+          onMouseEnter={e => { e.currentTarget.style.background = "var(--bg-surface-md)"; e.currentTarget.style.color = "var(--text-secondary)"; }}
+          onMouseLeave={e => { e.currentTarget.style.background = "var(--bg-surface)"; e.currentTarget.style.color = "var(--text-muted)"; }}>
           Ganti Bidang
         </button>
       </div>
@@ -668,7 +497,7 @@ export default function InterviewSection() {
   const [timer,         setTimer]         = useState(TIMER_SECONDS);
   const [chatHistory,   setChatHistory]   = useState([]);
   const [stats,         setStats]         = useState(() => loadStats() ?? getInitialStats());
-  const timerRef          = useRef(null);
+  const timerRef           = useRef(null);
   const feedbackTimeoutRef = useRef(null);
 
   const clearTimer    = useCallback(() => { if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; } }, []);
@@ -745,33 +574,24 @@ export default function InterviewSection() {
 
   const avgPct   = calcAvgPct(stats);
   const statCards = [
-    { label: "Sesi selesai",  val: stats.totalSessions,                                         color: "#3B82F6", icon: <IconTrophy /> },
-    { label: "Rata-rata",      val: `${avgPct}%`,                                                color: "#06B6D4", icon: <IconChart />  },
-    { label: "Skor terakhir", val: stats.lastSession ? `${stats.lastSession.pct}%` : "–",        color: "#8B5CF6", icon: <IconChart />  },
-    { label: "Topik favorit", val: topTopic(stats),                                               color: "#F59E0B", icon: <IconTrophy /> },
+    { label: "Sesi selesai",  val: stats.totalSessions,                                   color: "#3B82F6", icon: <IconTrophy /> },
+    { label: "Rata-rata",     val: `${avgPct}%`,                                           color: "#06B6D4", icon: <IconChart />  },
+    { label: "Skor terakhir", val: stats.lastSession ? `${stats.lastSession.pct}%` : "–", color: "#8B5CF6", icon: <IconChart />  },
+    { label: "Topik favorit", val: topTopic(stats),                                        color: "#F59E0B", icon: <IconTrophy /> },
   ];
   const SESSION_TARGET = 20;
   const skillBars = [
     { name: "Sesi diselesaikan", pct: Math.min((stats.totalSessions / SESSION_TARGET) * 100, 100), label: `${stats.totalSessions} sesi`, color: "#3B82F6" },
     { name: "Rata-rata skor",    pct: avgPct,                                                       label: `${avgPct}%`,                  color: "#06B6D4" },
-    { name: "Skor terakhir",     pct: stats.lastSession?.pct ?? 0, label: stats.lastSession ? `${stats.lastSession.pct}%` : "–",         color: "#8B5CF6" },
+    { name: "Skor terakhir",     pct: stats.lastSession?.pct ?? 0, label: stats.lastSession ? `${stats.lastSession.pct}%` : "–",          color: "#8B5CF6" },
   ];
   const maxScoreResult = questions.length * 5;
   const currentQ       = questions[currentIdx];
 
   return (
-    <section
-      id="interview"
-      className="relative overflow-hidden"
-      style={{ background: "#000000" }}
-    >
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 h-px"
-        style={{
-          background: "linear-gradient(to right, transparent, rgba(255,255,255,0.06) 30%, rgba(255,255,255,0.06) 70%, transparent)",
-        }}
-      />
+    <section id="interview" className="relative overflow-hidden" style={{ background: "var(--bg-base)" }}>
+      <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-px"
+        style={{ background: "linear-gradient(to right, transparent, var(--border-soft) 30%, var(--border-soft) 70%, transparent)" }} />
 
       <div className="pointer-events-none absolute top-0 left-0 w-[500px] h-[400px] rounded-full opacity-[0.055] blur-[160px]"
         style={{ background: "radial-gradient(circle, #3B82F6, transparent 70%)" }} />
@@ -780,38 +600,22 @@ export default function InterviewSection() {
       <div className="pointer-events-none absolute bottom-32 left-1/3 w-[300px] h-[250px] rounded-full opacity-[0.035] blur-[120px]"
         style={{ background: "radial-gradient(circle, #06B6D4, transparent 70%)" }} />
 
-      <div
-        className="pointer-events-none absolute inset-0 opacity-[0.016]"
+      <div className="pointer-events-none absolute inset-0 opacity-[0.016]"
         style={{
-          backgroundImage: "linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)",
+          backgroundImage: "linear-gradient(var(--border-soft) 1px, transparent 1px), linear-gradient(90deg, var(--border-soft) 1px, transparent 1px)",
           backgroundSize: "60px 60px",
-        }}
-      />
+        }} />
 
       <div className="relative z-10 min-h-screen flex items-center justify-center px-4 md:px-12 py-12 md:py-16">
         <div className="w-full max-w-[1100px]">
 
           <Reveal>
             <div className="flex items-center gap-3 mb-8 md:mb-10">
-              <p
-                className="text-[10px] md:text-[11px] font-medium uppercase tracking-[0.12em]"
-                style={{ color: "rgba(255,255,255,0.18)" }}
-              >
-                Simulasi
-              </p>
-              <div
-                className="h-px flex-1 max-w-[40px]"
-                style={{ background: "rgba(255,255,255,0.08)" }}
-              />
-              <span
-                className="inline-flex items-center gap-1.5 text-[11px] font-medium px-3 py-1 rounded-full"
-                style={{
-                  background: "rgba(59,130,246,0.10)",
-                  color: "#3B82F6",
-                  border: "1px solid rgba(59,130,246,0.18)",
-                  boxShadow: "inset 0 1px 0 rgba(59,130,246,0.12)",
-                }}
-              >
+              <p className="text-[10px] md:text-[11px] font-medium uppercase tracking-[0.12em]"
+                style={{ color: "var(--border-strong)" }}>Simulasi</p>
+              <div className="h-px flex-1 max-w-[40px]" style={{ background: "var(--border-soft)" }} />
+              <span className="inline-flex items-center gap-1.5 text-[11px] font-medium px-3 py-1 rounded-full"
+                style={{ background: "var(--accent-bg)", color: "var(--accent)", border: "1px solid var(--accent-border)", boxShadow: "inset 0 1px 0 rgba(59,130,246,0.12)" }}>
                 <span className="w-1.5 h-1.5 rounded-full bg-[#3B82F6]" style={{ boxShadow: "0 0 4px #3B82F6" }} />
                 Interview AI
               </span>
@@ -822,77 +626,55 @@ export default function InterviewSection() {
 
             {/* LEFT — info card */}
             <Reveal>
-              <motion.div
-                className="rounded-2xl p-6 md:p-8 flex flex-col relative overflow-hidden"
+              <motion.div className="rounded-2xl p-6 md:p-8 flex flex-col relative overflow-hidden"
                 style={glass.card}
-                initial={{ opacity: 0, x: -24 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true, amount: 0.15 }}
-                transition={{ duration: 0.55, ease: [0.4, 0, 0.2, 1] }}
-              >
-                <div
-                  className="absolute inset-x-0 top-0 h-[1.5px]"
-                  style={{ background: "linear-gradient(to right, #3B82F6, rgba(139,92,246,0.5) 50%, transparent)" }}
-                />
+                initial={{ opacity: 0, x: -24 }} whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, amount: 0.15 }} transition={{ duration: 0.55, ease: [0.4, 0, 0.2, 1] }}>
+                <div className="absolute inset-x-0 top-0 h-[1.5px]"
+                  style={{ background: "linear-gradient(to right, #3B82F6, rgba(139,92,246,0.5) 50%, transparent)" }} />
                 <div className="pointer-events-none absolute -top-24 -left-12 w-60 h-60 rounded-full opacity-[0.06] blur-[90px]"
                   style={{ background: "radial-gradient(circle, #3B82F6, transparent 70%)" }} />
 
                 <p className="text-[10px] md:text-[11px] font-medium uppercase tracking-[0.12em] mb-3"
-                  style={{ color: "rgba(255,255,255,0.18)" }}>
-                  Tingkatkan Keahlian
-                </p>
+                  style={{ color: "var(--border-strong)" }}>Tingkatkan Keahlian</p>
 
-                <h1
-                  className="text-[38px] sm:text-[44px] md:text-[52px] font-extrabold leading-[1.05] tracking-[-0.03em] mb-4"
-                  style={{ color: "#F0F0F5" }}
-                >
+                <h1 className="text-[38px] sm:text-[44px] md:text-[52px] font-extrabold leading-[1.05] tracking-[-0.03em] mb-4"
+                  style={{ color: "var(--text-primary)" }}>
                   interview{" "}
-                  <span
-                    className="bg-clip-text text-transparent"
-                    style={{ backgroundImage: "linear-gradient(135deg, #3B82F6, #8B5CF6)" }}
-                  >
-                    mu!
-                  </span>
+                  <span className="bg-clip-text text-transparent"
+                    style={{ backgroundImage: "linear-gradient(135deg, #3B82F6, #8B5CF6)" }}>mu!</span>
                 </h1>
 
-                <p className="text-sm leading-[1.7] text-[#555] mb-7 max-w-[400px]">
+                <p className="text-sm leading-[1.7] mb-7 max-w-[400px]" style={{ color: "var(--text-muted)" }}>
                   Berlatih wawancara bersama{" "}
-                  <strong className="text-[#888] font-medium">Anty</strong>, asisten virtual BletchAI.
+                  <strong className="font-medium" style={{ color: "var(--text-secondary)" }}>Anty</strong>, asisten virtual BletchAI.
                   Pilih jurusanmu, jawab pertanyaan, dan dapatkan evaluasi real-time dari AI.
                 </p>
 
                 <div className="flex gap-2.5 mb-5">
                   {[
-                    { val: stats.totalSessions,    label: "Sesi selesai",   color: "#E0E0F0" },
-                    { val: `${avgPct}%`,            label: "Rata-rata skor", color: "#06B6D4" },
-                    { val: topTopic(stats),         label: "Topik favorit",  color: "#8B5CF6" },
+                    { val: stats.totalSessions, label: "Sesi selesai",   color: "var(--text-primary)" },
+                    { val: `${avgPct}%`,         label: "Rata-rata skor", color: "#06B6D4" },
+                    { val: topTopic(stats),      label: "Topik favorit",  color: "#8B5CF6" },
                   ].map(({ val, label, color }) => (
-                    <div
-                      key={label}
-                      className="rounded-xl px-3 py-3 flex-1 min-w-0 relative overflow-hidden"
-                      style={{
-                        background: "rgba(255,255,255,0.03)",
-                        border: "1px solid rgba(255,255,255,0.07)",
-                      }}
-                    >
+                    <div key={label} className="rounded-xl px-3 py-3 flex-1 min-w-0 relative overflow-hidden"
+                      style={{ background: "var(--bg-surface)", border: "1px solid var(--border-soft)" }}>
                       <span className="block text-lg font-bold leading-[1.1] truncate" style={{ color }}>{val}</span>
-                      <span className="block text-[10px] text-[#3A3A4A] mt-0.5 truncate">{label}</span>
+                      {/* ✅ text-faint → text-muted */}
+                      <span className="block text-[10px] mt-0.5 truncate" style={{ color: "var(--text-muted)" }}>{label}</span>
                     </div>
                   ))}
                 </div>
 
                 <div className="flex gap-2 flex-wrap mb-7">
                   {[
-                    { dot: "#F59E0B", text: "4.9 Rating"       },
-                    { dot: "#3B82F6", text: "~10 menit"         },
-                    { dot: "#3B82F6", text: "60 detik / soal"   },
-                    { dot: "#06B6D4", text: "15 soal random"    },
+                    { dot: "#F59E0B", text: "4.9 Rating"     },
+                    { dot: "#3B82F6", text: "~10 menit"       },
+                    { dot: "#3B82F6", text: "60 detik / soal" },
+                    { dot: "#06B6D4", text: "15 soal random"  },
                   ].map(({ dot, text }) => (
-                    <span
-                      key={text}
-                      className="inline-flex items-center gap-1.5 rounded-full px-3 py-[5px] text-xs text-[#555]"
-                      style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}
-                    >
+                    <span key={text} className="inline-flex items-center gap-1.5 rounded-full px-3 py-[5px] text-xs"
+                      style={{ background: "var(--bg-surface)", border: "1px solid var(--border-soft)", color: "var(--text-muted)" }}>
                       <span className="w-[5px] h-[5px] rounded-full" style={{ background: dot }} />
                       {text}
                     </span>
@@ -900,17 +682,11 @@ export default function InterviewSection() {
                 </div>
 
                 <div className="flex items-center gap-3 flex-wrap">
-                  <button
-                    onClick={() => setIsStatsOpen(p => !p)}
+                  <button onClick={() => setIsStatsOpen(p => !p)}
                     className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-[13px] transition-all duration-200"
-                    style={{
-                      background: "rgba(255,255,255,0.03)",
-                      border: "1px solid rgba(255,255,255,0.08)",
-                      color: isStatsOpen ? "#888" : "#555",
-                    }}
-                    onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,255,255,0.07)"; e.currentTarget.style.color = "#888"; }}
-                    onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,0.03)"; e.currentTarget.style.color = isStatsOpen ? "#888" : "#555"; }}
-                  >
+                    style={{ background: "var(--bg-surface)", border: "1px solid var(--border-md)", color: isStatsOpen ? "var(--text-secondary)" : "var(--text-muted)" }}
+                    onMouseEnter={e => { e.currentTarget.style.background = "var(--bg-surface-md)"; e.currentTarget.style.color = "var(--text-secondary)"; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = "var(--bg-surface)"; e.currentTarget.style.color = isStatsOpen ? "var(--text-secondary)" : "var(--text-muted)"; }}>
                     <IconChart />
                     <span>{isStatsOpen ? "Sembunyikan statistik" : "Lihat statistik"}</span>
                     <svg viewBox="0 0 12 12" fill="none" className={`w-3 h-3 transition-transform duration-300 ${isStatsOpen ? "rotate-180" : ""}`}>
@@ -919,49 +695,36 @@ export default function InterviewSection() {
                   </button>
                 </div>
 
-                <div
-                  className={`overflow-hidden transition-all duration-[420ms] ease-[cubic-bezier(0.4,0,0.2,1)] ${isStatsOpen ? "max-h-[500px] opacity-100 mt-6" : "max-h-0 opacity-0 mt-0"}`}
-                >
-                  <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }} className="pt-5">
+                <div className={`overflow-hidden transition-all duration-[420ms] ease-[cubic-bezier(0.4,0,0.2,1)] ${isStatsOpen ? "max-h-[500px] opacity-100 mt-6" : "max-h-0 opacity-0 mt-0"}`}>
+                  <div style={{ borderTop: "1px solid var(--border-soft)" }} className="pt-5">
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
                       {statCards.map((s) => (
-                        <div
-                          key={s.label}
-                          className="rounded-xl p-3 min-w-0 relative overflow-hidden"
-                          style={{
-                            background: "rgba(255,255,255,0.025)",
-                            border: "1px solid rgba(255,255,255,0.06)",
-                          }}
-                        >
-                          <div
-                            className="absolute inset-x-0 top-0 h-[1.5px]"
-                            style={{ background: `linear-gradient(to right, ${s.color}, transparent 70%)` }}
-                          />
+                        <div key={s.label} className="rounded-xl p-3 min-w-0 relative overflow-hidden"
+                          style={{ background: "var(--bg-surface)", border: "1px solid var(--border-soft)" }}>
+                          <div className="absolute inset-x-0 top-0 h-[1.5px]"
+                            style={{ background: `linear-gradient(to right, ${s.color}, transparent 70%)` }} />
                           <div className="mb-1.5" style={{ color: s.color }}>{s.icon}</div>
                           <div className="text-base font-bold leading-[1.1] mb-1 truncate" style={{ color: s.color }}>{s.val}</div>
-                          <div className="text-[10px] text-[#3A3A4A] truncate">{s.label}</div>
+                          {/* ✅ text-faint → text-muted */}
+                          <div className="text-[10px] truncate" style={{ color: "var(--text-muted)" }}>{s.label}</div>
                         </div>
                       ))}
                     </div>
 
-                    <div
-                      className="rounded-xl px-4 py-4"
-                      style={{ background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.06)" }}
-                    >
-                      <p className="text-[10px] font-medium uppercase tracking-[0.10em] text-[#3A3A4A] mb-4">
+                    <div className="rounded-xl px-4 py-4"
+                      style={{ background: "var(--bg-surface)", border: "1px solid var(--border-soft)" }}>
+                      <p className="text-[10px] font-medium uppercase tracking-[0.10em] mb-4"
+                        style={{ color: "var(--text-muted)" }}>
                         Progress kamu
                       </p>
                       {skillBars.map((s) => (
                         <div key={s.name} className="mb-3 last:mb-0">
                           <div className="flex justify-between mb-1.5">
-                            <span className="text-xs text-[#555]">{s.name}</span>
+                            <span className="text-xs" style={{ color: "var(--text-muted)" }}>{s.name}</span>
                             <span className="text-xs font-semibold" style={{ color: s.color }}>{s.label ?? `${s.pct}%`}</span>
                           </div>
-                          <div className="h-[3px] rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.05)" }}>
-                            <div
-                              className="h-full rounded-full transition-all duration-700"
-                              style={{ width: `${s.pct}%`, background: s.color }}
-                            />
+                          <div className="h-[3px] rounded-full overflow-hidden" style={{ background: "var(--bg-surface-md)" }}>
+                            <div className="h-full rounded-full transition-all duration-700" style={{ width: `${s.pct}%`, background: s.color }} />
                           </div>
                         </div>
                       ))}
@@ -972,47 +735,21 @@ export default function InterviewSection() {
             </Reveal>
 
             {/* RIGHT — interactive panel */}
-            <motion.div
-              style={{ height: "520px" }}
-              initial={{ opacity: 0, x: 24 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true, amount: 0.15 }}
-              transition={{ duration: 0.55, delay: 0.1, ease: [0.4, 0, 0.2, 1] }}
-            >
+            <motion.div style={{ height: "520px" }}
+              initial={{ opacity: 0, x: 24 }} whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, amount: 0.15 }} transition={{ duration: 0.55, delay: 0.1, ease: [0.4, 0, 0.2, 1] }}>
               {sessionState === "idle" && (
-                <IdlePanel
-                  bidangList={BIDANG_CONFIG}
-                  activeBidang={activeBidang}
-                  onSelectBidang={setActiveBidang}
-                  onStart={handleStart}
-                />
+                <IdlePanel bidangList={BIDANG_CONFIG} activeBidang={activeBidang} onSelectBidang={setActiveBidang} onStart={handleStart} />
               )}
               {sessionState === "active" && currentQ && (
-                <ActivePanel
-                  question={currentQ.question}
-                  answers={currentQ.answers}
-                  currentIdx={currentIdx}
-                  totalQ={questions.length}
-                  timer={timer}
-                  chatHistory={chatHistory}
-                  isAnswered={isAnswered}
-                  isTimeout={isTimeout}
-                  isTyping={isTyping}
-                  score={score}
-                  onAnswer={handleAnswer}
-                  onNext={handleNext}
-                  onBack={handleBack}
-                />
+                <ActivePanel question={currentQ.question} answers={currentQ.answers} currentIdx={currentIdx}
+                  totalQ={questions.length} timer={timer} chatHistory={chatHistory} isAnswered={isAnswered}
+                  isTimeout={isTimeout} isTyping={isTyping} score={score}
+                  onAnswer={handleAnswer} onNext={handleNext} onBack={handleBack} />
               )}
               {sessionState === "result" && (
-                <ResultPanel
-                  score={score}
-                  maxScore={maxScoreResult}
-                  bidang={activeBidang}
-                  totalQ={questions.length}
-                  onRetry={handleRetry}
-                  onHome={handleBack}
-                />
+                <ResultPanel score={score} maxScore={maxScoreResult} bidang={activeBidang}
+                  totalQ={questions.length} onRetry={handleRetry} onHome={handleBack} />
               )}
             </motion.div>
           </div>

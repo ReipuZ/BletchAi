@@ -39,66 +39,74 @@ export default function Login({ onLogin, onGoRegister }) {
   };
 
   /* ── shared input style ── */
-  const inputClass = [
-    "w-full text-sm border rounded-xl bg-transparent",
-    "focus:outline-none transition placeholder-[#333]",
-    "text-[#E2E8F0]",
-  ].join(" ");
-
   const inputStyle = {
-    background:    "rgba(255,255,255,0.04)",
-    border:        "1px solid rgba(255,255,255,0.08)",
-    borderRadius:  "12px",
-    padding:       "10px 14px 10px 36px",
-    fontSize:      "13px",
-    color:         "#E2E8F0",
-    outline:       "none",
-    width:         "100%",
-    boxSizing:     "border-box",
-    transition:    "border-color .2s, background .2s, box-shadow .2s",
+    background:   "var(--bg-surface)",
+    border:       "1px solid var(--border-soft)",
+    borderRadius: "12px",
+    padding:      "10px 14px 10px 36px",
+    fontSize:     "13px",
+    color:        "var(--text-primary)",
+    outline:      "none",
+    width:        "100%",
+    boxSizing:    "border-box",
+    transition:   "border-color .2s, background .2s, box-shadow .2s",
   };
 
   const handleFocus = (e) => {
-    e.currentTarget.style.borderColor  = "rgba(59,130,246,0.40)";
-    e.currentTarget.style.boxShadow   = "0 0 0 3px rgba(59,130,246,0.06)";
-    e.currentTarget.style.background  = "rgba(255,255,255,0.06)";
+    e.currentTarget.style.borderColor = "var(--accent-border)";
+    e.currentTarget.style.boxShadow  = "0 0 0 3px var(--accent-bg)";
+    e.currentTarget.style.background = "var(--bg-surface-md)";
   };
   const handleBlur = (e) => {
-    e.currentTarget.style.borderColor  = "rgba(255,255,255,0.08)";
-    e.currentTarget.style.boxShadow   = "none";
-    e.currentTarget.style.background  = "rgba(255,255,255,0.04)";
+    e.currentTarget.style.borderColor = "var(--border-soft)";
+    e.currentTarget.style.boxShadow  = "none";
+    e.currentTarget.style.background = "var(--bg-surface)";
   };
 
   return (
     <div className="w-full max-w-sm mx-auto">
 
       {/* Badge */}
-      <div className="inline-flex items-center gap-1.5 mb-5"
-        style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.10)",
-          borderRadius: "999px", padding: "3px 10px" }}>
-        <span className="w-1.5 h-1.5 rounded-full bg-[#3B82F6] animate-pulse" />
-        <span className="text-[10px] font-medium" style={{ color: "#888" }}>Sosialisasi &amp; Edukasi Karier</span>
+      <div
+        className="inline-flex items-center gap-1.5 mb-5"
+        style={{
+          background:   "var(--bg-surface)",
+          border:       "1px solid var(--border-md)",
+          borderRadius: "999px",
+          padding:      "3px 10px",
+        }}
+      >
+        <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "var(--accent)" }} />
+        <span className="text-[10px] font-medium" style={{ color: "var(--text-secondary)" }}>
+          Sosialisasi &amp; Edukasi Karier
+        </span>
       </div>
 
       {/* Heading */}
-      <h2 className="text-2xl font-bold mb-1"
+      <h2
+        className="text-2xl font-bold mb-1"
         style={{
-          background:             "linear-gradient(to right,#ffffff 0%,#ffffff 35%,#DBEAFE 44%,#93C5FD 50%,#DBEAFE 56%,#ffffff 65%,#ffffff 100%)",
-          backgroundSize:         "250% 100%",
-          WebkitBackgroundClip:   "text",
-          WebkitTextFillColor:    "transparent",
-        }}>
+          background:           "var(--gradient-brand)",
+          backgroundSize:       "250% 100%",
+          WebkitBackgroundClip: "text",
+          WebkitTextFillColor:  "transparent",
+        }}
+      >
         Masuk
       </h2>
-      <p className="text-sm mb-7" style={{ color: "#3A3A3A" }}>Buka jalan menuju masa depanmu</p>
+      <p className="text-sm mb-7" style={{ color: "var(--text-muted)" }}>
+        Buka jalan menuju masa depanmu
+      </p>
 
       <form onSubmit={handleLogin} className="space-y-4">
 
         {/* Email */}
         <div>
-          <label className="block text-xs font-medium mb-1.5" style={{ color: "#555" }}>Email</label>
+          <label className="block text-xs font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>
+            Email
+          </label>
           <div className="relative">
-            <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "#333" }} />
+            <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "var(--text-muted)" }} />
             <input
               type="email"
               value={email}
@@ -114,9 +122,11 @@ export default function Login({ onLogin, onGoRegister }) {
 
         {/* Password */}
         <div>
-          <label className="block text-xs font-medium mb-1.5" style={{ color: "#555" }}>Kata Sandi</label>
+          <label className="block text-xs font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>
+            Kata Sandi
+          </label>
           <div className="relative">
-            <Lock size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "#333" }} />
+            <Lock size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "var(--text-muted)" }} />
             <input
               type={showPass ? "text" : "password"}
               value={password}
@@ -131,7 +141,7 @@ export default function Login({ onLogin, onGoRegister }) {
               type="button"
               onClick={() => setShowPass(!showPass)}
               className="absolute right-3 top-1/2 -translate-y-1/2 transition"
-              style={{ color: "#444", background: "none", border: "none", cursor: "pointer", padding: 0 }}
+              style={{ color: "var(--text-muted)", background: "none", border: "none", cursor: "pointer", padding: 0 }}
             >
               {showPass ? <EyeOff size={14} /> : <Eye size={14} />}
             </button>
@@ -139,10 +149,12 @@ export default function Login({ onLogin, onGoRegister }) {
         </div>
 
         {/* Lupa sandi */}
-        <p className="text-xs text-right cursor-pointer transition"
-          style={{ color: "#3B82F6" }}
-          onMouseEnter={(e) => e.currentTarget.style.color = "#93C5FD"}
-          onMouseLeave={(e) => e.currentTarget.style.color = "#3B82F6"}>
+        <p
+          className="text-xs text-right cursor-pointer transition"
+          style={{ color: "var(--accent)" }}
+          onMouseEnter={(e) => e.currentTarget.style.color = "var(--accent-light)"}
+          onMouseLeave={(e) => e.currentTarget.style.color = "var(--accent)"}
+        >
           Lupa kata sandi?
         </p>
 
@@ -151,19 +163,21 @@ export default function Login({ onLogin, onGoRegister }) {
           type="submit"
           className="w-full text-sm font-medium py-2.5 rounded-xl transition"
           style={{
-            background:   "rgba(20,20,28,0.95)",
-            border:       "1px solid rgba(255,255,255,0.10)",
-            color:        "#E2E8F0",
+            background:   "var(--bg-surface-md)",
+            border:       "1px solid var(--border-md)",
+            color:        "var(--text-primary)",
             borderRadius: "12px",
             cursor:       "pointer",
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.background    = "rgba(40,40,55,0.95)";
-            e.currentTarget.style.borderColor   = "rgba(255,255,255,0.18)";
+            e.currentTarget.style.background  = "var(--accent-bg)";
+            e.currentTarget.style.borderColor = "var(--accent-border)";
+            e.currentTarget.style.color       = "var(--accent-light)";
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.background    = "rgba(20,20,28,0.95)";
-            e.currentTarget.style.borderColor   = "rgba(255,255,255,0.10)";
+            e.currentTarget.style.background  = "var(--bg-surface-md)";
+            e.currentTarget.style.borderColor = "var(--border-md)";
+            e.currentTarget.style.color       = "var(--text-primary)";
           }}
         >
           Masuk
@@ -172,9 +186,9 @@ export default function Login({ onLogin, onGoRegister }) {
 
       {/* Divider */}
       <div className="flex items-center gap-3 my-5">
-        <div className="flex-1 h-px" style={{ background: "rgba(255,255,255,0.06)" }} />
-        <span className="text-xs" style={{ color: "#2A2A2A" }}>atau masuk dengan</span>
-        <div className="flex-1 h-px" style={{ background: "rgba(255,255,255,0.06)" }} />
+        <div className="flex-1 h-px" style={{ background: "var(--border-soft)" }} />
+        <span className="text-xs" style={{ color: "var(--text-muted)" }}>atau masuk dengan</span>
+        <div className="flex-1 h-px" style={{ background: "var(--border-soft)" }} />
       </div>
 
       {/* Google */}
@@ -183,21 +197,21 @@ export default function Login({ onLogin, onGoRegister }) {
         disabled={loading}
         className="w-full flex items-center justify-center gap-3 text-sm font-medium py-2.5 rounded-xl transition disabled:opacity-60"
         style={{
-          background:   "rgba(255,255,255,0.04)",
-          border:       "1px solid rgba(255,255,255,0.09)",
-          color:        "#777",
+          background:   "var(--bg-surface)",
+          border:       "1px solid var(--border-soft)",
+          color:        "var(--text-secondary)",
           borderRadius: "12px",
           cursor:       "pointer",
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.background  = "rgba(255,255,255,0.08)";
-          e.currentTarget.style.color       = "#CCCCCC";
-          e.currentTarget.style.borderColor = "rgba(255,255,255,0.15)";
+          e.currentTarget.style.background  = "var(--bg-surface-md)";
+          e.currentTarget.style.color       = "var(--text-primary)";
+          e.currentTarget.style.borderColor = "var(--border-md)";
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.background  = "rgba(255,255,255,0.04)";
-          e.currentTarget.style.color       = "#777";
-          e.currentTarget.style.borderColor = "rgba(255,255,255,0.09)";
+          e.currentTarget.style.background  = "var(--bg-surface)";
+          e.currentTarget.style.color       = "var(--text-secondary)";
+          e.currentTarget.style.borderColor = "var(--border-soft)";
         }}
       >
         <img src="https://www.svgrepo.com/show/355037/google.svg" className="w-4 h-4" alt="Google" />
@@ -205,39 +219,50 @@ export default function Login({ onLogin, onGoRegister }) {
       </button>
 
       {/* Separator */}
-      <div className="my-5 h-px" style={{ background: "rgba(255,255,255,0.05)" }} />
+      <div className="my-5 h-px" style={{ background: "var(--border-soft)" }} />
 
       {/* Social proof */}
       <div className="flex items-center gap-3 mb-5">
         <div className="flex -space-x-2">
-          {[["R", "#0d1b35", "#93C5FD"], ["P", "#0f1238", "#C4B5FD"], ["L", "#160b30", "#A78BFA"]].map(([letter, bg, color]) => (
+          {[
+            ["R", "var(--avatar-bg-1)", "var(--accent-light)"],
+            ["P", "var(--avatar-bg-2)", "#C4B5FD"],
+            ["L", "var(--avatar-bg-3)", "#A78BFA"],
+          ].map(([letter, bg, color]) => (
             <div
               key={letter}
               className="w-7 h-7 rounded-full border-2 flex items-center justify-center text-[9px] font-semibold"
-              style={{ backgroundColor: bg, borderColor: "rgba(6,6,10,0.97)", color, boxShadow: "0 0 0 1px rgba(255,255,255,0.06)" }}
+              style={{
+                backgroundColor: bg,
+                borderColor:     "var(--avatar-border)",
+                color,
+                boxShadow:       "0 0 0 1px var(--border-soft)",
+              }}
             >
               {letter}
             </div>
           ))}
         </div>
         <div>
-          <p className="text-xs font-semibold leading-tight" style={{ color: "#CCCCCC" }}>2.500+ Peserta Aktif</p>
+          <p className="text-xs font-semibold leading-tight" style={{ color: "var(--text-primary)" }}>
+            2.500+ Peserta Aktif
+          </p>
           <div className="flex items-center gap-1 mt-0.5">
             <Star size={9} className="fill-[#FBBF24] text-[#FBBF24]" />
-            <span className="text-[10px]" style={{ color: "#444" }}>4.9 Rating</span>
+            <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>4.9 Rating</span>
           </div>
         </div>
       </div>
 
       {/* Daftar link */}
-      <p className="text-xs text-center" style={{ color: "#2E2E2E" }}>
+      <p className="text-xs text-center" style={{ color: "var(--text-muted)" }}>
         Belum punya akun?{" "}
         <span
           onClick={onGoRegister}
           className="font-medium cursor-pointer transition"
-          style={{ color: "#3B82F6" }}
-          onMouseEnter={(e) => e.currentTarget.style.color = "#93C5FD"}
-          onMouseLeave={(e) => e.currentTarget.style.color = "#3B82F6"}
+          style={{ color: "var(--accent)" }}
+          onMouseEnter={(e) => e.currentTarget.style.color = "var(--accent-light)"}
+          onMouseLeave={(e) => e.currentTarget.style.color = "var(--accent)"}
         >
           Daftar di sini
         </span>

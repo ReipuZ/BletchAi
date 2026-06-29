@@ -2,25 +2,254 @@
 @tailwind components;
 @tailwind utilities;
 
-html,
-body {
-  /* ✦ Hitam solid — konsisten dengan semua section */
-  background-color: #000000;
-  min-height: 100vh;
+/* ============================================================
+   CSS VARIABLES — Dark (default)
+   ============================================================ */
+:root {
+  /* Background layers */
+  --bg-base:        #000000;
+  --bg-surface:     rgba(255,255,255,0.04);
+  --bg-surface-md:  rgba(255,255,255,0.07);
+  --bg-card:        rgba(10,10,10,0.88);
+  --bg-navbar:      rgba(8,8,12,0.80);
+  --bg-navbar-s:    rgba(8,8,12,0.92);
+
+  /* Borders */
+  --border-soft:    rgba(255,255,255,0.07);
+  --border-md:      rgba(255,255,255,0.10);
+  --border-strong:  rgba(255,255,255,0.12);
+
+  /* Text */
+  --text-primary:   #E8E8F0;
+  --text-secondary: #8A8A9A;
+  --text-muted:     #555565;
+  --text-faint:     #333333;
+
+  /* Accent blue */
+  --accent:              #3B82F6;
+  --accent-light:        #93C5FD;
+  --accent-bg:           rgba(59,130,246,0.14);
+  --accent-bg-hover:     rgba(59,130,246,0.22);
+  --accent-border:       rgba(59,130,246,0.28);
+
+  /* Scrollbar */
+  --scrollbar:      rgba(255,255,255,0.08);
+  --scrollbar-h:    rgba(255,255,255,0.14);
+
+  /* Overlay */
+  --overlay:        rgba(0,0,0,0.4);
+
+  /* Toggle */
+  --toggle-bg:      rgba(20,20,30,0.90);
+  --toggle-border:  rgba(255,255,255,0.12);
+  --toggle-color:   #93C5FD;
+  --toggle-shadow:  0 4px 24px rgba(0,0,0,0.5);
+
+  /* Misc komponen */
+  --text-label:     rgba(255,255,255,0.18);
+  --dot-online:     #22D47A;
+  --gradient-brand: linear-gradient(90deg, #3B82F6, #8B5CF6);
+
+  /* Avatar stack */
+  --avatar-bg-1:    #1A3050;
+  --avatar-bg-2:    #181F40;
+  --avatar-bg-3:    #251560;
+  --avatar-border:  #000000;
+  --avatar-text:    #ffffff;
+
+  /* Quick prompt pills */
+  --pill-bg:           rgba(255,255,255,0.08);
+  --pill-bg-hover:     rgba(255,255,255,0.13);
+  --pill-color:        rgba(255,255,255,0.55);
+  --pill-color-hover:  rgba(255,255,255,0.85);
+  --pill-border:       rgba(255,255,255,0.13);
+
+  /* Hero badge */
+  --hero-badge-bg:     rgba(255,255,255,0.08);
+  --hero-badge-color:  rgba(255,255,255,0.55);
+  --hero-badge-border: rgba(255,255,255,0.14);
+
+  /* Slide dots */
+  --slide-dot-active:  rgba(147,197,253,0.7);
+  --slide-dot:         rgba(255,255,255,0.20);
+
+  /* ── Efek visual (animasi tetap jalan, warna via var) ── */
+
+  /* Ambient drift blob — warna & opacity */
+  --blob-blue:         rgba(59,130,246,0.04);
+  --blob-purple:       rgba(139,92,246,0.06);
+  --blob-cyan:         rgba(6,182,212,0.04);
+  --blob-opacity-blue: 0.08;
+  --blob-opacity-purple: 0.06;
+  --blob-opacity-cyan: 0.04;
+
+  /* Card ambient drift inner blob */
+  --card-ambient:      rgba(59,130,246,0.04);
+
+  /* Shimmer teks hero (gradient putih-biru) */
+  --shimmer-from:      #ffffff;
+  --shimmer-mid-1:     #EFF6FF;
+  --shimmer-mid-2:     #BFDBFE;
+  --shimmer-peak:      #93C5FD;
+
+  /* Category pill hover shimmer strip */
+  --pill-shimmer:      rgba(255,255,255,0.06);
+
+  /* Card inset highlight (1px top) */
+  --card-inset:        rgba(255,255,255,0.08);
+
+  /* Box shadow warna */
+  --shadow-card:       rgba(0,0,0,0.4);
+  --shadow-card-lg:    rgba(0,0,0,0.5);
+  --shadow-search:     rgba(0,0,0,0.75);
+
+  /* Grid background */
+  --grid-opacity:      0.018;
 }
 
-/* Scrollbar halus agar tidak merusak estetika gelap */
-::-webkit-scrollbar {
-  width: 4px;
-  height: 4px;
+/* ============================================================
+   LIGHT MODE overrides
+   ============================================================ */
+html.light {
+  --bg-base:        #EEF2FF;
+  --bg-surface:     rgba(255,255,255,0.75);
+  --bg-surface-md:  rgba(255,255,255,0.95);
+  --bg-card:        rgba(255,255,255,0.90);
+  --bg-navbar:      rgba(238,242,255,0.85);
+  --bg-navbar-s:    rgba(238,242,255,0.97);
+
+  --border-soft:    rgba(59,130,246,0.10);
+  --border-md:      rgba(59,130,246,0.16);
+  --border-strong:  rgba(59,130,246,0.26);
+
+  --text-primary:   #0F172A;
+  --text-secondary: #334155;
+  --text-muted:     #64748B;
+  --text-faint:     #94A3B8;
+
+  --accent:              #2563EB;
+  --accent-light:        #1D4ED8;
+  --accent-bg:           rgba(37,99,235,0.10);
+  --accent-bg-hover:     rgba(37,99,235,0.18);
+  --accent-border:       rgba(37,99,235,0.30);
+
+  --scrollbar:      rgba(59,130,246,0.18);
+  --scrollbar-h:    rgba(59,130,246,0.35);
+
+  --overlay:        rgba(15,23,42,0.35);
+
+  --toggle-bg:      rgba(255,255,255,0.92);
+  --toggle-border:  rgba(59,130,246,0.20);
+  --toggle-color:   #2563EB;
+  --toggle-shadow:  0 4px 24px rgba(59,130,246,0.15);
+
+  --text-label:     rgba(15,23,42,0.35);
+  --dot-online:     #16A34A;
+  --gradient-brand: linear-gradient(90deg, #2563EB, #7C3AED);
+
+  /* Avatar */
+  --avatar-bg-1:    #BFDBFE;
+  --avatar-bg-2:    #C7D2FE;
+  --avatar-bg-3:    #DDD6FE;
+  --avatar-border:  #EEF2FF;
+  --avatar-text:    #1E3A5F;
+
+  /* Pills */
+  /* Pills selalu di atas foto gelap — tetap putih transparan seperti dark mode */
+  --pill-bg:           rgba(255,255,255,0.08);
+  --pill-bg-hover:     rgba(255,255,255,0.16);
+  --pill-color:        rgba(255,255,255,0.65);
+  --pill-color-hover:  rgba(255,255,255,0.95);
+  --pill-border:       rgba(255,255,255,0.16);
+
+  /* Hero badge */
+  /* Hero badge juga di atas foto gelap — tetap putih transparan */
+  --hero-badge-bg:     rgba(255,255,255,0.08);
+  --hero-badge-color:  rgba(255,255,255,0.55);
+  --hero-badge-border: rgba(255,255,255,0.14);
+
+  /* Slide dots */
+  --slide-dot-active:  rgba(37,99,235,0.75);
+  --slide-dot:         rgba(15,23,42,0.16);
+
+  /* ── Efek visual light mode — semua tetap animasi, warna disesuaikan ── */
+
+  /* Blob: opacity lebih tinggi supaya tetap keliatan di background terang */
+  --blob-blue:           rgba(59,130,246,0.18);
+  --blob-purple:         rgba(139,92,246,0.14);
+  --blob-cyan:           rgba(6,182,212,0.12);
+  --blob-opacity-blue:   0.22;
+  --blob-opacity-purple: 0.16;
+  --blob-opacity-cyan:   0.10;
+
+  /* Card ambient drift — lebih visible */
+  --card-ambient:        rgba(59,130,246,0.08);
+
+  /* Shimmer hero — putih ke biru gelap supaya keliatan di bg terang */
+  /* Shimmer hero tetap putih — teks selalu di atas foto dengan dark overlay */
+  --shimmer-from:   #ffffff;
+  --shimmer-mid-1:  #EFF6FF;
+  --shimmer-mid-2:  #BFDBFE;
+  --shimmer-peak:   #93C5FD;
+
+  /* Category hover shimmer strip — biru transparan */
+  --pill-shimmer:   rgba(59,130,246,0.10);
+
+  /* Card inset highlight */
+  --card-inset:     rgba(59,130,246,0.12);
+
+  /* Shadow lebih soft & biru */
+  --shadow-card:    rgba(59,130,246,0.08);
+  --shadow-card-lg: rgba(59,130,246,0.12);
+  --shadow-search:  rgba(15,23,42,0.12);
+
+  /* Grid lebih visible */
+  --grid-opacity:   0.04;
 }
-::-webkit-scrollbar-track {
-  background: transparent;
+
+/* ============================================================
+   BASE STYLES
+   ============================================================ */
+html, body {
+  background-color: var(--bg-base);
+  min-height: 100vh;
+  transition: background-color 0.3s ease;
 }
+
+section, main {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Input */
+html.light input {
+  color: var(--text-primary) !important;
+}
+html.light input::placeholder {
+  color: var(--text-muted) !important;
+}
+
+/* ============================================================
+   SCROLLBAR
+   ============================================================ */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--scrollbar);
   border-radius: 99px;
+  transition: background 0.3s;
 }
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.14);
+::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-h); }
+
+/* ============================================================
+   SMOOTH TRANSITION untuk mode switch
+   ============================================================ */
+*, *::before, *::after {
+  transition-property: background-color, border-color, color, box-shadow;
+  transition-duration: 0.25s;
+  transition-timing-function: ease;
+}
+
+[class*="animate-"],
+[style*="animation"] {
+  transition: none !important;
 }
