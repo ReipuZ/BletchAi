@@ -159,18 +159,25 @@ export default function HomeSection() {
       <div className="absolute inset-0 bg-cover bg-center bg-no-repeat md:bg-fixed"
         style={{ backgroundImage: `url(${backgroundImg})`, opacity: 0.03 }} />
 
-      {/* Chat overlay — portal + AnimatePresence handled inside ChatOverlay */}
       <ChatOverlay show={showOverlay} onClose={() => setShowOverlay(false)} initialMessage={overlayInitMsg} />
 
       <div className="relative z-10">
 
-        {/* Hero */}
-        <div className="px-3 md:px-12 pt-4 md:pt-10">
+        {/* Hero — pt dikurangi di mobile agar tidak ada gap besar */}
+        <div className="px-3 md:px-12 pt-2 md:pt-10">
           <div
-            className="relative z-10 rounded-[24px] md:rounded-[36px] overflow-visible flex flex-col items-center justify-center text-center"
-            style={{ minHeight: "clamp(280px, 42vw, 400px)", paddingTop: "clamp(30px, 5vw, 60px)", paddingBottom: "clamp(40px, 8vw, 80px)" }}
+            className="relative z-10 rounded-[20px] md:rounded-[36px] overflow-visible flex flex-col items-center justify-center text-center"
+            style={{
+              /* 
+                MOBILE: tinggi dikurangi jadi ~220px, bukan 280px+
+                Desktop tetap sama seperti sebelumnya
+              */
+              minHeight: "clamp(220px, 38vw, 400px)",
+              paddingTop: "clamp(20px, 4vw, 60px)",
+              paddingBottom: "clamp(36px, 7vw, 80px)",
+            }}
           >
-            <div className="absolute inset-0 rounded-[24px] md:rounded-[36px] overflow-hidden pointer-events-none">
+            <div className="absolute inset-0 rounded-[20px] md:rounded-[36px] overflow-hidden pointer-events-none">
               <div className="absolute inset-0 overflow-hidden">
                 <AnimatePresence initial={false}>
                   {prevSlide !== null && (
@@ -188,14 +195,14 @@ export default function HomeSection() {
               <div className="absolute inset-0" style={{ zIndex: 3,
                 background: `radial-gradient(ellipse at 50% 0%, rgba(0,0,0,0.08) 0%, transparent 55%),
                   linear-gradient(to bottom, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.15) 25%, rgba(0,0,0,0.75) 65%, rgba(0,0,0,0.98) 100%)` }} />
-              <div className="absolute inset-0 rounded-[24px] md:rounded-[36px] border border-white/[0.07] pointer-events-none" style={{ zIndex: 4 }} />
+              <div className="absolute inset-0 rounded-[20px] md:rounded-[36px] border border-white/[0.07] pointer-events-none" style={{ zIndex: 4 }} />
               <div className="absolute bottom-[36%] inset-x-0 h-px mx-10 md:mx-24 pointer-events-none" style={{ zIndex: 4,
                 background: "linear-gradient(to right, transparent, rgba(255,255,255,0.07), transparent)" }} />
             </div>
 
             <div className="relative z-10 px-4 md:px-8 pb-4 md:pb-6">
               <motion.span initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
-                className="inline-flex items-center gap-1.5 text-[#AAAAAA] text-[10px] md:text-xs font-medium px-3 py-1 rounded-full mb-3 md:mb-5"
+                className="inline-flex items-center gap-1.5 text-[#AAAAAA] text-[10px] md:text-xs font-medium px-3 py-1 rounded-full mb-2 md:mb-5"
                 style={{ background: "rgba(255,255,255,0.08)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)",
                   border: "1px solid rgba(255,255,255,0.14)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10)" }}>
                 <span className="w-1.5 h-1.5 rounded-full bg-[#3B82F6] animate-pulse-glow" />
@@ -203,7 +210,7 @@ export default function HomeSection() {
               </motion.span>
 
               <motion.h1 initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55, delay: 0.1 }}
-                className="text-[clamp(22px,5.5vw,52px)] font-bold leading-[1.35] tracking-tight pb-2">
+                className="text-[clamp(20px,5vw,52px)] font-bold leading-[1.3] tracking-tight pb-1">
                 <span className="block bg-clip-text text-transparent animate-shimmer-text pb-1"
                   style={{
                     backgroundImage: "linear-gradient(to right, #ffffff 0%, #ffffff 25%, #EFF6FF 36%, #BFDBFE 44%, #93C5FD 50%, #BFDBFE 56%, #EFF6FF 64%, #ffffff 75%, #ffffff 100%)",
@@ -228,7 +235,7 @@ export default function HomeSection() {
               </div>
 
               <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.35 }}
-                className="flex items-center justify-center gap-1.5 md:gap-2 mt-3 md:mt-4 overflow-x-auto [&::-webkit-scrollbar]:hidden">
+                className="flex items-center justify-center gap-1.5 md:gap-2 mt-2 md:mt-4 overflow-x-auto [&::-webkit-scrollbar]:hidden">
                 {quickPrompts.map(({ icon: Icon, label }) => (
                   <button key={label}
                     onClick={() => { setInputValue(label); openChat(label); }}
@@ -244,9 +251,9 @@ export default function HomeSection() {
             </div>
           </div>
 
-          {/* Search Card */}
+          {/* Search Card — overlap lebih sedikit di mobile */}
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }}
-            className="relative z-20 -mt-6 md:-mt-12 mx-0 md:mx-4">
+            className="relative z-20 -mt-4 md:-mt-12 mx-0 md:mx-4">
             <div className="relative overflow-hidden rounded-2xl md:rounded-3xl px-3 pt-3 pb-3 md:px-7 md:pt-6 md:pb-6"
               style={{ background: "rgba(10,10,10,0.88)", backdropFilter: "blur(28px)", WebkitBackdropFilter: "blur(28px)",
                 border: "1px solid rgba(255,255,255,0.09)", boxShadow: "0 20px 60px rgba(0,0,0,0.75), inset 0 1px 0 rgba(255,255,255,0.08)" }}>
@@ -307,7 +314,6 @@ export default function HomeSection() {
                 <div className="flex-1 h-px" style={{ background: "rgba(255,255,255,0.05)" }} />
               </div>
 
-              {/* Search input — opens overlay on send */}
               <div className="rounded-xl px-3 py-2 md:px-4 md:py-3.5 flex items-center gap-2.5 transition-all duration-300"
                 style={{ background: "rgba(255,255,255,0.04)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)",
                   border: "1px solid rgba(255,255,255,0.08)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05)" }}>
@@ -346,7 +352,6 @@ export default function HomeSection() {
                 Chatbot akan membantu menjawab pertanyaan berdasarkan informasi yang tersedia.
               </p>
 
-              {/* Social proof */}
               <div className="flex items-center gap-3 mt-3 md:mt-4 pt-3 md:pt-4"
                 style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
                 <div className="flex -space-x-2">
@@ -370,8 +375,8 @@ export default function HomeSection() {
           </motion.div>
         </div>
 
-        {/* Materi Populer */}
-        <Reveal className="px-3 md:px-12 mt-6 md:mt-12" amount={0.15}>
+        {/* Materi Populer — mt dikurangi di mobile */}
+        <Reveal className="px-3 md:px-12 mt-4 md:mt-12" amount={0.15}>
           <div className="flex items-center justify-between mb-3 md:mb-6">
             <div>
               <p className="text-[10px] md:text-[11px] font-medium uppercase tracking-[0.12em] mb-0.5 md:mb-1"

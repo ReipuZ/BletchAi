@@ -33,9 +33,6 @@ export default function Navbar({ onLogout, onLogin, localUser, isLogin, openStat
       if (dropdownRef.current      && !dropdownRef.current.contains(e.target))      setOpen(false);
       if (searchRef.current        && !searchRef.current.contains(e.target))        setSearchOpen(false);
       if (interviewDropRef.current && !interviewDropRef.current.contains(e.target)) setInterviewDropOpen(false);
-      if (mobileInterviewRef.current && !mobileInterviewRef.current.contains(e.target)) {
-        // handled separately below
-      }
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
@@ -143,10 +140,10 @@ export default function Navbar({ onLogout, onLogin, localUser, isLogin, openStat
   const inactiveHoverBorder = "1px solid rgba(255,255,255,0.10)";
 
   const navBarStyle = (isMobile = false) => ({
-    width: isMobile ? "calc(100% - 2.5rem)" : "calc(100% - 4rem)",
-    maxWidth: isMobile ? "520px" : "1160px",
-    marginTop: isMobile ? "10px" : "14px",
-    background: scrolled ? "rgba(8,8,12,0.88)" : "rgba(8,8,12,0.72)",
+    width: isMobile ? "calc(100% - 2rem)" : "calc(100% - 4rem)",
+    maxWidth: isMobile ? "480px" : "1160px",
+    marginTop: isMobile ? "8px" : "14px",
+    background: scrolled ? "rgba(8,8,12,0.92)" : "rgba(8,8,12,0.80)",
     backdropFilter: "blur(24px)",
     WebkitBackdropFilter: "blur(24px)",
     border: scrolled ? "1px solid rgba(255,255,255,0.12)" : "1px solid rgba(255,255,255,0.07)",
@@ -158,10 +155,10 @@ export default function Navbar({ onLogout, onLogin, localUser, isLogin, openStat
   const InterviewDropdown = ({ isMobile = false }) => (
     <div style={{
       ...dropdownStyle,
-      width: "260px",
+      width: "240px",
       right: isMobile ? "auto" : "50%",
       left: isMobile ? "50%" : "auto",
-      top: "40px",
+      top: "36px",
       transform: interviewDropOpen
         ? `translateX(${isMobile ? "-50%" : "50%"}) translateY(0) scale(1)`
         : `translateX(${isMobile ? "-50%" : "50%"}) translateY(-8px) scale(0.96)`,
@@ -173,7 +170,6 @@ export default function Navbar({ onLogout, onLogin, localUser, isLogin, openStat
           Interview AI
         </p>
       </div>
-
       <button
         onClick={() => scrollTo("interview")}
         className="w-full flex items-center gap-3 px-4 py-3 text-left transition-all"
@@ -190,7 +186,6 @@ export default function Navbar({ onLogout, onLogin, localUser, isLogin, openStat
           <p className="text-[11px]" style={{ color: "#555565" }}>Latih kemampuan wawancara kamu</p>
         </div>
       </button>
-
       <button
         onClick={handleLihatStatistik}
         className="w-full flex items-center gap-3 px-4 py-3 text-left transition-all"
@@ -207,7 +202,6 @@ export default function Navbar({ onLogout, onLogin, localUser, isLogin, openStat
           <p className="text-[11px]" style={{ color: "#555565" }}>Pantau perkembangan kemampuan kamu</p>
         </div>
       </button>
-
       <div className="h-2" />
     </div>
   );
@@ -445,26 +439,26 @@ export default function Navbar({ onLogout, onLogin, localUser, isLogin, openStat
       </header>
 
       {/* ============================================================
-          MOBILE — floating top pill (mirip desktop, versi ringkas)
+          MOBILE NAVBAR — compact pill, icon-only nav + right actions
       ============================================================ */}
       <header
-        className="md:hidden fixed top-0 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 px-3 py-1.5 rounded-2xl transition-all duration-500"
+        className="md:hidden fixed top-0 left-1/2 -translate-x-1/2 z-50 flex items-center gap-1.5 px-2.5 py-1.5 rounded-2xl transition-all duration-500"
         style={navBarStyle(true)}
       >
         {/* Logo */}
-        <div className="flex items-center gap-1.5 flex-shrink-0">
+        <div className="flex items-center gap-1 flex-shrink-0">
           <div className="w-5 h-5 rounded-md flex items-center justify-center"
             style={{ background: "rgba(59,130,246,0.18)", border: "1px solid rgba(59,130,246,0.30)" }}>
             <span style={{ fontSize: "10px", fontWeight: 700, color: "#93C5FD", lineHeight: 1 }}>B</span>
           </div>
-          <span className="text-[13px] font-semibold tracking-tight" style={{ color: "#E8E8F0", letterSpacing: "-0.01em" }}>
+          <span className="text-[12px] font-semibold" style={{ color: "#E8E8F0", letterSpacing: "-0.01em" }}>
             Bletch AI
           </span>
         </div>
 
         <div className="w-px h-4 flex-shrink-0" style={{ background: "rgba(255,255,255,0.09)" }} />
 
-        {/* Nav links — mobile (icon + label, compact) */}
+        {/* Nav links — icon only on mobile */}
         <nav className="flex items-center gap-0.5 flex-1 justify-center">
           {menuItems.map((item) => {
             const Icon     = item.icon;
@@ -475,7 +469,7 @@ export default function Navbar({ onLogout, onLogin, localUser, isLogin, openStat
                 <div key={item.name} className="relative" ref={mobileInterviewRef}>
                   <button
                     onClick={() => setInterviewDropOpen((v) => !v)}
-                    className="relative flex items-center gap-1 px-2 py-1.5 rounded-xl text-[11px] font-medium transition-all duration-200"
+                    className="relative flex items-center gap-1 px-2 py-1.5 rounded-xl transition-all duration-200"
                     style={isActive ? {
                       background: "rgba(59,130,246,0.14)",
                       color: "#93C5FD",
@@ -486,8 +480,7 @@ export default function Navbar({ onLogout, onLogin, localUser, isLogin, openStat
                       background: "transparent",
                     }}
                   >
-                    <Icon size={13} strokeWidth={isActive ? 2.2 : 1.8} />
-                    <span className="hidden xs:inline">Interview</span>
+                    <Icon size={14} strokeWidth={isActive ? 2.2 : 1.8} />
                     <ChevronDown size={9} style={{
                       color: isActive ? "#93C5FD" : "#555565",
                       transform: interviewDropOpen ? "rotate(180deg)" : "rotate(0deg)",
@@ -507,7 +500,7 @@ export default function Navbar({ onLogout, onLogin, localUser, isLogin, openStat
               <button
                 key={item.name}
                 onClick={() => scrollTo(item.target)}
-                className="relative flex items-center gap-1 px-2 py-1.5 rounded-xl text-[11px] font-medium transition-all duration-200"
+                className="relative flex items-center justify-center w-8 h-8 rounded-xl transition-all duration-200"
                 style={isActive ? {
                   background: "rgba(59,130,246,0.14)",
                   color: "#93C5FD",
@@ -518,8 +511,7 @@ export default function Navbar({ onLogout, onLogin, localUser, isLogin, openStat
                   background: "transparent",
                 }}
               >
-                <Icon size={13} strokeWidth={isActive ? 2.2 : 1.8} />
-                <span className="hidden xs:inline">{item.name}</span>
+                <Icon size={14} strokeWidth={isActive ? 2.2 : 1.8} />
                 {isActive && (
                   <span className="absolute -bottom-[1px] left-1/2 -translate-x-1/2 w-4 h-px"
                     style={{ background: "linear-gradient(90deg, transparent, rgba(59,130,246,0.8), transparent)" }} />
@@ -531,28 +523,31 @@ export default function Navbar({ onLogout, onLogin, localUser, isLogin, openStat
 
         <div className="w-px h-4 flex-shrink-0" style={{ background: "rgba(255,255,255,0.09)" }} />
 
-        {/* Right — search + notif + avatar (mobile) */}
+        {/* Right — search + notif + avatar */}
         <div className="flex items-center gap-0.5 flex-shrink-0">
           {/* Search */}
           <div className="relative" ref={searchRef}>
             <button
               onClick={() => setSearchOpen((v) => !v)}
               className="w-7 h-7 rounded-xl flex items-center justify-center transition-all duration-200"
-              style={{ color: searchOpen ? "#93C5FD" : inactiveColor, background: searchOpen ? "rgba(59,130,246,0.12)" : "transparent", border: searchOpen ? "1px solid rgba(59,130,246,0.28)" : inactiveBorder }}
+              style={{
+                color: searchOpen ? "#93C5FD" : inactiveColor,
+                background: searchOpen ? "rgba(59,130,246,0.12)" : "transparent",
+                border: searchOpen ? "1px solid rgba(59,130,246,0.28)" : inactiveBorder,
+              }}
             >
               <Search size={13} />
             </button>
 
-            {/* Search dropdown — positioned below, full pill width on mobile */}
             {searchOpen && (
               <div style={{
                 position: "fixed",
-                top: "58px",
+                top: "52px",
                 left: "50%",
                 transform: "translateX(-50%)",
-                width: "calc(100vw - 2.5rem)",
-                maxWidth: "480px",
-                background: "rgba(10,10,10,0.92)",
+                width: "calc(100vw - 2rem)",
+                maxWidth: "440px",
+                background: "rgba(10,10,10,0.95)",
                 backdropFilter: "blur(28px)",
                 WebkitBackdropFilter: "blur(28px)",
                 border: "1px solid rgba(255,255,255,0.10)",
@@ -603,14 +598,15 @@ export default function Navbar({ onLogout, onLogin, localUser, isLogin, openStat
             style={{ color: inactiveColor, background: "transparent", border: inactiveBorder }}
           >
             <Bell size={13} />
-            <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-blue-500" style={{ boxShadow: "0 0 5px rgba(59,130,246,0.7)" }} />
+            <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-blue-500"
+              style={{ boxShadow: "0 0 5px rgba(59,130,246,0.7)" }} />
           </button>
 
-          {/* Avatar / akun */}
+          {/* Avatar */}
           <div className="relative" ref={mobileAvatarRef}>
             <button
               onClick={() => setMobileMenuOpen((v) => !v)}
-              className="flex items-center gap-1.5 pl-1 pr-1.5 py-0.5 rounded-xl transition-all duration-200"
+              className="flex items-center gap-1 pl-1 pr-1 py-0.5 rounded-xl transition-all duration-200"
               style={{
                 background: mobileMenuOpen ? "rgba(255,255,255,0.07)" : "transparent",
                 border: mobileMenuOpen ? "1px solid rgba(255,255,255,0.10)" : inactiveBorder,
@@ -618,8 +614,10 @@ export default function Navbar({ onLogout, onLogin, localUser, isLogin, openStat
             >
               {loggedIn ? (
                 <div className="relative w-6 h-6 flex-shrink-0">
-                  <img src={avatarSrc} alt="profile" className="w-6 h-6 rounded-full object-cover" style={{ outline: "1.5px solid rgba(255,255,255,0.16)" }} referrerPolicy="no-referrer" />
-                  <span className="absolute bottom-0 right-0 w-1.5 h-1.5 rounded-full bg-emerald-400" style={{ border: "1.5px solid #080810" }} />
+                  <img src={avatarSrc} alt="profile" className="w-6 h-6 rounded-full object-cover"
+                    style={{ outline: "1.5px solid rgba(255,255,255,0.16)" }} referrerPolicy="no-referrer" />
+                  <span className="absolute bottom-0 right-0 w-1.5 h-1.5 rounded-full bg-emerald-400"
+                    style={{ border: "1.5px solid #080810" }} />
                 </div>
               ) : (
                 <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0"
@@ -627,10 +625,13 @@ export default function Navbar({ onLogout, onLogin, localUser, isLogin, openStat
                   <UserRound size={12} style={{ color: "#666666" }} />
                 </div>
               )}
-              <ChevronDown size={10} style={{ color: "#666670", transform: mobileMenuOpen ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s ease" }} />
+              <ChevronDown size={9} style={{
+                color: "#666670",
+                transform: mobileMenuOpen ? "rotate(180deg)" : "rotate(0deg)",
+                transition: "transform 0.2s ease",
+              }} />
             </button>
 
-            {/* Mobile avatar dropdown */}
             {mobileMenuOpen && (
               <>
                 <div
@@ -640,10 +641,10 @@ export default function Navbar({ onLogout, onLogin, localUser, isLogin, openStat
                 />
                 <div style={{
                   position: "fixed",
-                  top: "58px",
-                  right: "1.25rem",
-                  width: "240px",
-                  background: "rgba(10,10,10,0.92)",
+                  top: "52px",
+                  right: "1rem",
+                  width: "220px",
+                  background: "rgba(10,10,10,0.95)",
                   backdropFilter: "blur(28px)",
                   WebkitBackdropFilter: "blur(28px)",
                   border: "1px solid rgba(255,255,255,0.10)",
@@ -656,20 +657,47 @@ export default function Navbar({ onLogout, onLogin, localUser, isLogin, openStat
                   {loggedIn ? (
                     <>
                       <div className="px-4 py-3 flex items-center gap-3" style={{ borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
-                        <img src={avatarSrc} alt="profile" className="w-9 h-9 rounded-full object-cover" style={{ outline: "1.5px solid rgba(255,255,255,0.12)" }} referrerPolicy="no-referrer" />
+                        <img src={avatarSrc} alt="profile" className="w-8 h-8 rounded-full object-cover"
+                          style={{ outline: "1.5px solid rgba(255,255,255,0.12)" }} referrerPolicy="no-referrer" />
                         <div className="min-w-0">
-                          <p className="text-sm font-medium truncate" style={{ color: "#E2E8F0" }}>{displayName || "User"}</p>
-                          <p className="text-xs truncate" style={{ color: "#555565" }}>{displayEmail}</p>
+                          <p className="text-xs font-medium truncate" style={{ color: "#E2E8F0" }}>{displayName || "User"}</p>
+                          <p className="text-[10px] truncate" style={{ color: "#555565" }}>{displayEmail}</p>
                         </div>
                       </div>
-                      <button onClick={() => { setMobileMenuOpen(false); if (onLogin) onLogin("login"); }} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-all" style={{ color: "#999999", borderBottom: "1px solid rgba(255,255,255,0.07)", background: "transparent" }} onMouseEnter={e => { e.currentTarget.style.color = "#EEEEEE"; e.currentTarget.style.background = "rgba(255,255,255,0.06)"; }} onMouseLeave={e => { e.currentTarget.style.color = "#999999"; e.currentTarget.style.background = "transparent"; }}><UserRound size={15} /> Ganti Akun</button>
-                      <button onClick={() => { setMobileMenuOpen(false); handleLogout(); }} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-all" style={{ color: "#F87171", background: "transparent" }} onMouseEnter={e => e.currentTarget.style.background = "rgba(239,68,68,0.08)"} onMouseLeave={e => e.currentTarget.style.background = "transparent"}><LogOut size={15} /> Keluar</button>
+                      <button onClick={() => { setMobileMenuOpen(false); if (onLogin) onLogin("login"); }}
+                        className="w-full flex items-center gap-2.5 px-4 py-2.5 text-xs transition-all"
+                        style={{ color: "#999999", borderBottom: "1px solid rgba(255,255,255,0.07)", background: "transparent" }}
+                        onMouseEnter={e => { e.currentTarget.style.color = "#EEEEEE"; e.currentTarget.style.background = "rgba(255,255,255,0.06)"; }}
+                        onMouseLeave={e => { e.currentTarget.style.color = "#999999"; e.currentTarget.style.background = "transparent"; }}>
+                        <UserRound size={13} /> Ganti Akun
+                      </button>
+                      <button onClick={() => { setMobileMenuOpen(false); handleLogout(); }}
+                        className="w-full flex items-center gap-2.5 px-4 py-2.5 text-xs transition-all"
+                        style={{ color: "#F87171", background: "transparent" }}
+                        onMouseEnter={e => e.currentTarget.style.background = "rgba(239,68,68,0.08)"}
+                        onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
+                        <LogOut size={13} /> Keluar
+                      </button>
                     </>
                   ) : (
                     <>
-                      <div className="px-4 py-3" style={{ borderBottom: "1px solid rgba(255,255,255,0.07)" }}><p className="text-xs" style={{ color: "#555565" }}>Kamu belum masuk</p></div>
-                      <button onClick={() => { setMobileMenuOpen(false); onLogin("login"); }} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-all" style={{ color: "#93C5FD", borderBottom: "1px solid rgba(255,255,255,0.07)", background: "transparent" }} onMouseEnter={e => e.currentTarget.style.background = "rgba(59,130,246,0.08)"} onMouseLeave={e => e.currentTarget.style.background = "transparent"}><LogOut size={15} className="rotate-180" /> Masuk</button>
-                      <button onClick={() => { setMobileMenuOpen(false); onLogin("register"); }} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-all" style={{ color: "#666666", background: "transparent" }} onMouseEnter={e => { e.currentTarget.style.color = "#EEEEEE"; e.currentTarget.style.background = "rgba(255,255,255,0.06)"; }} onMouseLeave={e => { e.currentTarget.style.color = "#666666"; e.currentTarget.style.background = "transparent"; }}><UserRound size={15} /> Daftar</button>
+                      <div className="px-4 py-3" style={{ borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
+                        <p className="text-xs" style={{ color: "#555565" }}>Kamu belum masuk</p>
+                      </div>
+                      <button onClick={() => { setMobileMenuOpen(false); onLogin("login"); }}
+                        className="w-full flex items-center gap-2.5 px-4 py-2.5 text-xs font-medium transition-all"
+                        style={{ color: "#93C5FD", borderBottom: "1px solid rgba(255,255,255,0.07)", background: "transparent" }}
+                        onMouseEnter={e => e.currentTarget.style.background = "rgba(59,130,246,0.08)"}
+                        onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
+                        <LogOut size={13} className="rotate-180" /> Masuk
+                      </button>
+                      <button onClick={() => { setMobileMenuOpen(false); onLogin("register"); }}
+                        className="w-full flex items-center gap-2.5 px-4 py-2.5 text-xs transition-all"
+                        style={{ color: "#666666", background: "transparent" }}
+                        onMouseEnter={e => { e.currentTarget.style.color = "#EEEEEE"; e.currentTarget.style.background = "rgba(255,255,255,0.06)"; }}
+                        onMouseLeave={e => { e.currentTarget.style.color = "#666666"; e.currentTarget.style.background = "transparent"; }}>
+                        <UserRound size={13} /> Daftar
+                      </button>
                     </>
                   )}
                 </div>
@@ -679,16 +707,13 @@ export default function Navbar({ onLogout, onLogin, localUser, isLogin, openStat
         </div>
       </header>
 
-      {/* Spacer untuk konten tidak tertutup navbar mobile */}
-      <div className="md:hidden" style={{ height: "58px" }} />
+      {/* Spacer mobile — lebih kecil supaya konten tidak terlalu jauh */}
+      <div className="md:hidden" style={{ height: "52px" }} />
 
       <style>{`
         @keyframes dropIn {
           from { opacity: 0; transform: translateY(-6px) scale(0.97); }
           to   { opacity: 1; transform: translateY(0)  scale(1); }
-        }
-        @media (min-width: 420px) {
-          .hidden.xs\\:inline { display: inline !important; }
         }
       `}</style>
     </>
