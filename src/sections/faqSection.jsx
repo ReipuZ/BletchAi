@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { ChevronDown } from "lucide-react";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 const faqs = [
   {
@@ -38,120 +37,265 @@ export default function FaqSection() {
   };
 
   return (
-    <section id="faq" className="bg-[#F7F3EE] px-4 sm:px-6 md:px-8 py-10 sm:py-16">
+    <section
+      id="faq"
+      className="relative overflow-hidden py-12 sm:py-20 px-4 sm:px-6 md:px-8"
+      style={{ background: "#000000" }}
+    >
+      <style>{`
+        @keyframes ambient-drift {
+          0%   { transform: translate(0%, 0%) scale(1); }
+          50%  { transform: translate(20%, -20%) scale(1.1); }
+          100% { transform: translate(0%, 0%) scale(1); }
+        }
+        @keyframes pulse-glow {
+          0%, 100% { opacity: 0.4; }
+          50%       { opacity: 0.9; }
+        }
+        .faq-pulse { animation: pulse-glow 3s ease-in-out infinite; }
+        .faq-drift { animation: ambient-drift 10s ease-in-out infinite; }
+        @media (prefers-reduced-motion: reduce) {
+          .faq-pulse, .faq-drift { animation: none; }
+        }
+      `}</style>
 
-      {/* Header */}
-      <div className="text-center mb-6 sm:mb-10">
-        <motion.h2
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="text-2xl sm:text-4xl font-black text-zinc-900"
-        >
-          FAQ
-        </motion.h2>
-        <motion.p
-          initial={{ opacity: 0, y: 10 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-          className="mt-1 sm:mt-1.5 text-zinc-500 italic text-xs sm:text-sm"
-        >
-          Pertanyaan umum
-        </motion.p>
-      </div>
+      {/* ── Background dekorasi ── */}
+      <div
+        className="faq-drift pointer-events-none absolute -top-20 -left-20 w-[420px] h-[420px] rounded-full opacity-[0.07]"
+        style={{
+          background: "radial-gradient(circle, #3B82F6, transparent 70%)",
+          filter: "blur(140px)",
+        }}
+      />
+      <div
+        className="pointer-events-none absolute -top-10 -right-16 w-[320px] h-[320px] rounded-full opacity-[0.05]"
+        style={{
+          background: "radial-gradient(circle, #8B5CF6, transparent 70%)",
+          filter: "blur(120px)",
+        }}
+      />
+      <div
+        className="pointer-events-none absolute bottom-0 left-1/2 -translate-x-1/2 w-[500px] h-[200px] rounded-full opacity-[0.04]"
+        style={{
+          background: "radial-gradient(circle, #06B6D4, transparent 70%)",
+          filter: "blur(100px)",
+        }}
+      />
 
-      {/* FAQ list */}
-      <div className="max-w-3xl mx-auto space-y-2 sm:space-y-3">
-        {faqs.map((faq, index) => {
-          const isOpen = activeIndex === index;
-          return (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 14 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.3 }}
-              transition={{ duration: 0.4, delay: index * 0.07 }}
-              className={`
-                relative rounded-xl sm:rounded-2xl border overflow-hidden transition-colors duration-300
-                ${isOpen
-                  ? "border-[#C49A5A] bg-white"
-                  : "border-[#E2D5C3] bg-white hover:border-[#C49A5A]"}
-              `}
-            >
-              <AnimatePresence>
-                {isOpen && (
-                  <motion.div
-                    key="wipe"
-                    className="absolute inset-0 z-0 pointer-events-none"
-                    style={{
-                      background: "linear-gradient(180deg, #FDF6EE 0%, #FDF6EE 100%)",
-                      clipPath: "polygon(0 0, 100% 0, 100% 0, 0 0)",
-                    }}
-                    initial={{ clipPath: "polygon(0 0, 100% 0, 100% 0, 0 0)" }}
-                    animate={{ clipPath: "polygon(0 0, 100% 0, 100% 100%, 0 100%)" }}
-                    exit={{ clipPath: "polygon(0 0, 100% 0, 100% 0, 0 0)" }}
-                    transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
-                  />
-                )}
-              </AnimatePresence>
+      {/* Grid lines */}
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.018]"
+        style={{
+          backgroundImage: `
+            linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)
+          `,
+          backgroundSize: "60px 60px",
+        }}
+      />
 
-              {/* Accent bar kiri */}
+      {/* ── Content ── */}
+      <div className="relative z-10 max-w-3xl mx-auto">
+
+        {/* Header */}
+        <div className="text-center mb-10 sm:mb-14">
+          <motion.span
+            initial={{ opacity: 0, y: -8 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+            className="inline-flex items-center gap-1.5 text-[#AAAAAA] text-[11px] font-medium px-3.5 py-1.5 rounded-full mb-4"
+            style={{
+              background: "rgba(255,255,255,0.07)",
+              backdropFilter: "blur(12px)",
+              WebkitBackdropFilter: "blur(12px)",
+              border: "1px solid rgba(255,255,255,0.13)",
+              boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10)",
+            }}
+          >
+            <span className="faq-pulse w-1.5 h-1.5 rounded-full bg-[#3B82F6]" />
+            Pusat Bantuan
+          </motion.span>
+
+          <motion.h2
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="text-[clamp(24px,5vw,38px)] font-bold tracking-tight bg-clip-text text-transparent"
+            style={{
+              backgroundImage:
+                "linear-gradient(135deg, #ffffff 0%, #E0E0E0 50%, #999 100%)",
+            }}
+          >
+            Pertanyaan Umum
+          </motion.h2>
+
+          <motion.p
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="mt-2 text-[#555555] italic text-xs sm:text-sm"
+          >
+            Semua yang perlu kamu ketahui tentang BletchAI
+          </motion.p>
+        </div>
+
+        {/* FAQ list */}
+        <div className="space-y-2.5">
+          {faqs.map((faq, index) => {
+            const isOpen = activeIndex === index;
+            return (
               <motion.div
-                className="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-2xl bg-[#A67C52]"
-                initial={{ scaleY: 0 }}
-                animate={{ scaleY: isOpen ? 1 : 0 }}
-                transition={{ duration: 0.3, ease: "easeOut" }}
-                style={{ transformOrigin: "top" }}
-              />
-
-              {/* Tombol */}
-              <button
-                onClick={() => handleToggle(index)}
-                className="relative z-10 w-full flex justify-between items-center px-3.5 sm:px-6 py-3 sm:py-4 text-left gap-2.5 sm:gap-4"
+                key={index}
+                initial={{ opacity: 0, y: 14 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{ duration: 0.4, delay: index * 0.07 }}
+                className="relative rounded-2xl overflow-hidden"
+                style={{
+                  background: isOpen
+                    ? "rgba(255,255,255,0.05)"
+                    : "rgba(255,255,255,0.03)",
+                  backdropFilter: "blur(20px)",
+                  WebkitBackdropFilter: "blur(20px)",
+                  border: isOpen
+                    ? "1px solid rgba(59,130,246,0.30)"
+                    : "1px solid rgba(255,255,255,0.08)",
+                  boxShadow: isOpen
+                    ? "0 8px 32px rgba(0,0,0,0.55), inset 0 1px 0 rgba(59,130,246,0.10)"
+                    : "0 4px 16px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06)",
+                  transition: "border-color 0.25s, background 0.25s, box-shadow 0.25s",
+                }}
               >
-                <span className={`text-xs sm:text-base font-semibold transition-colors duration-200 leading-snug ${isOpen ? "text-[#7A5230]" : "text-zinc-800"}`}>
-                  {faq.question}
-                </span>
-
+                {/* Accent bar kiri — gradasi biru ke ungu */}
                 <motion.div
-                  animate={{ rotate: isOpen ? 180 : 0 }}
-                  transition={{ duration: 0.3, ease: "easeInOut" }}
-                  className={`
-                    w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-colors duration-300
-                    ${isOpen ? "bg-[#A67C52] text-white" : "bg-[#EDE5D8] text-[#A67C52]"}
-                  `}
-                >
-                  <ChevronDown size={13} className="sm:hidden" />
-                  <ChevronDown size={16} className="hidden sm:block" />
-                </motion.div>
-              </button>
+                  className="absolute left-0 top-0 bottom-0 w-[3px]"
+                  style={{
+                    background: "linear-gradient(180deg, #3B82F6 0%, #8B5CF6 100%)",
+                    borderRadius: "3px 0 0 3px",
+                    transformOrigin: "top",
+                  }}
+                  animate={{ scaleY: isOpen ? 1 : 0 }}
+                  transition={{ duration: 0.3, ease: "easeOut" }}
+                />
 
-              {/* Jawaban */}
-              <AnimatePresence initial={false}>
-                {isOpen && (
-                  <motion.div
-                    key="answer"
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.32, ease: [0.4, 0, 0.2, 1] }}
-                    className="relative z-10 overflow-hidden"
+                {/* Top glow line */}
+                <AnimatePresence>
+                  {isOpen && (
+                    <motion.div
+                      key="topglow"
+                      className="absolute top-0 left-0 right-0 h-px"
+                      style={{
+                        background:
+                          "linear-gradient(90deg, transparent, rgba(59,130,246,0.5), rgba(139,92,246,0.3), transparent)",
+                      }}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.3 }}
+                    />
+                  )}
+                </AnimatePresence>
+
+                {/* Tombol */}
+                <button
+                  onClick={() => handleToggle(index)}
+                  className="relative z-10 w-full flex justify-between items-center px-4 sm:px-6 py-4 sm:py-5 text-left gap-3"
+                >
+                  <span
+                    className="text-sm sm:text-base font-semibold leading-snug transition-colors duration-200"
+                    style={{ color: isOpen ? "#93C5FD" : "#CCCCCC" }}
                   >
-                    <div className="px-3.5 sm:px-6 pb-3.5 sm:pb-5 pt-0">
-                      {/* divider tipis */}
-                      <div className="h-px bg-[#E8D8C4] mb-3 sm:mb-4" />
-                      <p className="text-[11px] sm:text-sm text-zinc-600 leading-relaxed">
+                    {faq.question}
+                  </span>
+
+                  {/* Icon + / × */}
+                  <motion.div
+                    animate={{ rotate: isOpen ? 45 : 0 }}
+                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                    className="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center flex-shrink-0 text-base font-light transition-all duration-300"
+                    style={
+                      isOpen
+                        ? {
+                            background: "rgba(59,130,246,0.20)",
+                            border: "1px solid rgba(59,130,246,0.35)",
+                            color: "#93C5FD",
+                            boxShadow: "0 0 12px rgba(59,130,246,0.15)",
+                          }
+                        : {
+                            background: "rgba(59,130,246,0.08)",
+                            border: "1px solid rgba(59,130,246,0.20)",
+                            color: "#3B82F6",
+                          }
+                    }
+                  >
+                    +
+                  </motion.div>
+                </button>
+
+                {/* Jawaban */}
+                <AnimatePresence initial={false}>
+                  {isOpen && (
+                    <motion.div
+                      key="answer"
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.32, ease: [0.4, 0, 0.2, 1] }}
+                      className="overflow-hidden relative z-10"
+                    >
+                      {/* Divider gradasi */}
+                      <div
+                        className="h-px mx-4 sm:mx-6"
+                        style={{
+                          background:
+                            "linear-gradient(90deg, rgba(59,130,246,0.25), rgba(139,92,246,0.15), rgba(255,255,255,0.04))",
+                        }}
+                      />
+                      <p className="px-4 sm:px-6 pt-3.5 pb-5 text-xs sm:text-sm text-[#888888] leading-relaxed">
                         {faq.answer}
                       </p>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </motion.div>
-          );
-        })}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            );
+          })}
+        </div>
+
+        {/* Footer */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+          className="flex items-center justify-center gap-3 mt-10 pt-8"
+          style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
+        >
+          <span className="text-xs text-[#444444]">Masih ada pertanyaan?</span>
+          <button
+            className="text-xs font-medium px-4 py-1.5 rounded-full transition-all duration-200"
+            style={{
+              color: "#3B82F6",
+              background: "rgba(59,130,246,0.10)",
+              border: "1px solid rgba(59,130,246,0.22)",
+              backdropFilter: "blur(8px)",
+              WebkitBackdropFilter: "blur(8px)",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = "rgba(59,130,246,0.18)";
+              e.currentTarget.style.borderColor = "rgba(59,130,246,0.35)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "rgba(59,130,246,0.10)";
+              e.currentTarget.style.borderColor = "rgba(59,130,246,0.22)";
+            }}
+          >
+            Hubungi kami →
+          </button>
+        </motion.div>
       </div>
     </section>
   );

@@ -1,408 +1,1024 @@
+import { useState, useCallback, useEffect, useRef } from "react";
+import Reveal, { RevealGroup, revealItem } from "../components/Reveal.jsx";
 import { motion } from "framer-motion";
-import { ArrowUpRight, Mic, Sparkles, Clock, Star } from "lucide-react";
-import Reveal from "../components/Reveal.jsx";
 
+import rpl from "./interview/rpl";
+import desainGrafis from "./interview/desainGrafis";
+import akuntansi from "./interview/akuntansi";
+import multimedia from "./interview/multimedia";
+import tataBoga from "./interview/tataBoga";
+import teknikOtomotif from "./interview/teknikOtomotif";
+
+const TIMER_SECONDS = 60;
+const QUESTIONS_PER_SESSION = 15;
+const STORAGE_KEY = "bletchai_stats";
+
+const BIDANG_CONFIG = [
+  {
+    name: "Rekayasa Perangkat Lunak", data: rpl, color: "#3B82F6",
+    icon: <svg viewBox="0 0 20 20" fill="none" className="w-4 h-4"><path d="M5 7l-3 3 3 3M15 7l3 3-3 3M11 4l-2 12" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>,
+  },
+  {
+    name: "Desain Grafis", data: desainGrafis, color: "#8B5CF6",
+    icon: <svg viewBox="0 0 20 20" fill="none" className="w-4 h-4"><circle cx="10" cy="10" r="3" stroke="currentColor" strokeWidth="1.6"/><path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.22 4.22l1.42 1.42M14.36 14.36l1.42 1.42M4.22 15.78l1.42-1.42M14.36 5.64l1.42-1.42" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/></svg>,
+  },
+  {
+    name: "Akuntansi", data: akuntansi, color: "#06B6D4",
+    icon: <svg viewBox="0 0 20 20" fill="none" className="w-4 h-4"><rect x="3" y="3" width="14" height="14" rx="2" stroke="currentColor" strokeWidth="1.6"/><path d="M7 10h6M7 13h4M7 7h6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/></svg>,
+  },
+  {
+    name: "Teknik Otomotif", data: teknikOtomotif, color: "#F59E0B",
+    icon: <svg viewBox="0 0 20 20" fill="none" className="w-4 h-4"><circle cx="10" cy="10" r="3" stroke="currentColor" strokeWidth="1.6"/><path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.93 4.93l1.41 1.41M13.66 13.66l1.41 1.41M4.93 15.07l1.41-1.41M13.66 6.34l1.41-1.41" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/></svg>,
+  },
+  {
+    name: "Multimedia", data: multimedia, color: "#EC4899",
+    icon: <svg viewBox="0 0 20 20" fill="none" className="w-4 h-4"><path d="M3 5a2 2 0 012-2h10a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V5z" stroke="currentColor" strokeWidth="1.6"/><path d="M8 7.5l5 2.5-5 2.5V7.5z" fill="currentColor"/></svg>,
+  },
+  {
+    name: "Tata Boga", data: tataBoga, color: "#10B981",
+    icon: <svg viewBox="0 0 20 20" fill="none" className="w-4 h-4"><path d="M10 2c0 0-5 3-5 7h10c0-4-5-7-5-7z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round"/><path d="M5 9v7a2 2 0 002 2h6a2 2 0 002-2V9" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/></svg>,
+  },
+];
+
+/* ─── Pure logic helpers ─────────────────────────────────────── */
+function pickRandom(arr, n) { return [...arr].sort(() => Math.random() - 0.5).slice(0, Math.min(n, arr.length)); }
+function loadStats() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || null; } catch { return null; } }
+function saveStats(s) { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(s)); } catch {} }
+function getInitialStats() { return { totalSessions: 0, totalScore: 0, totalPossible: 0, topicCounts: {}, lastSession: null }; }
+function calcAvgPct(s) { if (!s || s.totalPossible === 0) return 0; return Math.round((s.totalScore / s.totalPossible) * 100); }
+function topTopic(s) {
+  if (!s?.topicCounts) return "–";
+  const e = Object.entries(s.topicCounts).sort((a, b) => b[1] - a[1]);
+  if (!e.length) return "–";
+  const name = e[0][0];
+  if (name.length <= 10) return name;
+  return name.split(" ").map(w => w[0]).join("").toUpperCase();
+}
+function getHRDFeedback(point, isTimeout) {
+  const pool = {
+    timeout: ["Waktu habis. Dalam wawancara nyata, kecepatan berpikir sangat dinilai. Pastikan Anda berlatih menjawab lebih spontan ya.", "Waktu Anda habis sebelum menjawab. Tidak apa-apa, ini adalah bagian dari proses belajar. Mari lanjutkan.", "Waktu habis. Latihan rutin akan membantu Anda menjawab lebih cepat dan percaya diri."],
+    5: ["Jawaban yang luar biasa. Komprehensif, terstruktur, dan menunjukkan pemahaman mendalam. Ini persis yang kami cari.", "Sempurna. Anda menjawab dengan sangat baik — menghubungkan teori dengan konteks praktis. Sangat mengesankan.", "Excellent. Jawaban Anda mencerminkan kompetensi profesional yang tinggi. Saya terkesan."],
+    4: ["Jawaban yang baik. Sudah mencakup poin utama dengan tepat. Sedikit elaborasi dengan contoh konkret akan membuatnya sempurna.", "Bagus. Pemahaman Anda sudah solid. Coba tambahkan konteks pengalaman pribadi untuk memperkuat jawaban.", "Baik sekali. Anda sudah di jalur yang benar. Perdalam sedikit lagi untuk jawaban yang lebih meyakinkan."],
+    3: ["Cukup baik, namun masih ada ruang untuk berkembang. Coba pelajari topik ini lebih dalam untuk jawaban yang lebih meyakinkan.", "Dasar pemahaman Anda sudah ada. Tambahkan lebih banyak detail spesifik untuk meninggalkan kesan lebih kuat pada interviewer.", "Anda memahami konsep umumnya. Namun depth jawaban perlu ditingkatkan — berlatihlah menyampaikan dengan lebih terstruktur."],
+    2: ["Jawaban Anda masih kurang lengkap. Di wawancara sesungguhnya, ini bisa menjadi kelemahan. Persiapkan topik ini lebih matang.", "Masih perlu banyak perbaikan. Pelajari topik ini lebih mendalam dan latih cara menyampaikannya dengan jelas.", "Belum cukup kuat untuk meyakinkan interviewer. Jadikan ini sebagai catatan untuk dipersiapkan lebih baik."],
+    1: ["Jawaban ini perlu banyak perbaikan. Jangan khawatir — dari sini kita tahu area mana yang harus diprioritaskan untuk dipelajari.", "Ini belum menjawab pertanyaan dengan baik. Pelajari topik ini sebelum interview sesungguhnya.", "Perlu peningkatan signifikan. Jadikan ini motivasi untuk belajar lebih dalam sebelum wawancara nyata."],
+  };
+  const key = isTimeout ? "timeout" : Math.min(point, 5);
+  const arr = pool[key] || pool[1];
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function hexToRgb(hex) {
+  return `${parseInt(hex.slice(1,3),16)},${parseInt(hex.slice(3,5),16)},${parseInt(hex.slice(5,7),16)}`;
+}
+
+/* ─── Design tokens ──────────────────────────────────────────── */
+const glass = {
+  card: {
+    background: "rgba(255,255,255,0.05)",
+    backdropFilter: "blur(20px)",
+    WebkitBackdropFilter: "blur(20px)",
+    border: "1px solid rgba(255,255,255,0.10)",
+    boxShadow: "0 4px 24px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08)",
+  },
+  panel: {
+    background: "rgba(10,10,10,0.88)",
+    backdropFilter: "blur(28px)",
+    WebkitBackdropFilter: "blur(28px)",
+    border: "1px solid rgba(255,255,255,0.09)",
+    boxShadow: "0 20px 60px rgba(0,0,0,0.70), inset 0 1px 0 rgba(255,255,255,0.07)",
+  },
+};
+
+/* ─── Icon set ───────────────────────────────────────────────── */
+const IconBot    = () => <svg viewBox="0 0 20 20" fill="none" className="w-4 h-4"><rect x="3" y="7" width="14" height="10" rx="2" stroke="currentColor" strokeWidth="1.5"/><path d="M7 7V5a3 3 0 016 0v2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/><circle cx="7.5" cy="12" r="1" fill="currentColor"/><circle cx="12.5" cy="12" r="1" fill="currentColor"/></svg>;
+const IconUser   = () => <svg viewBox="0 0 20 20" fill="none" className="w-4 h-4"><circle cx="10" cy="7" r="3" stroke="currentColor" strokeWidth="1.5"/><path d="M4 17c0-3.314 2.686-6 6-6s6 2.686 6 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>;
+const IconArrow  = () => <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>;
+const IconBack   = () => <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5"><path d="M10 4L6 8l4 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>;
+const IconCheck  = () => <svg viewBox="0 0 16 16" fill="none" className="w-3 h-3"><path d="M3 8l4 4 6-7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>;
+const IconClock  = () => <svg viewBox="0 0 16 16" fill="none" className="w-3 h-3"><circle cx="8" cy="8" r="6" stroke="currentColor" strokeWidth="1.4"/><path d="M8 5v3l2 2" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/></svg>;
+const IconChart  = () => <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5"><rect x="2" y="10" width="3" height="4" rx="0.5" fill="currentColor"/><rect x="6.5" y="6" width="3" height="8" rx="0.5" fill="currentColor"/><rect x="11" y="2" width="3" height="12" rx="0.5" fill="currentColor"/></svg>;
+const IconTrophy = () => <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5"><path d="M4 2h8v6a4 4 0 01-8 0V2z" stroke="currentColor" strokeWidth="1.4"/><path d="M2 3h2M12 3h2M8 12v2M6 14h4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/></svg>;
+
+/* ─── TimerBar ───────────────────────────────────────────────── */
+function TimerBar({ seconds, total }) {
+  const pct   = (seconds / total) * 100;
+  const isCrit = seconds <= 5;
+  const isUrg  = seconds <= 15;
+  const color  = isCrit ? "#EF4444" : isUrg ? "#F59E0B" : "#3B82F6";
+  return (
+    <div className="flex items-center gap-2">
+      <span style={{ color: isCrit ? "#EF4444" : isUrg ? "#F59E0B" : "#555" }}><IconClock /></span>
+      <div className="flex-1 h-[3px] rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
+        <div
+          className="h-full rounded-full transition-all duration-1000 ease-linear"
+          style={{ width: `${pct}%`, background: color, boxShadow: isCrit ? `0 0 6px ${color}` : "none" }}
+        />
+      </div>
+      <span className={`text-[11px] font-mono font-semibold w-7 text-right tabular-nums ${isCrit ? "text-red-400" : isUrg ? "text-amber-400" : "text-[#444]"}`}>
+        {seconds}s
+      </span>
+    </div>
+  );
+}
+
+/* ─── AIChatBubble ───────────────────────────────────────────── */
+function AIChatBubble({ children, typing = false }) {
+  return (
+    <div className="flex items-start gap-2.5">
+      <div className="relative shrink-0">
+        <div
+          className="w-7 h-7 rounded-full flex items-center justify-center text-[#3B82F6]"
+          style={{
+            background: "rgba(59,130,246,0.12)",
+            border: "1px solid rgba(59,130,246,0.22)",
+            boxShadow: "0 0 0 3px rgba(59,130,246,0.05)",
+          }}
+        >
+          <IconBot />
+        </div>
+        <span
+          className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full border border-black"
+          style={{ background: "#22D47A" }}
+        />
+      </div>
+      <div
+        className="rounded-2xl rounded-tl-sm px-3.5 py-2.5 max-w-[85%]"
+        style={{
+          background: "rgba(255,255,255,0.06)",
+          border: "1px solid rgba(255,255,255,0.09)",
+          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.06)",
+        }}
+      >
+        {typing ? (
+          <div className="flex gap-1 items-center py-0.5">
+            {[0, 0.2, 0.4].map((d, i) => (
+              <span
+                key={i}
+                className="w-1.5 h-1.5 rounded-full bg-[#444] animate-bounce"
+                style={{ animationDelay: `${d}s`, animationDuration: "1s" }}
+              />
+            ))}
+          </div>
+        ) : (
+          <p className="text-xs text-[#C0C0D0] leading-[1.75]">{children}</p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ─── UserChatBubble ─────────────────────────────────────────── */
+function UserChatBubble({ text, point, label }) {
+  const pointColor =
+    point >= 5 ? "#3B82F6"
+    : point >= 4 ? "#06B6D4"
+    : point >= 3 ? "#F59E0B"
+    : point >= 2 ? "#F97316"
+    : "#EF4444";
+  return (
+    <div className="flex items-start gap-2.5 justify-end">
+      <div className="flex flex-col items-end gap-1 max-w-[85%]">
+        <div
+          className="rounded-2xl rounded-tr-sm px-3.5 py-2.5"
+          style={{
+            background: "rgba(59,130,246,0.14)",
+            border: "1px solid rgba(59,130,246,0.22)",
+            boxShadow: "inset 0 1px 0 rgba(59,130,246,0.15)",
+          }}
+        >
+          <span className="text-[11px] font-semibold text-[#93C5FD] block mb-0.5">{label}</span>
+          <p className="text-xs text-[#DBEAFE] leading-[1.6]">{text}</p>
+        </div>
+        <div className="flex items-center gap-1.5 pr-1">
+          <span className="text-[10px] font-semibold" style={{ color: pointColor }}>+{point} poin</span>
+          <span style={{ color: pointColor }}><IconCheck /></span>
+        </div>
+      </div>
+      <div
+        className="w-7 h-7 rounded-full shrink-0 flex items-center justify-center text-[#666]"
+        style={{
+          background: "rgba(255,255,255,0.05)",
+          border: "1px solid rgba(255,255,255,0.09)",
+        }}
+      >
+        <IconUser />
+      </div>
+    </div>
+  );
+}
+
+/* ─── AnswerOverlay ──────────────────────────────────────────── */
+function AnswerOverlay({ answers, timer, onAnswer, onHeightChange }) {
+  const overlayRef = useRef(null);
+  const labels = ["A", "B", "C", "D", "E"];
+
+  useEffect(() => {
+    if (!overlayRef.current) return;
+    const el = overlayRef.current;
+    const measure = () => { if (onHeightChange) onHeightChange(el.offsetHeight); };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [onHeightChange]);
+
+  return (
+    <div
+      ref={overlayRef}
+      className="absolute inset-x-0 bottom-0 flex flex-col justify-end rounded-b-2xl overflow-hidden"
+      style={{ zIndex: 20 }}
+    >
+      <div
+        className="absolute inset-0"
+        style={{ background: "linear-gradient(to top, rgba(0,0,0,0.97) 60%, rgba(0,0,0,0.0) 100%)" }}
+      />
+      <div className="relative z-10 px-3 pb-3 pt-8 flex flex-col gap-1.5">
+        <div className="px-1 pb-2">
+          <TimerBar seconds={timer} total={TIMER_SECONDS} />
+        </div>
+        {answers.map((ans, i) => (
+          <button
+            key={i}
+            onClick={() => onAnswer(i)}
+            className="w-full text-left flex items-start gap-2.5 rounded-xl px-3 py-2 transition-all duration-150 group"
+            style={{
+              background: "rgba(12,12,20,0.85)",
+              border: "1px solid rgba(255,255,255,0.08)",
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.background = "rgba(59,130,246,0.12)";
+              e.currentTarget.style.borderColor = "rgba(59,130,246,0.28)";
+              e.currentTarget.style.boxShadow = "inset 0 1px 0 rgba(59,130,246,0.15)";
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.background = "rgba(12,12,20,0.85)";
+              e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)";
+              e.currentTarget.style.boxShadow = "none";
+            }}
+          >
+            <span
+              className="text-[10px] font-bold rounded-md w-5 h-5 flex items-center justify-center shrink-0 mt-px"
+              style={{ background: "rgba(255,255,255,0.06)", color: "#555", border: "1px solid rgba(255,255,255,0.08)" }}
+            >
+              {labels[i]}
+            </span>
+            <span className="text-xs leading-[1.55] text-[#888]">{ans.text}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ─── IdlePanel ──────────────────────────────────────────────── */
+function IdlePanel({ bidangList, activeBidang, onSelectBidang, onStart }) {
+  return (
+    <div
+      className="flex flex-col rounded-2xl overflow-hidden relative"
+      style={{ ...glass.panel, height: "520px" }}
+    >
+      <div
+        className="pointer-events-none absolute -top-20 -right-20 w-48 h-48 rounded-full opacity-[0.07] blur-[80px]"
+        style={{ background: "radial-gradient(circle, #3B82F6, transparent 70%)" }}
+      />
+
+      <div
+        className="flex items-center gap-3 px-4 py-3 shrink-0"
+        style={{ borderBottom: "1px solid rgba(255,255,255,0.07)" }}
+      >
+        <div
+          className="relative w-8 h-8 rounded-full flex items-center justify-center text-[#3B82F6] shrink-0"
+          style={{ background: "rgba(59,130,246,0.12)", border: "1px solid rgba(59,130,246,0.22)" }}
+        >
+          <IconBot />
+          <span
+            className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full border border-black"
+            style={{ background: "#22D47A" }}
+          />
+        </div>
+        <div>
+          <p className="text-xs font-semibold text-[#E0E0E0]">Anty AI</p>
+          <div className="flex items-center gap-1.5 mt-px">
+            <span className="w-[5px] h-[5px] rounded-full bg-[#22D47A]" />
+            <span className="text-[10px] text-[#444]">Online · HRD Evaluator</span>
+          </div>
+        </div>
+        <div className="ml-auto">
+          <span
+            className="text-[10px] font-medium px-2.5 py-1 rounded-full"
+            style={{
+              background: "rgba(59,130,246,0.10)",
+              color: "#3B82F6",
+              border: "1px solid rgba(59,130,246,0.18)",
+            }}
+          >
+            Simulasi
+          </span>
+        </div>
+      </div>
+
+      <div className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-3 min-h-0">
+        <AIChatBubble>Halo! Saya Anty, asisten virtual BletchAI. Saya akan memandu sesi simulasi wawancara HRD kamu.</AIChatBubble>
+        <AIChatBubble>
+          Pilih bidang keahlian kamu di bawah ini, lalu kita mulai{" "}
+          <strong className="text-[#93C5FD]">15 pertanyaan acak</strong> dengan timer 60 detik per soal.
+        </AIChatBubble>
+
+        <div className="grid grid-cols-2 gap-2 mt-1">
+          {bidangList.map((b) => {
+            const isActive = activeBidang === b.name;
+            const rgb = hexToRgb(b.color);
+            return (
+              <button
+                key={b.name}
+                onClick={() => onSelectBidang(b.name)}
+                className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-left transition-all duration-150 relative overflow-hidden"
+                style={
+                  isActive
+                    ? {
+                        background: `rgba(${rgb},0.10)`,
+                        border: `1px solid rgba(${rgb},0.28)`,
+                        boxShadow: `inset 0 1px 0 rgba(${rgb},0.15)`,
+                      }
+                    : {
+                        background: "rgba(255,255,255,0.03)",
+                        border: "1px solid rgba(255,255,255,0.07)",
+                      }
+                }
+                onMouseEnter={e => {
+                  if (!isActive) {
+                    e.currentTarget.style.background = "rgba(255,255,255,0.06)";
+                    e.currentTarget.style.borderColor = "rgba(255,255,255,0.12)";
+                  }
+                }}
+                onMouseLeave={e => {
+                  if (!isActive) {
+                    e.currentTarget.style.background = "rgba(255,255,255,0.03)";
+                    e.currentTarget.style.borderColor = "rgba(255,255,255,0.07)";
+                  }
+                }}
+              >
+                {isActive && (
+                  <div
+                    className="absolute left-0 top-0 bottom-0 w-[2px] rounded-l-xl"
+                    style={{ background: b.color }}
+                  />
+                )}
+                <span style={{ color: isActive ? b.color : "#555" }}>{b.icon}</span>
+                <span
+                  className={`text-[11px] font-medium leading-[1.3] ${isActive ? "text-[#E0E0E0]" : "text-[#555]"}`}
+                >
+                  {b.name}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div
+        className="shrink-0 px-4 pb-4 pt-3"
+        style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
+      >
+        <button
+          onClick={onStart}
+          disabled={!activeBidang}
+          className="w-full flex items-center justify-center gap-2 rounded-xl py-2.5 text-xs font-semibold transition-all duration-200"
+          style={
+            activeBidang
+              ? {
+                  background: "rgba(59,130,246,0.16)",
+                  border: "1px solid rgba(59,130,246,0.30)",
+                  color: "#93C5FD",
+                  boxShadow: "inset 0 1px 0 rgba(59,130,246,0.20), 0 0 16px rgba(59,130,246,0.06)",
+                }
+              : {
+                  background: "rgba(255,255,255,0.03)",
+                  border: "1px solid rgba(255,255,255,0.06)",
+                  color: "#2E2E2E",
+                  cursor: "not-allowed",
+                }
+          }
+          onMouseEnter={e => {
+            if (activeBidang) {
+              e.currentTarget.style.background = "rgba(59,130,246,0.24)";
+              e.currentTarget.style.boxShadow = "inset 0 1px 0 rgba(59,130,246,0.25), 0 0 20px rgba(59,130,246,0.12)";
+            }
+          }}
+          onMouseLeave={e => {
+            if (activeBidang) {
+              e.currentTarget.style.background = "rgba(59,130,246,0.16)";
+              e.currentTarget.style.boxShadow = "inset 0 1px 0 rgba(59,130,246,0.20), 0 0 16px rgba(59,130,246,0.06)";
+            }
+          }}
+        >
+          {activeBidang ? `Mulai Interview · ${activeBidang.split(" ")[0]}` : "Pilih bidang dulu"}
+          {activeBidang && <IconArrow />}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ─── ActivePanel ────────────────────────────────────────────── */
+function ActivePanel({ question, answers, currentIdx, totalQ, timer, chatHistory, isAnswered, isTyping, score, onAnswer, onNext, onBack }) {
+  const chatFeedRef   = useRef(null);
+  const [overlayHeight, setOverlayHeight] = useState(0);
+  const isLast = currentIdx === totalQ - 1;
+
+  useEffect(() => { setOverlayHeight(0); }, [currentIdx]);
+  useEffect(() => {
+    if (chatFeedRef.current) chatFeedRef.current.scrollTop = chatFeedRef.current.scrollHeight;
+  }, [chatHistory, isTyping, overlayHeight]);
+
+  const progressPct = ((currentIdx + (isAnswered ? 1 : 0)) / totalQ) * 100;
+
+  return (
+    <div
+      className="flex flex-col rounded-2xl overflow-hidden relative"
+      style={{ ...glass.panel, height: "520px" }}
+    >
+      <div className="absolute inset-x-0 top-0 h-[2px] z-30">
+        <div
+          className="h-full transition-all duration-500 ease-out"
+          style={{
+            width: `${progressPct}%`,
+            background: "linear-gradient(to right, #3B82F6, #8B5CF6)",
+          }}
+        />
+      </div>
+
+      <div
+        className="flex items-center justify-between px-4 py-3 shrink-0 mt-[2px]"
+        style={{ borderBottom: "1px solid rgba(255,255,255,0.07)" }}
+      >
+        <div className="flex items-center gap-2.5">
+          <div
+            className="relative w-7 h-7 rounded-full flex items-center justify-center text-[#3B82F6] shrink-0"
+            style={{ background: "rgba(59,130,246,0.12)", border: "1px solid rgba(59,130,246,0.22)" }}
+          >
+            <IconBot />
+            <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full border border-black" style={{ background: "#22D47A" }} />
+          </div>
+          <div>
+            <p className="text-[11px] font-semibold text-[#C8C8D8]">Anty AI — Pewawancara</p>
+            <p className="text-[10px] text-[#3E3E4A]">Sesi aktif</p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <div className="text-right">
+            <p className="text-xs font-bold text-[#3B82F6]">{score} poin</p>
+            <p className="text-[10px] text-[#3E3E4A]">{currentIdx + 1}/{totalQ}</p>
+          </div>
+          <svg viewBox="0 0 32 32" className="w-7 h-7 -rotate-90">
+            <circle cx="16" cy="16" r="13" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="3"/>
+            <circle
+              cx="16" cy="16" r="13" fill="none"
+              stroke="#3B82F6" strokeWidth="3" strokeLinecap="round"
+              strokeDasharray={`${2 * Math.PI * 13}`}
+              strokeDashoffset={`${2 * Math.PI * 13 * (1 - progressPct / 100)}`}
+              style={{ transition: "stroke-dashoffset 0.5s ease" }}
+            />
+          </svg>
+        </div>
+      </div>
+
+      <div
+        ref={chatFeedRef}
+        className="flex-1 overflow-y-auto px-4 py-3 flex flex-col gap-3 min-h-0"
+        style={{ paddingBottom: !isAnswered && overlayHeight > 0 ? `${overlayHeight + 8}px` : "12px" }}
+      >
+        {chatHistory.map((msg, i) =>
+          msg.role === "ai"
+            ? <AIChatBubble key={i}>{msg.text}</AIChatBubble>
+            : <UserChatBubble key={i} text={msg.text} point={msg.point} label={msg.label} />
+        )}
+        {isTyping && <AIChatBubble typing />}
+      </div>
+
+      {!isAnswered && (
+        <AnswerOverlay
+          answers={answers}
+          timer={timer}
+          onAnswer={onAnswer}
+          onHeightChange={setOverlayHeight}
+        />
+      )}
+
+      {isAnswered && (
+        <div
+          className="shrink-0 flex items-center justify-between px-4 py-3"
+          style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
+        >
+          <button
+            onClick={onBack}
+            className="flex items-center gap-1.5 text-[11px] text-[#3A3A4A] hover:text-[#666] transition-colors"
+          >
+            <IconBack /> Keluar sesi
+          </button>
+          <button
+            onClick={onNext}
+            className="flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-semibold transition-all duration-200"
+            style={{
+              background: "rgba(59,130,246,0.16)",
+              border: "1px solid rgba(59,130,246,0.28)",
+              color: "#93C5FD",
+              boxShadow: "inset 0 1px 0 rgba(59,130,246,0.18)",
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.background = "rgba(59,130,246,0.24)";
+              e.currentTarget.style.boxShadow = "inset 0 1px 0 rgba(59,130,246,0.25), 0 0 14px rgba(59,130,246,0.10)";
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.background = "rgba(59,130,246,0.16)";
+              e.currentTarget.style.boxShadow = "inset 0 1px 0 rgba(59,130,246,0.18)";
+            }}
+          >
+            {isLast ? "Lihat Hasil" : "Lanjut"} <IconArrow />
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ─── ResultPanel ────────────────────────────────────────────── */
+function ResultPanel({ score, maxScore, bidang, totalQ, onRetry, onHome }) {
+  const pct   = Math.round((score / maxScore) * 100);
+  const grade =
+    pct >= 85 ? { label: "Excellent",      color: "#3B82F6"  } :
+    pct >= 70 ? { label: "Bagus",          color: "#06B6D4"  } :
+    pct >= 55 ? { label: "Cukup",          color: "#F59E0B"  } :
+                { label: "Perlu Latihan",  color: "#F97316"  };
+
+  return (
+    <div
+      className="flex flex-col rounded-2xl overflow-y-auto p-5 gap-5 relative"
+      style={{ ...glass.panel, height: "520px" }}
+    >
+      <div
+        className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 w-64 h-32 rounded-full opacity-[0.10] blur-[80px]"
+        style={{ background: `radial-gradient(circle, ${grade.color}, transparent 70%)` }}
+      />
+
+      <div className="flex flex-col items-center gap-2 pt-2">
+        <div className="relative w-24 h-24">
+          <svg viewBox="0 0 96 96" className="w-full h-full -rotate-90">
+            <circle cx="48" cy="48" r="38" fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth="7"/>
+            <circle
+              cx="48" cy="48" r="38" fill="none"
+              stroke={grade.color} strokeWidth="7" strokeLinecap="round"
+              strokeDasharray={`${2 * Math.PI * 38}`}
+              strokeDashoffset={`${2 * Math.PI * 38 * (1 - pct / 100)}`}
+              style={{ transition: "stroke-dashoffset 1s ease", filter: `drop-shadow(0 0 6px ${grade.color}55)` }}
+            />
+          </svg>
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            <span className="text-2xl font-black text-[#E8E8F0]">{pct}%</span>
+            <span className="text-[9px] text-[#333]">skor</span>
+          </div>
+        </div>
+
+        <span
+          className="text-sm font-bold px-3 py-1 rounded-full"
+          style={{
+            background: `rgba(${hexToRgb(grade.color)},0.12)`,
+            color: grade.color,
+            border: `1px solid rgba(${hexToRgb(grade.color)},0.25)`,
+          }}
+        >
+          {grade.label}
+        </span>
+        <p className="text-[11px] text-[#3A3A4A]">Sesi {bidang} selesai</p>
+      </div>
+
+      <div className="grid grid-cols-3 gap-2">
+        {[
+          { val: score,   label: "Poin",  color: "#3B82F6" },
+          { val: maxScore, label: "Maks", color: "#444"    },
+          { val: totalQ,  label: "Soal",  color: "#06B6D4" },
+        ].map(({ val, label, color }) => (
+          <div
+            key={label}
+            className="rounded-xl p-3 text-center"
+            style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}
+          >
+            <p className="text-lg font-black" style={{ color }}>{val}</p>
+            <p className="text-[10px] text-[#3A3A4A] mt-0.5">{label}</p>
+          </div>
+        ))}
+      </div>
+
+      <AIChatBubble>
+        {pct >= 85
+          ? "Performa luar biasa! Anda sangat siap untuk wawancara nyata. Pertahankan kualitas jawaban ini."
+          : pct >= 70
+          ? "Hasil yang baik. Ada beberapa area yang bisa diperdalam lagi. Terus berlatih dan Anda pasti akan semakin siap."
+          : pct >= 55
+          ? "Hasil cukup. Pelajari kembali topik yang terasa sulit dan lakukan sesi latihan lebih rutin."
+          : "Masih banyak ruang untuk berkembang. Jangan menyerah — setiap latihan membuat Anda semakin siap."}
+      </AIChatBubble>
+
+      <div className="flex gap-2 mt-auto">
+        <button
+          onClick={onRetry}
+          className="flex-1 rounded-xl py-2.5 text-xs font-semibold transition-all duration-200"
+          style={{
+            background: "rgba(59,130,246,0.15)",
+            border: "1px solid rgba(59,130,246,0.28)",
+            color: "#93C5FD",
+            boxShadow: "inset 0 1px 0 rgba(59,130,246,0.18)",
+          }}
+          onMouseEnter={e => { e.currentTarget.style.background = "rgba(59,130,246,0.24)"; }}
+          onMouseLeave={e => { e.currentTarget.style.background = "rgba(59,130,246,0.15)"; }}
+        >
+          Coba Lagi
+        </button>
+        <button
+          onClick={onHome}
+          className="flex-1 rounded-xl py-2.5 text-xs font-semibold transition-all duration-200"
+          style={{
+            background: "rgba(255,255,255,0.04)",
+            border: "1px solid rgba(255,255,255,0.08)",
+            color: "#666",
+          }}
+          onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,255,255,0.08)"; e.currentTarget.style.color = "#999"; }}
+          onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,0.04)"; e.currentTarget.style.color = "#666"; }}
+        >
+          Ganti Bidang
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Main export ────────────────────────────────────────────── */
 export default function InterviewSection() {
+  const [isStatsOpen,   setIsStatsOpen]   = useState(false);
+  const [activeBidang,  setActiveBidang]  = useState("Rekayasa Perangkat Lunak");
+  const [sessionState,  setSessionState]  = useState("idle");
+  const [questions,     setQuestions]     = useState([]);
+  const [currentIdx,    setCurrentIdx]    = useState(0);
+  const [isAnswered,    setIsAnswered]    = useState(false);
+  const [isTimeout,     setIsTimeout]     = useState(false);
+  const [isTyping,      setIsTyping]      = useState(false);
+  const [score,         setScore]         = useState(0);
+  const [timer,         setTimer]         = useState(TIMER_SECONDS);
+  const [chatHistory,   setChatHistory]   = useState([]);
+  const [stats,         setStats]         = useState(() => loadStats() ?? getInitialStats());
+  const timerRef          = useRef(null);
+  const feedbackTimeoutRef = useRef(null);
+
+  const clearTimer    = useCallback(() => { if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; } }, []);
+  const clearFeedback = useCallback(() => { if (feedbackTimeoutRef.current) { clearTimeout(feedbackTimeoutRef.current); feedbackTimeoutRef.current = null; } }, []);
+  const startTimer    = useCallback(() => {
+    clearTimer(); setTimer(TIMER_SECONDS);
+    timerRef.current = setInterval(() => setTimer(t => { if (t <= 1) { clearInterval(timerRef.current); timerRef.current = null; return 0; } return t - 1; }), 1000);
+  }, [clearTimer]);
+
+  useEffect(() => {
+    if (sessionState === "active" && timer === 0 && !isAnswered) {
+      clearTimer(); setIsTimeout(true); setIsAnswered(true); setIsTyping(true);
+      feedbackTimeoutRef.current = setTimeout(() => {
+        feedbackTimeoutRef.current = null;
+        setIsTyping(false);
+        setChatHistory(h => [...h, { role: "ai", text: getHRDFeedback(0, true) }]);
+      }, 1200);
+    }
+  }, [timer, isAnswered, sessionState, clearTimer]);
+
+  useEffect(() => () => { clearTimer(); clearFeedback(); }, [clearTimer, clearFeedback]);
+
+  const handleStart = useCallback(() => {
+    if (!activeBidang) return;
+    const cfg = BIDANG_CONFIG.find(b => b.name === activeBidang);
+    if (!cfg) return;
+    clearFeedback();
+    const picked = pickRandom(cfg.data, QUESTIONS_PER_SESSION);
+    setQuestions(picked); setCurrentIdx(0); setIsAnswered(false); setIsTimeout(false);
+    setIsTyping(false); setScore(0);
+    setChatHistory([{ role: "ai", text: picked[0].question }]);
+    setSessionState("active"); startTimer();
+  }, [activeBidang, startTimer, clearFeedback]);
+
+  const handleAnswer = useCallback((idx) => {
+    if (isAnswered) return;
+    clearTimer();
+    const q = questions[currentIdx];
+    const ans = q.answers[idx];
+    const labels = ["A", "B", "C", "D", "E"];
+    const earned = ans.point;
+    setScore(s => s + earned); setIsAnswered(true); setIsTimeout(false);
+    setChatHistory(h => [...h, { role: "user", text: ans.text, point: earned, label: labels[idx] }]);
+    setIsTyping(true);
+    feedbackTimeoutRef.current = setTimeout(() => {
+      feedbackTimeoutRef.current = null;
+      setIsTyping(false);
+      setChatHistory(h => [...h, { role: "ai", text: getHRDFeedback(earned, false) }]);
+    }, 900 + Math.random() * 400);
+  }, [isAnswered, questions, currentIdx, clearTimer]);
+
+  const handleNext = useCallback(() => {
+    clearFeedback(); setIsTyping(false);
+    const nextIdx = currentIdx + 1;
+    if (nextIdx >= questions.length) {
+      const maxS = questions.length * 5;
+      const newStats = {
+        ...stats,
+        totalSessions: stats.totalSessions + 1,
+        totalScore: stats.totalScore + score,
+        totalPossible: stats.totalPossible + maxS,
+        topicCounts: { ...stats.topicCounts, [activeBidang]: (stats.topicCounts[activeBidang] ?? 0) + 1 },
+        lastSession: { bidang: activeBidang, score, maxScore: maxS, pct: Math.round((score / maxS) * 100), date: new Date().toISOString() },
+      };
+      setStats(newStats); saveStats(newStats); clearTimer(); setSessionState("result");
+    } else {
+      setCurrentIdx(nextIdx); setIsAnswered(false); setIsTimeout(false);
+      setChatHistory(h => [...h, { role: "ai", text: questions[nextIdx].question }]); startTimer();
+    }
+  }, [currentIdx, questions, score, stats, activeBidang, clearTimer, clearFeedback, startTimer]);
+
+  const handleBack  = useCallback(() => { clearTimer(); clearFeedback(); setIsTyping(false); setSessionState("idle"); setChatHistory([]); }, [clearTimer, clearFeedback]);
+  const handleRetry = useCallback(() => handleStart(), [handleStart]);
+
+  const avgPct   = calcAvgPct(stats);
+  const statCards = [
+    { label: "Sesi selesai",  val: stats.totalSessions,                                         color: "#3B82F6", icon: <IconTrophy /> },
+    { label: "Rata-rata",      val: `${avgPct}%`,                                                color: "#06B6D4", icon: <IconChart />  },
+    { label: "Skor terakhir", val: stats.lastSession ? `${stats.lastSession.pct}%` : "–",        color: "#8B5CF6", icon: <IconChart />  },
+    { label: "Topik favorit", val: topTopic(stats),                                               color: "#F59E0B", icon: <IconTrophy /> },
+  ];
+  const SESSION_TARGET = 20;
+  const skillBars = [
+    { name: "Sesi diselesaikan", pct: Math.min((stats.totalSessions / SESSION_TARGET) * 100, 100), label: `${stats.totalSessions} sesi`, color: "#3B82F6" },
+    { name: "Rata-rata skor",    pct: avgPct,                                                       label: `${avgPct}%`,                  color: "#06B6D4" },
+    { name: "Skor terakhir",     pct: stats.lastSession?.pct ?? 0, label: stats.lastSession ? `${stats.lastSession.pct}%` : "–",         color: "#8B5CF6" },
+  ];
+  const maxScoreResult = questions.length * 5;
+  const currentQ       = questions[currentIdx];
+
   return (
     <section
       id="interview"
-      className="py-10 sm:py-14 md:py-20 px-4 sm:px-8 md:px-12"
-      style={{
-        background:
-          "linear-gradient(180deg, #000000 0%, #06090F 18%, #080D18 60%, #06090F 90%, #000000 100%)",
-        borderTop: "1px solid rgba(255,255,255,0.05)",
-      }}
+      className="relative overflow-hidden"
+      style={{ background: "#000000" }}
     >
-      <style>{`
-        @keyframes drift-a {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          50%       { transform: translate(22px, -18px) scale(1.08); }
-        }
-        @keyframes drift-b {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          50%       { transform: translate(-16px, 14px) scale(1.06); }
-        }
-        @keyframes drift-c {
-          0%, 100% { transform: translate(0, 0); }
-          50%       { transform: translate(10px, 10px); }
-        }
-        @keyframes pulse-dot {
-          0%, 100% { opacity: 0.5; }
-          50%       { opacity: 1; }
-        }
-        @media (prefers-reduced-motion: reduce) {
-          .drift-a, .drift-b, .drift-c, .pulse-dot { animation: none !important; }
-        }
-      `}</style>
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 h-px"
+        style={{
+          background: "linear-gradient(to right, transparent, rgba(255,255,255,0.06) 30%, rgba(255,255,255,0.06) 70%, transparent)",
+        }}
+      />
 
-      <Reveal amount={0.2} y={24}>
-        <div
-          className="relative max-w-5xl mx-auto rounded-[24px] sm:rounded-[32px] overflow-hidden"
-          style={{
-            background: "rgba(10,10,10,0.72)",
-            backdropFilter: "blur(24px)",
-            WebkitBackdropFilter: "blur(24px)",
-            border: "1px solid rgba(255,255,255,0.09)",
-            boxShadow:
-              "0 32px 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.07)",
-          }}
-        >
-          {/* ── Ambient glow blobs ── */}
-          <div
-            className="pointer-events-none absolute -top-24 -right-24 w-72 h-72 rounded-full"
-            style={{
-              background:
-                "radial-gradient(circle, rgba(59,130,246,0.10) 0%, transparent 70%)",
-              animation: "drift-a 10s ease-in-out infinite",
-            }}
-          />
-          <div
-            className="pointer-events-none absolute -bottom-20 -left-16 w-64 h-64 rounded-full"
-            style={{
-              background:
-                "radial-gradient(circle, rgba(139,92,246,0.08) 0%, transparent 70%)",
-              animation: "drift-b 13s ease-in-out infinite",
-            }}
-          />
-          <div
-            className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full"
-            style={{
-              background:
-                "radial-gradient(circle, rgba(34,211,238,0.04) 0%, transparent 65%)",
-              animation: "drift-c 9s ease-in-out infinite",
-            }}
-          />
+      <div className="pointer-events-none absolute top-0 left-0 w-[500px] h-[400px] rounded-full opacity-[0.055] blur-[160px]"
+        style={{ background: "radial-gradient(circle, #3B82F6, transparent 70%)" }} />
+      <div className="pointer-events-none absolute top-20 right-0 w-[350px] h-[300px] rounded-full opacity-[0.04] blur-[130px]"
+        style={{ background: "radial-gradient(circle, #8B5CF6, transparent 70%)" }} />
+      <div className="pointer-events-none absolute bottom-32 left-1/3 w-[300px] h-[250px] rounded-full opacity-[0.035] blur-[120px]"
+        style={{ background: "radial-gradient(circle, #06B6D4, transparent 70%)" }} />
 
-          {/* ── Grid dekoratif ── */}
-          <div
-            className="pointer-events-none absolute inset-0 opacity-[0.025]"
-            style={{
-              backgroundImage: `linear-gradient(rgba(255,255,255,0.6) 1px, transparent 1px),
-                                linear-gradient(90deg, rgba(255,255,255,0.6) 1px, transparent 1px)`,
-              backgroundSize: "48px 48px",
-            }}
-          />
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.016]"
+        style={{
+          backgroundImage: "linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)",
+          backgroundSize: "60px 60px",
+        }}
+      />
 
-          {/* ── Konten utama ── */}
-          <div className="relative z-10 flex flex-col md:flex-row items-center gap-8 md:gap-0 px-6 sm:px-10 md:px-14 py-10 sm:py-14">
+      <div className="relative z-10 min-h-screen flex items-center justify-center px-4 md:px-12 py-12 md:py-16">
+        <div className="w-full max-w-[1100px]">
 
-            {/* ── Kiri: teks & CTA ── */}
-            <div className="flex-1 text-center md:text-left">
-
-              {/* Badge pill */}
-              <motion.span
-                initial={{ opacity: 0, y: -8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.45 }}
-                className="inline-flex items-center gap-1.5 text-[11px] md:text-xs font-medium px-3 py-1 rounded-full mb-4"
+          <Reveal>
+            <div className="flex items-center gap-3 mb-8 md:mb-10">
+              <p
+                className="text-[10px] md:text-[11px] font-medium uppercase tracking-[0.12em]"
+                style={{ color: "rgba(255,255,255,0.18)" }}
+              >
+                Simulasi
+              </p>
+              <div
+                className="h-px flex-1 max-w-[40px]"
+                style={{ background: "rgba(255,255,255,0.08)" }}
+              />
+              <span
+                className="inline-flex items-center gap-1.5 text-[11px] font-medium px-3 py-1 rounded-full"
                 style={{
-                  background: "rgba(255,255,255,0.06)",
-                  backdropFilter: "blur(12px)",
-                  WebkitBackdropFilter: "blur(12px)",
-                  border: "1px solid rgba(255,255,255,0.10)",
-                  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08)",
-                  color: "#888888",
+                  background: "rgba(59,130,246,0.10)",
+                  color: "#3B82F6",
+                  border: "1px solid rgba(59,130,246,0.18)",
+                  boxShadow: "inset 0 1px 0 rgba(59,130,246,0.12)",
                 }}
               >
-                <span
-                  className="w-1.5 h-1.5 rounded-full"
-                  style={{
-                    background: "#22D3EE",
-                    animation: "pulse-dot 2.5s ease-in-out infinite",
-                    boxShadow: "0 0 6px rgba(34,211,238,0.7)",
-                  }}
-                />
-                Simulasi Interview AI
-              </motion.span>
+                <span className="w-1.5 h-1.5 rounded-full bg-[#3B82F6]" style={{ boxShadow: "0 0 4px #3B82F6" }} />
+                Interview AI
+              </span>
+            </div>
+          </Reveal>
 
-              {/* Heading */}
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-4 items-start">
+
+            {/* LEFT — info card */}
+            <Reveal>
               <motion.div
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.08 }}
+                className="rounded-2xl p-6 md:p-8 flex flex-col relative overflow-hidden"
+                style={glass.card}
+                initial={{ opacity: 0, x: -24 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, amount: 0.15 }}
+                transition={{ duration: 0.55, ease: [0.4, 0, 0.2, 1] }}
               >
-                <p
-                  className="text-base sm:text-xl md:text-2xl font-semibold mb-1"
-                  style={{ color: "#555555" }}
-                >
+                <div
+                  className="absolute inset-x-0 top-0 h-[1.5px]"
+                  style={{ background: "linear-gradient(to right, #3B82F6, rgba(139,92,246,0.5) 50%, transparent)" }}
+                />
+                <div className="pointer-events-none absolute -top-24 -left-12 w-60 h-60 rounded-full opacity-[0.06] blur-[90px]"
+                  style={{ background: "radial-gradient(circle, #3B82F6, transparent 70%)" }} />
+
+                <p className="text-[10px] md:text-[11px] font-medium uppercase tracking-[0.12em] mb-3"
+                  style={{ color: "rgba(255,255,255,0.18)" }}>
                   Tingkatkan Keahlian
                 </p>
-                <h2
-                  className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold leading-[1.02] tracking-tight"
-                  style={{
-                    backgroundImage:
-                      "linear-gradient(135deg, #ffffff 0%, #CCCCCC 50%, #888888 100%)",
-                    WebkitBackgroundClip: "text",
-                    WebkitTextFillColor: "transparent",
-                    backgroundClip: "text",
-                  }}
-                >
-                  interview mu!
-                </h2>
-              </motion.div>
 
-              {/* Deskripsi */}
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.45, delay: 0.2 }}
-                className="text-[12px] sm:text-sm md:text-[15px] leading-relaxed mt-4 max-w-md md:mx-0 mx-auto"
-                style={{ color: "#555555" }}
-              >
-                Berlatih wawancara bersama{" "}
-                <span
-                  className="font-semibold not-italic"
-                  style={{ color: "#93C5FD" }}
+                <h1
+                  className="text-[38px] sm:text-[44px] md:text-[52px] font-extrabold leading-[1.05] tracking-[-0.03em] mb-4"
+                  style={{ color: "#F0F0F5" }}
                 >
-                  Anty
-                </span>
-                , asisten virtual BletchAI. Latih kemampuan interview-mu melalui
-                simulasi interaktif dan dapatkan evaluasi berdasarkan hasil latihanmu.
-              </motion.p>
-
-              {/* Stat pills kecil */}
-              <motion.div
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.45, delay: 0.3 }}
-                className="flex flex-wrap gap-2 mt-5 md:justify-start justify-center"
-              >
-                {[
-                  { icon: Star,  color: "#FBBF24", label: "4.9 Rating" },
-                  { icon: Clock, color: "#22D3EE", label: "~15 menit" },
-                  { icon: Mic,   color: "#A78BFA", label: "Real-time AI" },
-                ].map(({ icon: Icon, color, label }) => (
+                  interview{" "}
                   <span
-                    key={label}
-                    className="inline-flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-full"
-                    style={{
-                      background: "rgba(255,255,255,0.05)",
-                      backdropFilter: "blur(8px)",
-                      WebkitBackdropFilter: "blur(8px)",
-                      border: "1px solid rgba(255,255,255,0.09)",
-                      boxShadow: "inset 0 1px 0 rgba(255,255,255,0.07)",
-                      color: "#666666",
-                    }}
+                    className="bg-clip-text text-transparent"
+                    style={{ backgroundImage: "linear-gradient(135deg, #3B82F6, #8B5CF6)" }}
                   >
-                    <Icon size={11} style={{ color }} />
-                    {label}
+                    mu!
                   </span>
-                ))}
-              </motion.div>
+                </h1>
 
-              {/* CTA Button */}
-              <motion.div
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.45, delay: 0.38 }}
-                className="mt-7 md:justify-start flex justify-center"
-              >
-                <motion.button
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.97 }}
-                  className="inline-flex items-center gap-2 text-sm font-semibold px-6 py-3 rounded-xl transition-all duration-200"
-                  style={{
-                    background: "rgba(59,130,246,0.15)",
-                    backdropFilter: "blur(8px)",
-                    WebkitBackdropFilter: "blur(8px)",
-                    color: "#93C5FD",
-                    border: "1px solid rgba(59,130,246,0.28)",
-                    boxShadow:
-                      "inset 0 1px 0 rgba(59,130,246,0.22), 0 4px 16px rgba(59,130,246,0.10)",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = "rgba(59,130,246,0.25)";
-                    e.currentTarget.style.boxShadow =
-                      "inset 0 1px 0 rgba(59,130,246,0.28), 0 8px 24px rgba(59,130,246,0.18)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = "rgba(59,130,246,0.15)";
-                    e.currentTarget.style.boxShadow =
-                      "inset 0 1px 0 rgba(59,130,246,0.22), 0 4px 16px rgba(59,130,246,0.10)";
-                  }}
-                >
-                  Mulai Interview
-                  <ArrowUpRight size={15} strokeWidth={2.5} />
-                </motion.button>
-              </motion.div>
-            </div>
+                <p className="text-sm leading-[1.7] text-[#555] mb-7 max-w-[400px]">
+                  Berlatih wawancara bersama{" "}
+                  <strong className="text-[#888] font-medium">Anty</strong>, asisten virtual BletchAI.
+                  Pilih jurusanmu, jawab pertanyaan, dan dapatkan evaluasi real-time dari AI.
+                </p>
 
-            {/* ── Kanan: visual card mock ── */}
-            <div className="md:w-64 lg:w-72 flex-shrink-0 w-full max-w-xs mx-auto md:mx-0">
-              <motion.div
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ y: [0, -8, 0] }}
-                transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-              >
-                {/* Card simulasi interview */}
-                <div
-                  className="rounded-2xl overflow-hidden"
-                  style={{
-                    background: "rgba(255,255,255,0.04)",
-                    backdropFilter: "blur(20px)",
-                    WebkitBackdropFilter: "blur(20px)",
-                    border: "1px solid rgba(255,255,255,0.09)",
-                    boxShadow:
-                      "0 16px 48px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.07)",
-                  }}
-                >
-                  {/* Header card */}
-                  <div
-                    className="px-4 py-3 flex items-center gap-2.5"
-                    style={{ borderBottom: "1px solid rgba(255,255,255,0.07)" }}
-                  >
-                    {/* Avatar Anty */}
+                <div className="flex gap-2.5 mb-5">
+                  {[
+                    { val: stats.totalSessions,    label: "Sesi selesai",   color: "#E0E0F0" },
+                    { val: `${avgPct}%`,            label: "Rata-rata skor", color: "#06B6D4" },
+                    { val: topTopic(stats),         label: "Topik favorit",  color: "#8B5CF6" },
+                  ].map(({ val, label, color }) => (
                     <div
-                      className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
+                      key={label}
+                      className="rounded-xl px-3 py-3 flex-1 min-w-0 relative overflow-hidden"
                       style={{
-                        background: "rgba(34,211,238,0.12)",
-                        border: "1px solid rgba(34,211,238,0.22)",
-                        boxShadow: "inset 0 1px 0 rgba(34,211,238,0.15)",
+                        background: "rgba(255,255,255,0.03)",
+                        border: "1px solid rgba(255,255,255,0.07)",
                       }}
                     >
-                      <Mic size={14} style={{ color: "#22D3EE" }} />
+                      <span className="block text-lg font-bold leading-[1.1] truncate" style={{ color }}>{val}</span>
+                      <span className="block text-[10px] text-[#3A3A4A] mt-0.5 truncate">{label}</span>
                     </div>
-                    <div>
-                      <p className="text-xs font-semibold" style={{ color: "#CCCCCC" }}>
-                        Anty
-                      </p>
-                      <div className="flex items-center gap-1">
-                        <span
-                          className="w-1.5 h-1.5 rounded-full"
-                          style={{
-                            background: "#22D3EE",
-                            animation: "pulse-dot 2s ease-in-out infinite",
-                          }}
-                        />
-                        <span className="text-[10px]" style={{ color: "#555555" }}>
-                          Online
-                        </span>
-                      </div>
-                    </div>
-                    {/* Sparkles */}
-                    <Sparkles
-                      size={14}
-                      className="ml-auto flex-shrink-0"
-                      style={{ color: "#A78BFA" }}
-                    />
-                  </div>
+                  ))}
+                </div>
 
-                  {/* Chat bubbles */}
-                  <div className="px-3 py-3 flex flex-col gap-2.5">
-                    {/* Anty */}
-                    <div className="flex gap-2 items-end">
-                      <div
-                        className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0"
-                        style={{
-                          background: "rgba(34,211,238,0.10)",
-                          border: "1px solid rgba(34,211,238,0.18)",
-                        }}
-                      >
-                        <Mic size={10} style={{ color: "#22D3EE" }} />
-                      </div>
-                      <div
-                        className="rounded-2xl rounded-bl-sm px-3 py-2 max-w-[85%]"
-                        style={{
-                          background: "rgba(255,255,255,0.07)",
-                          border: "1px solid rgba(255,255,255,0.09)",
-                          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.06)",
-                        }}
-                      >
-                        <p className="text-[11px] leading-relaxed" style={{ color: "#AAAAAA" }}>
-                          Ceritakan pengalaman kamu menghadapi konflik di tempat kerja!
-                        </p>
-                      </div>
-                    </div>
+                <div className="flex gap-2 flex-wrap mb-7">
+                  {[
+                    { dot: "#F59E0B", text: "4.9 Rating"       },
+                    { dot: "#3B82F6", text: "~10 menit"         },
+                    { dot: "#3B82F6", text: "60 detik / soal"   },
+                    { dot: "#06B6D4", text: "15 soal random"    },
+                  ].map(({ dot, text }) => (
+                    <span
+                      key={text}
+                      className="inline-flex items-center gap-1.5 rounded-full px-3 py-[5px] text-xs text-[#555]"
+                      style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}
+                    >
+                      <span className="w-[5px] h-[5px] rounded-full" style={{ background: dot }} />
+                      {text}
+                    </span>
+                  ))}
+                </div>
 
-                    {/* User */}
-                    <div className="flex gap-2 items-end justify-end">
-                      <div
-                        className="rounded-2xl rounded-br-sm px-3 py-2 max-w-[85%]"
-                        style={{
-                          background: "rgba(59,130,246,0.12)",
-                          border: "1px solid rgba(59,130,246,0.22)",
-                          boxShadow: "inset 0 1px 0 rgba(59,130,246,0.15)",
-                        }}
-                      >
-                        <p className="text-[11px] leading-relaxed" style={{ color: "#93C5FD" }}>
-                          Saya pernah menghadapi perbedaan pendapat...
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Typing indicator */}
-                    <div className="flex gap-2 items-end">
-                      <div
-                        className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0"
-                        style={{
-                          background: "rgba(34,211,238,0.10)",
-                          border: "1px solid rgba(34,211,238,0.18)",
-                        }}
-                      >
-                        <Mic size={10} style={{ color: "#22D3EE" }} />
-                      </div>
-                      <div
-                        className="rounded-2xl rounded-bl-sm px-4 py-3"
-                        style={{
-                          background: "rgba(255,255,255,0.06)",
-                          border: "1px solid rgba(255,255,255,0.09)",
-                        }}
-                      >
-                        <div className="flex gap-1 items-center">
-                          {[0, 0.18, 0.36].map((delay, i) => (
-                            <span
-                              key={i}
-                              className="w-1.5 h-1.5 rounded-full"
-                              style={{
-                                background: "#555555",
-                                animation: `pulse-dot 1.2s ease-in-out ${delay}s infinite`,
-                              }}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Skor preview */}
-                  <div
-                    className="mx-3 mb-3 rounded-xl px-3 py-2.5 flex items-center justify-between"
+                <div className="flex items-center gap-3 flex-wrap">
+                  <button
+                    onClick={() => setIsStatsOpen(p => !p)}
+                    className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-[13px] transition-all duration-200"
                     style={{
-                      background: "rgba(255,255,255,0.04)",
+                      background: "rgba(255,255,255,0.03)",
                       border: "1px solid rgba(255,255,255,0.08)",
-                      boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05)",
+                      color: isStatsOpen ? "#888" : "#555",
                     }}
+                    onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,255,255,0.07)"; e.currentTarget.style.color = "#888"; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,0.03)"; e.currentTarget.style.color = isStatsOpen ? "#888" : "#555"; }}
                   >
-                    <p className="text-[10px]" style={{ color: "#555555" }}>
-                      Skor sementara
-                    </p>
-                    <div className="flex items-center gap-1.5">
-                      {[
-                        { label: "K", color: "#3B82F6" },
-                        { label: "C", color: "#22D3EE" },
-                        { label: "P", color: "#A78BFA" },
-                      ].map(({ label, color }) => (
-                        <span
-                          key={label}
-                          className="text-[10px] font-bold w-5 h-5 rounded-md flex items-center justify-center"
+                    <IconChart />
+                    <span>{isStatsOpen ? "Sembunyikan statistik" : "Lihat statistik"}</span>
+                    <svg viewBox="0 0 12 12" fill="none" className={`w-3 h-3 transition-transform duration-300 ${isStatsOpen ? "rotate-180" : ""}`}>
+                      <path d="M2 4l4 4 4-4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
+                    </svg>
+                  </button>
+                </div>
+
+                <div
+                  className={`overflow-hidden transition-all duration-[420ms] ease-[cubic-bezier(0.4,0,0.2,1)] ${isStatsOpen ? "max-h-[500px] opacity-100 mt-6" : "max-h-0 opacity-0 mt-0"}`}
+                >
+                  <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }} className="pt-5">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
+                      {statCards.map((s) => (
+                        <div
+                          key={s.label}
+                          className="rounded-xl p-3 min-w-0 relative overflow-hidden"
                           style={{
-                            background: `${color}18`,
-                            border: `1px solid ${color}30`,
-                            color,
+                            background: "rgba(255,255,255,0.025)",
+                            border: "1px solid rgba(255,255,255,0.06)",
                           }}
                         >
-                          {label}
-                        </span>
+                          <div
+                            className="absolute inset-x-0 top-0 h-[1.5px]"
+                            style={{ background: `linear-gradient(to right, ${s.color}, transparent 70%)` }}
+                          />
+                          <div className="mb-1.5" style={{ color: s.color }}>{s.icon}</div>
+                          <div className="text-base font-bold leading-[1.1] mb-1 truncate" style={{ color: s.color }}>{s.val}</div>
+                          <div className="text-[10px] text-[#3A3A4A] truncate">{s.label}</div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div
+                      className="rounded-xl px-4 py-4"
+                      style={{ background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.06)" }}
+                    >
+                      <p className="text-[10px] font-medium uppercase tracking-[0.10em] text-[#3A3A4A] mb-4">
+                        Progress kamu
+                      </p>
+                      {skillBars.map((s) => (
+                        <div key={s.name} className="mb-3 last:mb-0">
+                          <div className="flex justify-between mb-1.5">
+                            <span className="text-xs text-[#555]">{s.name}</span>
+                            <span className="text-xs font-semibold" style={{ color: s.color }}>{s.label ?? `${s.pct}%`}</span>
+                          </div>
+                          <div className="h-[3px] rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.05)" }}>
+                            <div
+                              className="h-full rounded-full transition-all duration-700"
+                              style={{ width: `${s.pct}%`, background: s.color }}
+                            />
+                          </div>
+                        </div>
                       ))}
                     </div>
                   </div>
                 </div>
               </motion.div>
-            </div>
+            </Reveal>
 
+            {/* RIGHT — interactive panel */}
+            <motion.div
+              style={{ height: "520px" }}
+              initial={{ opacity: 0, x: 24 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, amount: 0.15 }}
+              transition={{ duration: 0.55, delay: 0.1, ease: [0.4, 0, 0.2, 1] }}
+            >
+              {sessionState === "idle" && (
+                <IdlePanel
+                  bidangList={BIDANG_CONFIG}
+                  activeBidang={activeBidang}
+                  onSelectBidang={setActiveBidang}
+                  onStart={handleStart}
+                />
+              )}
+              {sessionState === "active" && currentQ && (
+                <ActivePanel
+                  question={currentQ.question}
+                  answers={currentQ.answers}
+                  currentIdx={currentIdx}
+                  totalQ={questions.length}
+                  timer={timer}
+                  chatHistory={chatHistory}
+                  isAnswered={isAnswered}
+                  isTimeout={isTimeout}
+                  isTyping={isTyping}
+                  score={score}
+                  onAnswer={handleAnswer}
+                  onNext={handleNext}
+                  onBack={handleBack}
+                />
+              )}
+              {sessionState === "result" && (
+                <ResultPanel
+                  score={score}
+                  maxScore={maxScoreResult}
+                  bidang={activeBidang}
+                  totalQ={questions.length}
+                  onRetry={handleRetry}
+                  onHome={handleBack}
+                />
+              )}
+            </motion.div>
           </div>
+
         </div>
-      </Reveal>
+      </div>
     </section>
   );
 }

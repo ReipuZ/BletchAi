@@ -3,7 +3,6 @@ import Navbar from "../components/Navbar";
 import HomeSection from "../sections/homeSection";
 import KursusSection from "../sections/kursusSection";
 import InterviewSection from "../sections/interviewSection";
-import StatsSection from "../sections/statsSection";
 import FaqSection from "../sections/faqSection";
 import AboutSection from "../sections/aboutSection";
 import FloatingMascot from "../components/floatingMascot.jsx";
@@ -23,7 +22,6 @@ export default function Dashboard({ onLogout, onLogin, localUser, isLogin }) {
         <HomeSection />
         <KursusSection />
         <InterviewSection />
-        <StatsSection />
         <FaqSection />
         <AboutSection />
       </main>
