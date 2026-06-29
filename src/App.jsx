@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import AuthModal from "./components/AuthModal";
 import Dashboard from "./pages/dashboard";
+import LoadingScreen from "./components/LoadingScreen";
 
 export default function App() {
   const [isLogin, setIsLogin] = useState(false);
@@ -53,6 +54,8 @@ export default function App() {
         initialMode={authMode}
         onSuccess={handleLoginSuccess}
       />
+
+       <LoadingScreen />
     </>
   );
 }
