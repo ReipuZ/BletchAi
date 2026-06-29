@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import AuthModal from "./components/AuthModal";
 import Dashboard from "./pages/dashboard";
-import Chat from "./pages/Chat";
 
 export default function App() {
   const [isLogin, setIsLogin] = useState(false);
