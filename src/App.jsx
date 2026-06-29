@@ -25,9 +25,7 @@ export default function App() {
 
   const handleLoginSuccess = () => {
     localStorage.setItem("isLogin", "true");
-
     const u = JSON.parse(localStorage.getItem("user") || "null");
-
     setLocalUser(u);
     setIsLogin(true);
     setAuthOpen(false);
@@ -36,7 +34,6 @@ export default function App() {
   const logout = () => {
     localStorage.removeItem("isLogin");
     localStorage.removeItem("user");
-
     setLocalUser(null);
     setIsLogin(false);
   };
@@ -49,9 +46,6 @@ export default function App() {
         localUser={isLogin ? localUser : null}
         isLogin={isLogin}
       />
-
-      {/* TEST AI */}
-      <Chat />
 
       <AuthModal
         isOpen={authOpen}
