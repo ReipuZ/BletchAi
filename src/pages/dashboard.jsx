@@ -16,8 +16,11 @@ export default function Dashboard({ onLogout, onLogin, localUser, isLogin }) {
         isLogin={isLogin}
       />
 
-      {/* pt-20 diganti: mobile pakai pt-0 (navbar sudah punya spacer sendiri), desktop tetap pt-20 */}
-      <main className="pt-0 md:pt-20 pb-24 md:pb-0 overflow-x-hidden">
+      {/* 
+        Mobile: pt-[56px] = tepat setinggi navbar mobile (48px navbar + 8px marginTop)
+        Desktop: pt-20 = sama seperti sebelumnya
+      */}
+      <main className="pt-[56px] md:pt-20 pb-24 md:pb-0 overflow-x-hidden">
         <HomeSection />
         <KursusSection />
         <InterviewSection />

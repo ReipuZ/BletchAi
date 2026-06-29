@@ -117,7 +117,7 @@ export default function HomeSection() {
   return (
     <section
       id="home"
-      className="relative pb-24 md:pb-10 overflow-hidden"
+      className="relative pb-6 md:pb-10 overflow-hidden"
       style={{ background: "#000000" }}
     >
       <style>{`
