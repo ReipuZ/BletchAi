@@ -9,7 +9,38 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+const API_KEYS = [
+  process.env.GROQ_API_KEY_1,
+  process.env.GROQ_API_KEY_2,
+  process.env.GROQ_API_KEY_3,
+  process.env.GROQ_API_KEY_4,
+  process.env.GROQ_API_KEY_5,
+  process.env.GROQ_API_KEY_6,
+  process.env.GROQ_API_KEY_7,
+  process.env.GROQ_API_KEY_8,
+  process.env.GROQ_API_KEY_9,
+].filter(Boolean);
+
+async function askGroq(messages, temperature = 0.7) {
+  for (const key of API_KEYS) {
+    try {
+      const groq = new Groq({ apiKey: key });
+
+      const completion = await groq.chat.completions.create({
+        model: "llama-3.3-70b-versatile",
+        temperature,
+        messages,
+      });
+
+      return completion;
+
+    } catch (err) {
+      console.log("API key gagal, coba key berikutnya...");
+    }
+  }
+
+  throw new Error("Semua API key gagal.");
+}
 
 // =============================================
 // SYSTEM PROMPT
@@ -60,14 +91,13 @@ app.post("/chat", async (req, res) => {
       return res.status(400).json({ error: "Pesan tidak boleh kosong." });
     }
 
-    const completion = await groq.chat.completions.create({
-      model: "llama-3.3-70b-versatile",
-      temperature: 0.7,
-      messages: [
-        { role: "system", content: SYSTEM_PROMPT },
-        { role: "user", content: message },
-      ],
-    });
+    const completion = await askGroq(
+  [
+    { role: "system", content: SYSTEM_PROMPT },
+    { role: "user", content: message },
+  ],
+  0.7
+);
 
     const reply = completion.choices?.[0]?.message?.content?.trim();
 
@@ -89,13 +119,10 @@ app.get("/", (req, res) => res.send("BletchAI Backend aktif 🚀"));
 
 app.get("/test", async (req, res) => {
   try {
-    const completion = await groq.chat.completions.create({
-      model: "llama-3.3-70b-versatile",
-      messages: [
-        { role: "system", content: SYSTEM_PROMPT },
-        { role: "user", content: "Perkenalkan dirimu secara singkat." },
-      ],
-    });
+    const completion = await askGroq([
+  { role: "system", content: SYSTEM_PROMPT },
+  { role: "user", content: "Perkenalkan dirimu secara singkat." },
+]);
 
     const reply = completion.choices?.[0]?.message?.content?.trim();
     res.send(reply ?? "Groq tidak menghasilkan jawaban.");
