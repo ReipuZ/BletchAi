@@ -1,5 +1,4 @@
-// src/pages/Dashboard.jsx
-import Navbar from "../components/Navbar";
+import Navbar from "../components/navbar";
 import HomeSection from "../sections/homeSection";
 import KursusSection from "../sections/kursusSection";
 import InterviewSection from "../sections/interviewSection";
