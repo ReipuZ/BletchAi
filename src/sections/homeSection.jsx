@@ -164,7 +164,7 @@ export default function HomeSection() {
       <div className="relative z-10">
 
         {/* Hero — pt dikurangi di mobile agar tidak ada gap besar */}
-        <div className="px-3 md:px-12 pt-2 md:pt-10">
+        <div className="px-3 md:px-12 pt-0 md:pt-10">
           <div
             className="relative z-10 rounded-[20px] md:rounded-[36px] overflow-visible flex flex-col items-center justify-center text-center"
             style={{
@@ -172,9 +172,9 @@ export default function HomeSection() {
                 MOBILE: tinggi dikurangi jadi ~220px, bukan 280px+
                 Desktop tetap sama seperti sebelumnya
               */
-              minHeight: "clamp(220px, 38vw, 400px)",
+              minHeight: "clamp(180px, 40svh, 400px)",
               paddingTop: "clamp(20px, 4vw, 60px)",
-              paddingBottom: "clamp(36px, 7vw, 80px)",
+              paddingBottom: "clamp(52px, 10vw, 80px)",
             }}
           >
             <div className="absolute inset-0 rounded-[20px] md:rounded-[36px] overflow-hidden pointer-events-none">
@@ -253,7 +253,7 @@ export default function HomeSection() {
 
           {/* Search Card — overlap lebih sedikit di mobile */}
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }}
-            className="relative z-20 -mt-4 md:-mt-12 mx-0 md:mx-4">
+            className="relative z-20 -mt-10 md:-mt-12 mx-0 md:mx-4">
             <div className="relative overflow-hidden rounded-2xl md:rounded-3xl px-3 pt-3 pb-3 md:px-7 md:pt-6 md:pb-6"
               style={{ background: "rgba(10,10,10,0.88)", backdropFilter: "blur(28px)", WebkitBackdropFilter: "blur(28px)",
                 border: "1px solid rgba(255,255,255,0.09)", boxShadow: "0 20px 60px rgba(0,0,0,0.75), inset 0 1px 0 rgba(255,255,255,0.08)" }}>
