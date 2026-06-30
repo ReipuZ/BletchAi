@@ -26,6 +26,9 @@ export default function ChatOverlay({
   // NEW: simpan sessionId yang sedang aktif di overlay ini. Dipisah dari
   // prop supaya tidak berubah di tengah sesi kalau parent re-render dengan
   // prop sessionId yang berbeda sebelum overlay sempat ditutup.
+  // ID ini juga yang dikirim ke backend (/chat) supaya Anty bisa mengingat
+  // riwayat percakapan dari pesan ke pesan, bukan cuma riwayat lokal di
+  // chatHistoryStore.
   const activeSessionIdRef = useRef(null);
 
   useEffect(() => {
@@ -41,6 +44,16 @@ export default function ChatOverlay({
           setMessages(initialMessages);
           activeSessionIdRef.current = sessionId || null;
         }
+
+        // NEW: kalau belum ada sessionId aktif (chat baru, bukan lanjutan
+        // dari history lama), generate satu sessionId baru. Ini dikirim ke
+        // backend supaya Anty mengingat konteks percakapan selama overlay
+        // ini terbuka, terlepas dari sessionId riwayat lokal di
+        // chatHistoryStore (dua hal yang berbeda, kebetulan bisa sama).
+        if (!activeSessionIdRef.current) {
+          activeSessionIdRef.current = crypto.randomUUID();
+        }
+
         didSendInitial.current = true;
 
         if (initialMessage) {
@@ -58,7 +71,7 @@ export default function ChatOverlay({
       //   pakai updateSession supaya menyambung di entri yang sama.
       // - Kalau tidak, pakai saveSession seperti biasa (sesi baru).
       if (messages.length > 0) {
-        if (activeSessionIdRef.current) {
+        if (sessionId) {
           updateSession(activeSessionIdRef.current, messages);
         } else {
           saveSession(messages);
@@ -82,7 +95,9 @@ export default function ChatOverlay({
       const response = await fetch("https://bletchai-production.up.railway.app/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: msg }),
+        // NEW: kirim sessionId supaya backend tahu ini lanjutan percakapan
+        // mana, dan bisa menyertakan riwayat sebelumnya saat tanya ke Groq.
+        body: JSON.stringify({ message: msg, sessionId: activeSessionIdRef.current }),
       });
       const data = await response.json();
       const reply =

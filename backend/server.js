@@ -43,6 +43,41 @@ async function askGroq(messages, temperature = 0.7) {
 }
 
 // =============================================
+// MEMORY PERCAKAPAN (PER SESSION)
+// =============================================
+// Map<sessionId, [{role, content}, ...]>
+// Catatan: ini in-memory, jadi history akan hilang kalau server restart
+// atau kalau kamu deploy multi-instance (load balanced). Untuk production
+// yang lebih serius, ganti dengan Redis/DB (lihat catatan di bawah file).
+const sessions = new Map();
+
+// Batas jumlah pesan (user+assistant) yang disimpan per sesi,
+// supaya konteks tidak membengkak dan boros token.
+const MAX_HISTORY_MESSAGES = 20;
+
+// Bersihkan sesi yang sudah tidak aktif lebih dari 2 jam (biar memory tidak bocor)
+const SESSION_TTL_MS = 2 * 60 * 60 * 1000;
+function touchSession(sessionId) {
+  const session = sessions.get(sessionId);
+  if (session) session.lastActive = Date.now();
+}
+setInterval(() => {
+  const now = Date.now();
+  for (const [id, session] of sessions.entries()) {
+    if (now - session.lastActive > SESSION_TTL_MS) {
+      sessions.delete(id);
+    }
+  }
+}, 30 * 60 * 1000); // cek tiap 30 menit
+
+function getHistory(sessionId) {
+  if (!sessions.has(sessionId)) {
+    sessions.set(sessionId, { messages: [], lastActive: Date.now() });
+  }
+  return sessions.get(sessionId);
+}
+
+// =============================================
 // SYSTEM PROMPT
 // =============================================
 const SYSTEM_PROMPT = `Kamu adalah Anty, AI mentor karier di BletchAI.
@@ -225,19 +260,30 @@ Anty harus terasa seperti mentor yang mengenal pengguna, memahami perjalanan mer
 // =============================================
 app.post("/chat", async (req, res) => {
   try {
-    const { message } = req.body;
+    const { message, sessionId } = req.body;
 
     if (!message?.trim()) {
       return res.status(400).json({ error: "Pesan tidak boleh kosong." });
     }
 
+    if (!sessionId) {
+      return res.status(400).json({
+        error: "sessionId wajib dikirim agar Anty bisa mengingat percakapan.",
+      });
+    }
+
+    const session = getHistory(sessionId);
+
+    // Tambahkan pesan user ke history
+    session.messages.push({ role: "user", content: message });
+
+    // Bangun array pesan: system + history (yang sudah dipotong) 
+    const trimmedHistory = session.messages.slice(-MAX_HISTORY_MESSAGES);
+
     const completion = await askGroq(
-  [
-    { role: "system", content: SYSTEM_PROMPT },
-    { role: "user", content: message },
-  ],
-  0.7
-);
+      [{ role: "system", content: SYSTEM_PROMPT }, ...trimmedHistory],
+      0.7
+    );
 
     const reply = completion.choices?.[0]?.message?.content?.trim();
 
@@ -245,11 +291,31 @@ app.post("/chat", async (req, res) => {
       return res.status(500).json({ error: "AI tidak menghasilkan jawaban. Coba lagi." });
     }
 
+    // Simpan balasan assistant ke history juga
+    session.messages.push({ role: "assistant", content: reply });
+    // Pastikan history tidak membengkak tanpa batas di memory
+    if (session.messages.length > MAX_HISTORY_MESSAGES) {
+      session.messages = session.messages.slice(-MAX_HISTORY_MESSAGES);
+    }
+    touchSession(sessionId);
+
     res.json({ reply });
   } catch (error) {
     console.error("Error pada /chat:", error);
     res.status(500).json({ error: error.message });
   }
+});
+
+// =============================================
+// ENDPOINT RESET SESI (opsional, kalau user mau mulai topik baru)
+// =============================================
+app.post("/chat/reset", (req, res) => {
+  const { sessionId } = req.body;
+  if (!sessionId) {
+    return res.status(400).json({ error: "sessionId wajib diisi." });
+  }
+  sessions.delete(sessionId);
+  res.json({ message: "Riwayat percakapan untuk sesi ini sudah direset." });
 });
 
 // =============================================
@@ -260,9 +326,9 @@ app.get("/", (req, res) => res.send("BletchAI Backend aktif 🚀"));
 app.get("/test", async (req, res) => {
   try {
     const completion = await askGroq([
-  { role: "system", content: SYSTEM_PROMPT },
-  { role: "user", content: "Perkenalkan dirimu secara singkat." },
-]);
+      { role: "system", content: SYSTEM_PROMPT },
+      { role: "user", content: "Perkenalkan dirimu secara singkat." },
+    ]);
 
     const reply = completion.choices?.[0]?.message?.content?.trim();
     res.send(reply ?? "Groq tidak menghasilkan jawaban.");
