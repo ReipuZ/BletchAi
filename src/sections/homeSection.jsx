@@ -100,8 +100,13 @@ export default function HomeSection() {
 
   const triggerClickWave = (cat) => setClickWave({ cat, key: Date.now() + Math.random() });
 
+  // FIXED: openChat sebelumnya bisa menerima event object dari onClick
+  // langsung (mis. onClick={openChat}), yang membuat `msg` jadi event,
+  // bukan string — lalu `text.trim()` error karena event tidak punya
+  // method trim(). Sekarang openChat memvalidasi bahwa msg benar-benar
+  // string sebelum dipakai, sehingga aman dipanggil dengan cara apa pun.
   const openChat = (msg) => {
-    const text = msg || inputValue;
+    const text = (typeof msg === "string" ? msg : inputValue);
     if (!text.trim()) return;
     // Chat baru biasa dari beranda — pastikan tidak membawa sisa riwayat
     // sesi lama dari percobaan "lanjutkan chat" sebelumnya.
@@ -562,8 +567,13 @@ export default function HomeSection() {
                     w.style.background = "var(--bg-surface)";
                   }}
                 />
+                {/* FIXED: dulunya onClick={openChat} — meneruskan event klik
+                    sebagai argumen `msg`, sehingga openChat membaca event
+                    object bukan string dan gagal (error di .trim()). Sekarang
+                    dibungkus arrow function supaya event TIDAK diteruskan,
+                    dan openChat otomatis memakai state `inputValue`. */}
                 <button
-                  onClick={openChat}
+                  onClick={() => openChat()}
                   disabled={!inputValue.trim()}
                   className="rounded-lg w-7 h-7 md:w-9 md:h-9 flex items-center justify-center shrink-0 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
                   style={{

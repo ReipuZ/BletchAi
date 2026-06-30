@@ -30,7 +30,7 @@ export default function Register({ onGoLogin, onSuccess }) {
     background:   "var(--bg-surface)",
     border:       "1px solid var(--border-soft)",
     borderRadius: "12px",
-    padding:      "10px 14px 10px 36px",
+    padding:      "9px 14px 9px 36px",
     fontSize:     "13px",
     color:        "var(--text-primary)",
     outline:      "none",
@@ -53,9 +53,9 @@ export default function Register({ onGoLogin, onSuccess }) {
   return (
     <div className="w-full max-w-sm mx-auto">
 
-      {/* Badge */}
+      {/* Badge — disembunyikan di mobile */}
       <div
-        className="inline-flex items-center gap-1.5 mb-5"
+        className="hidden sm:inline-flex items-center gap-1.5 mb-5"
         style={{
           background:   "var(--bg-surface)",
           border:       "1px solid var(--border-md)",
@@ -71,7 +71,7 @@ export default function Register({ onGoLogin, onSuccess }) {
 
       {/* Heading */}
       <h2
-        className="text-2xl font-bold mb-1"
+        className="text-xl sm:text-2xl font-bold mb-1"
         style={{
           background:           "var(--gradient-brand)",
           backgroundSize:       "250% 100%",
@@ -81,15 +81,15 @@ export default function Register({ onGoLogin, onSuccess }) {
       >
         Buat akun baru
       </h2>
-      <p className="text-sm mb-6" style={{ color: "var(--text-muted)" }}>
+      <p className="text-xs sm:text-sm mb-3 sm:mb-6" style={{ color: "var(--text-muted)" }}>
         Siapkan dirimu menghadapi dunia kerja
       </p>
 
-      <form onSubmit={handleRegister} className="space-y-3">
+      <form onSubmit={handleRegister} className="space-y-2 sm:space-y-3">
 
         {/* Nama */}
         <div>
-          <label className="block text-xs font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>
+          <label className="block text-xs font-medium mb-1 sm:mb-1.5" style={{ color: "var(--text-secondary)" }}>
             Nama Lengkap
           </label>
           <div className="relative">
@@ -109,7 +109,7 @@ export default function Register({ onGoLogin, onSuccess }) {
 
         {/* Email */}
         <div>
-          <label className="block text-xs font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>
+          <label className="block text-xs font-medium mb-1 sm:mb-1.5" style={{ color: "var(--text-secondary)" }}>
             Email
           </label>
           <div className="relative">
@@ -128,9 +128,9 @@ export default function Register({ onGoLogin, onSuccess }) {
         </div>
 
         {/* Password row — 2 kolom sejajar */}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
           <div>
-            <label className="block text-xs font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>
+            <label className="block text-xs font-medium mb-1 sm:mb-1.5" style={{ color: "var(--text-secondary)" }}>
               Kata Sandi
             </label>
             <div className="relative">
@@ -157,7 +157,7 @@ export default function Register({ onGoLogin, onSuccess }) {
             </div>
           </div>
           <div>
-            <label className="block text-xs font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>
+            <label className="block text-xs font-medium mb-1 sm:mb-1.5" style={{ color: "var(--text-secondary)" }}>
               Konfirmasi
             </label>
             <div className="relative">
@@ -192,7 +192,7 @@ export default function Register({ onGoLogin, onSuccess }) {
             onChange={(e) => setAgree(e.target.checked)}
             className="mt-0.5 accent-[#3B82F6]"
           />
-          <span className="text-xs leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+          <span className="text-[11px] sm:text-xs leading-relaxed" style={{ color: "var(--text-secondary)" }}>
             Saya setuju dengan{" "}
             <span
               className="cursor-pointer transition"
@@ -239,15 +239,15 @@ export default function Register({ onGoLogin, onSuccess }) {
         </button>
       </form>
 
-      {/* Divider */}
-      <div className="flex items-center gap-3 my-4">
+      {/* Divider — disembunyikan di mobile */}
+      <div className="hidden sm:flex items-center gap-3 my-4">
         <div className="flex-1 h-px" style={{ background: "var(--border-soft)" }} />
         <span className="text-xs" style={{ color: "var(--text-muted)" }}>atau</span>
         <div className="flex-1 h-px" style={{ background: "var(--border-soft)" }} />
       </div>
 
-      {/* Social proof */}
-      <div className="flex items-center gap-3 mb-4">
+      {/* Social proof — disembunyikan di mobile */}
+      <div className="hidden sm:flex items-center gap-3 mb-4">
         <div className="flex -space-x-2">
           {[
             ["R", "var(--avatar-bg-1)", "var(--accent-light)"],
@@ -280,7 +280,7 @@ export default function Register({ onGoLogin, onSuccess }) {
       </div>
 
       {/* Footer */}
-      <p className="text-xs text-center" style={{ color: "var(--text-muted)" }}>
+      <p className="text-xs text-center mt-3 sm:mt-0" style={{ color: "var(--text-muted)" }}>
         Sudah punya akun?{" "}
         <span
           onClick={onGoLogin}

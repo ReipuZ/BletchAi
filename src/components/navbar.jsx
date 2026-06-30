@@ -373,16 +373,34 @@ export default function Navbar({ onLogout, onLogin, localUser, isLogin, openStat
         className="hidden md:flex fixed top-0 left-1/2 -translate-x-1/2 z-50 items-center gap-4 px-5 py-2 rounded-2xl transition-all duration-500"
         style={navBarStyle(false)}
       >
-        {/* Logo */}
+        {/* Logo — CHANGED: logo huruf "B" diganti logo asli dari assets.
+            Logo asli berwarna putih sehingga di light mode perlu outline
+            hitam (drop-shadow 4 arah) supaya tetap terlihat. */}
         <div
-          className="flex items-center gap-1.5 flex-shrink-0 cursor-pointer" /* CHANGED: cursor-pointer + onClick agar logo selalu balik ke home */
+          className="flex items-center gap-2 flex-shrink-0 cursor-pointer"
           onClick={() => goTo({ target: "home" })}
         >
-          <div className="w-5 h-5 rounded-md flex items-center justify-center"
-            style={{ background: "var(--accent-bg)", border: "1px solid var(--accent-border)" }}>
-            <span style={{ fontSize: "10px", fontWeight: 700, color: "var(--accent-light)", lineHeight: 1 }}>B</span>
-          </div>
-          <span className="text-[14px] font-semibold tracking-tight" style={{ color: "var(--text-primary)", letterSpacing: "-0.01em" }}>
+          <img
+            src="/src/assets/image/logo.png"
+            alt="Bletch AI"
+            className="w-7 h-7 object-contain"
+            style={{
+              filter: !isDark
+                ? "drop-shadow(1px 0 0 #000) drop-shadow(-1px 0 0 #000) drop-shadow(0 1px 0 #000) drop-shadow(0 -1px 0 #000)"
+                : "none",
+            }}
+          />
+          <span
+            className="text-[15px] font-bold tracking-tight"
+            style={{
+              color: "var(--text-primary)",
+              letterSpacing: "-0.03em",
+              background: "linear-gradient(135deg, var(--text-primary) 40%, var(--accent-light) 100%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+            }}
+          >
             Bletch AI
           </span>
         </div>
@@ -662,16 +680,31 @@ export default function Navbar({ onLogout, onLogin, localUser, isLogin, openStat
         className="md:hidden fixed top-0 left-1/2 -translate-x-1/2 z-50 flex items-center gap-1.5 px-2.5 py-1.5 rounded-2xl transition-all duration-500"
         style={navBarStyle(true)}
       >
-        {/* Logo */}
+        {/* Logo — CHANGED: sama seperti desktop, logo asli + stroke hitam light mode */}
         <div
-          className="flex items-center gap-1 flex-shrink-0 cursor-pointer" /* CHANGED: cursor-pointer + onClick */
+          className="flex items-center gap-1.5 flex-shrink-0 cursor-pointer"
           onClick={() => goTo({ target: "home" })}
         >
-          <div className="w-5 h-5 rounded-md flex items-center justify-center"
-            style={{ background: "var(--accent-bg)", border: "1px solid var(--accent-border)" }}>
-            <span style={{ fontSize: "10px", fontWeight: 700, color: "var(--accent-light)", lineHeight: 1 }}>B</span>
-          </div>
-          <span className="text-[12px] font-semibold" style={{ color: "var(--text-primary)", letterSpacing: "-0.01em" }}>
+          <img
+            src="/src/assets/image/logo.png"
+            alt="Bletch AI"
+            className="w-6 h-6 object-contain"
+            style={{
+              filter: !isDark
+                ? "drop-shadow(1px 0 0 #000) drop-shadow(-1px 0 0 #000) drop-shadow(0 1px 0 #000) drop-shadow(0 -1px 0 #000)"
+                : "none",
+            }}
+          />
+          <span
+            className="text-[13px] font-bold"
+            style={{
+              letterSpacing: "-0.03em",
+              background: "linear-gradient(135deg, var(--text-primary) 40%, var(--accent-light) 100%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+            }}
+          >
             Bletch AI
           </span>
         </div>

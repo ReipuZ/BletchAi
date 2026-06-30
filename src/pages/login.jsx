@@ -38,12 +38,11 @@ export default function Login({ onLogin, onGoRegister }) {
     }
   };
 
-  /* ── shared input style ── */
   const inputStyle = {
     background:   "var(--bg-surface)",
     border:       "1px solid var(--border-soft)",
     borderRadius: "12px",
-    padding:      "10px 14px 10px 36px",
+    padding:      "9px 14px 9px 36px",
     fontSize:     "13px",
     color:        "var(--text-primary)",
     outline:      "none",
@@ -66,9 +65,9 @@ export default function Login({ onLogin, onGoRegister }) {
   return (
     <div className="w-full max-w-sm mx-auto">
 
-      {/* Badge */}
+      {/* Badge — disembunyikan di mobile supaya hemat ruang */}
       <div
-        className="inline-flex items-center gap-1.5 mb-5"
+        className="hidden sm:inline-flex items-center gap-1.5 mb-5"
         style={{
           background:   "var(--bg-surface)",
           border:       "1px solid var(--border-md)",
@@ -84,7 +83,7 @@ export default function Login({ onLogin, onGoRegister }) {
 
       {/* Heading */}
       <h2
-        className="text-2xl font-bold mb-1"
+        className="text-xl sm:text-2xl font-bold mb-1"
         style={{
           background:           "var(--gradient-brand)",
           backgroundSize:       "250% 100%",
@@ -94,15 +93,15 @@ export default function Login({ onLogin, onGoRegister }) {
       >
         Masuk
       </h2>
-      <p className="text-sm mb-7" style={{ color: "var(--text-muted)" }}>
+      <p className="text-xs sm:text-sm mb-4 sm:mb-7" style={{ color: "var(--text-muted)" }}>
         Buka jalan menuju masa depanmu
       </p>
 
-      <form onSubmit={handleLogin} className="space-y-4">
+      <form onSubmit={handleLogin} className="space-y-2.5 sm:space-y-4">
 
         {/* Email */}
         <div>
-          <label className="block text-xs font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>
+          <label className="block text-xs font-medium mb-1 sm:mb-1.5" style={{ color: "var(--text-secondary)" }}>
             Email
           </label>
           <div className="relative">
@@ -122,7 +121,7 @@ export default function Login({ onLogin, onGoRegister }) {
 
         {/* Password */}
         <div>
-          <label className="block text-xs font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>
+          <label className="block text-xs font-medium mb-1 sm:mb-1.5" style={{ color: "var(--text-secondary)" }}>
             Kata Sandi
           </label>
           <div className="relative">
@@ -185,7 +184,7 @@ export default function Login({ onLogin, onGoRegister }) {
       </form>
 
       {/* Divider */}
-      <div className="flex items-center gap-3 my-5">
+      <div className="flex items-center gap-3 my-3 sm:my-5">
         <div className="flex-1 h-px" style={{ background: "var(--border-soft)" }} />
         <span className="text-xs" style={{ color: "var(--text-muted)" }}>atau masuk dengan</span>
         <div className="flex-1 h-px" style={{ background: "var(--border-soft)" }} />
@@ -218,11 +217,10 @@ export default function Login({ onLogin, onGoRegister }) {
         {loading ? "Memproses..." : "Lanjutkan dengan Google"}
       </button>
 
-      {/* Separator */}
-      <div className="my-5 h-px" style={{ background: "var(--border-soft)" }} />
+      {/* Separator + social proof — disembunyikan di mobile, hemat tinggi */}
+      <div className="hidden sm:block my-5 h-px" style={{ background: "var(--border-soft)" }} />
 
-      {/* Social proof */}
-      <div className="flex items-center gap-3 mb-5">
+      <div className="hidden sm:flex items-center gap-3 mb-5">
         <div className="flex -space-x-2">
           {[
             ["R", "var(--avatar-bg-1)", "var(--accent-light)"],
@@ -255,7 +253,7 @@ export default function Login({ onLogin, onGoRegister }) {
       </div>
 
       {/* Daftar link */}
-      <p className="text-xs text-center" style={{ color: "var(--text-muted)" }}>
+      <p className="text-xs text-center mt-3 sm:mt-0" style={{ color: "var(--text-muted)" }}>
         Belum punya akun?{" "}
         <span
           onClick={onGoRegister}

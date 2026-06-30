@@ -206,7 +206,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login", onSu
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.22 }}
-          className="fixed inset-0 z-[100] flex items-center justify-center px-4 py-6"
+          className="fixed inset-0 z-[100] flex items-center justify-center px-3 py-4 sm:px-4 sm:py-6"
           style={{ background: "var(--overlay)", backdropFilter: "blur(8px)" }}
           onClick={onClose}
         >
@@ -215,9 +215,9 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login", onSu
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.93, y: 28 }}
             transition={{ type: "spring", stiffness: 280, damping: 26 }}
-            className="relative w-full max-w-[860px] overflow-hidden flex flex-col md:flex-row rounded-3xl"
+            className="relative w-full max-w-[860px] overflow-hidden flex flex-col md:flex-row rounded-2xl md:rounded-3xl"
             style={{
-              maxHeight: "calc(100vh - 3rem)",
+              maxHeight: "calc(100vh - 2rem)",
               border: "1px solid var(--border-soft)",
               boxShadow: "0 30px 80px var(--shadow-card-lg)",
             }}
@@ -226,12 +226,13 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login", onSu
 
             {/* ══════════════════════════════
                 PANEL KIRI — selalu dark (biarkan karena ada semut)
+                Desktop (md:) tidak diubah sama sekali.
             ══════════════════════════════ */}
             <div
               className="flex flex-col w-full md:w-[360px] flex-shrink-0 relative overflow-hidden"
               style={{
                 background: "linear-gradient(160deg, #000000 0%, #050a14 50%, #080f1e 100%)",
-                minHeight: "160px",
+                minHeight: "130px",
               }}
             >
               {/* Dekorasi glow */}
@@ -296,7 +297,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login", onSu
                   <motion.div
                     initial={{ opacity: 0, scale: 0.85 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    style={{ scale: 0.55, transformOrigin: "center bottom" }}
+                    style={{ scale: 0.42, transformOrigin: "center bottom" }}
                   >
                     <CyborgAnt />
                   </motion.div>
@@ -331,7 +332,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login", onSu
                 </div>
               </div>
 
-              {/* ── Desktop panel penuh ── */}
+              {/* ── Desktop panel penuh — TIDAK DIUBAH ── */}
               <div className="hidden md:flex relative z-10 flex-col h-full p-8 justify-between">
                 <motion.div
                   initial={{ opacity: 0, y: -10 }}
@@ -437,6 +438,8 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login", onSu
 
             {/* ══════════════════════════════
                 PANEL KANAN — form, pakai CSS vars
+                Desktop (sm: ke atas) tidak diubah sama sekali — hanya
+                padding/posisi mobile yang dikompres.
             ══════════════════════════════ */}
             <div
               className="relative flex-1 flex flex-col overflow-y-auto"
@@ -453,7 +456,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login", onSu
                 />
               </div>
 
-              <div className="relative z-10 px-6 sm:px-10 py-10 flex flex-col h-full">
+              <div className="relative z-10 px-5 sm:px-10 py-6 sm:py-10 flex flex-col h-full">
 
                 {/* Tombol close */}
                 <motion.button
@@ -461,13 +464,13 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login", onSu
                   whileHover={{ scale: 1.12, rotate: 90 }}
                   whileTap={{ scale: 0.9 }}
                   transition={{ duration: 0.18 }}
-                  className="absolute top-4 right-4 z-10 w-8 h-8 rounded-full flex items-center justify-center"
+                  className="absolute top-3 right-3 sm:top-4 sm:right-4 z-10 w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center"
                   style={{
                     background: "var(--bg-surface)",
                     border: "1px solid var(--border-md)",
                   }}
                 >
-                  <X size={15} style={{ color: "var(--text-muted)" }} />
+                  <X size={14} style={{ color: "var(--text-muted)" }} />
                 </motion.button>
 
                 <AnimatePresence mode="wait">

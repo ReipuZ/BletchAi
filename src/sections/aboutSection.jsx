@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Mail, Phone, MapPin } from "lucide-react";
+import logo from "../assets/image/logo.png";
 
 const navLinks = [
   { label: "Home",      href: "#home"      },
@@ -30,6 +31,9 @@ const socials = [
 ];
 
 export default function FooterSection() {
+  // Deteksi light mode dari class di <html>
+  const isLight = document.documentElement.classList.contains("light");
+
   return (
     <footer
       className="relative overflow-hidden pt-12 sm:pt-16 md:pt-20 pb-6 sm:pb-8"
@@ -65,51 +69,25 @@ export default function FooterSection() {
         }
       `}</style>
 
-      {/* ── Ambient glows — pakai var() agar responsif light/dark ── */}
-      <div
-        className="footer-blob-1 pointer-events-none absolute -bottom-20 -left-20 w-[300px] h-[300px] sm:w-[420px] sm:h-[420px] rounded-full"
-        style={{
-          background: "radial-gradient(circle, var(--blob-blue), transparent 70%)",
-          opacity: "var(--blob-opacity-blue)",
-          filter: "blur(120px)",
-        }}
-      />
-      <div
-        className="footer-blob-2 pointer-events-none absolute -top-10 right-0 w-[200px] h-[200px] sm:w-[300px] sm:h-[300px] rounded-full"
-        style={{
-          background: "radial-gradient(circle, var(--blob-purple), transparent 70%)",
-          opacity: "var(--blob-opacity-purple)",
-          filter: "blur(100px)",
-        }}
-      />
-      <div
-        className="footer-blob-3 pointer-events-none absolute bottom-0 left-1/2 -translate-x-1/2 w-[300px] h-[120px] sm:w-[500px] sm:h-[180px] rounded-full"
-        style={{
-          background: "radial-gradient(circle, var(--blob-cyan), transparent 70%)",
-          opacity: "var(--blob-opacity-cyan)",
-          filter: "blur(90px)",
-        }}
-      />
+      {/* ── Ambient glows ── */}
+      <div className="footer-blob-1 pointer-events-none absolute -bottom-20 -left-20 w-[300px] h-[300px] sm:w-[420px] sm:h-[420px] rounded-full"
+        style={{ background: "radial-gradient(circle, var(--blob-blue), transparent 70%)", opacity: "var(--blob-opacity-blue)", filter: "blur(120px)" }} />
+      <div className="footer-blob-2 pointer-events-none absolute -top-10 right-0 w-[200px] h-[200px] sm:w-[300px] sm:h-[300px] rounded-full"
+        style={{ background: "radial-gradient(circle, var(--blob-purple), transparent 70%)", opacity: "var(--blob-opacity-purple)", filter: "blur(100px)" }} />
+      <div className="footer-blob-3 pointer-events-none absolute bottom-0 left-1/2 -translate-x-1/2 w-[300px] h-[120px] sm:w-[500px] sm:h-[180px] rounded-full"
+        style={{ background: "radial-gradient(circle, var(--blob-cyan), transparent 70%)", opacity: "var(--blob-opacity-cyan)", filter: "blur(90px)" }} />
 
       {/* ── Grid lines ── */}
-      <div
-        className="pointer-events-none absolute inset-0"
+      <div className="pointer-events-none absolute inset-0"
         style={{
-          backgroundImage:
-            "linear-gradient(var(--border-soft) 1px, transparent 1px), linear-gradient(90deg, var(--border-soft) 1px, transparent 1px)",
+          backgroundImage: "linear-gradient(var(--border-soft) 1px, transparent 1px), linear-gradient(90deg, var(--border-soft) 1px, transparent 1px)",
           backgroundSize: "60px 60px",
           opacity: "var(--grid-opacity)",
-        }}
-      />
+        }} />
 
       {/* ── Top separator ── */}
-      <div
-        className="absolute top-0 inset-x-0 h-px"
-        style={{
-          background:
-            "linear-gradient(90deg, transparent 0%, var(--accent-border) 30%, rgba(139,92,246,0.25) 65%, transparent 100%)",
-        }}
-      />
+      <div className="absolute top-0 inset-x-0 h-px"
+        style={{ background: "linear-gradient(90deg, transparent 0%, var(--accent-border) 30%, rgba(139,92,246,0.25) 65%, transparent 100%)" }} />
 
       <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-8 md:px-10">
         <div
@@ -123,18 +101,29 @@ export default function FooterSection() {
             viewport={{ once: true }} transition={{ duration: 0.5 }}
             className="col-span-2 md:col-span-1"
           >
+            {/* CHANGED: logo huruf "B" diganti logo asli. Di light mode logo
+                putih diberi drop-shadow hitam 4 arah supaya tetap terlihat. */}
             <div className="flex items-center gap-2.5 mb-3">
-              <div
-                className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
+              <img
+                src={logo}
+                alt="Bletch AI"
+                className="w-8 h-8 object-contain flex-shrink-0"
                 style={{
-                  background: "var(--accent-bg)",
-                  border: "1px solid var(--accent-border)",
-                  boxShadow: "inset 0 1px 0 var(--accent-border)",
+                  filter: isLight
+                    ? "drop-shadow(1px 0 0 #000) drop-shadow(-1px 0 0 #000) drop-shadow(0 1px 0 #000) drop-shadow(0 -1px 0 #000)"
+                    : "none",
+                }}
+              />
+              <span
+                className="text-lg font-black tracking-tight"
+                style={{
+                  letterSpacing: "-0.03em",
+                  background: "linear-gradient(135deg, var(--text-primary) 40%, var(--accent-light) 100%)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  backgroundClip: "text",
                 }}
               >
-                <span className="font-black text-xs" style={{ color: "var(--accent-light)" }}>B</span>
-              </div>
-              <span className="text-lg font-black tracking-wide" style={{ color: "var(--text-primary)" }}>
                 BLETCHAI
               </span>
             </div>
@@ -150,10 +139,7 @@ export default function FooterSection() {
                 lineHeight: "1.4",
               }}
             >
-              <span
-                className="footer-pulse w-1.5 h-1.5 rounded-full flex-shrink-0"
-                style={{ background: "var(--accent)" }}
-              />
+              <span className="footer-pulse w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: "var(--accent)" }} />
               Platform Persiapan Karier untuk SMK
             </span>
 
@@ -163,26 +149,11 @@ export default function FooterSection() {
 
             <div className="flex gap-2 mt-4 sm:mt-5">
               {socials.map((s) => (
-                <a
-                  key={s.label}
-                  href={s.href}
-                  aria-label={s.label}
+                <a key={s.label} href={s.href} aria-label={s.label}
                   className="w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200"
-                  style={{
-                    background: "var(--bg-surface)",
-                    border: "1px solid var(--border-soft)",
-                    color: "var(--text-muted)",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = "var(--accent-bg)";
-                    e.currentTarget.style.borderColor = "var(--accent-border)";
-                    e.currentTarget.style.color = "var(--accent-light)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = "var(--bg-surface)";
-                    e.currentTarget.style.borderColor = "var(--border-soft)";
-                    e.currentTarget.style.color = "var(--text-muted)";
-                  }}
+                  style={{ background: "var(--bg-surface)", border: "1px solid var(--border-soft)", color: "var(--text-muted)" }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = "var(--accent-bg)"; e.currentTarget.style.borderColor = "var(--accent-border)"; e.currentTarget.style.color = "var(--accent-light)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = "var(--bg-surface)"; e.currentTarget.style.borderColor = "var(--border-soft)"; e.currentTarget.style.color = "var(--text-muted)"; }}
                 >
                   <svg viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5">
                     <path d={s.icon} />
@@ -198,20 +169,13 @@ export default function FooterSection() {
             viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.1 }}
             className="col-span-1"
           >
-            <p
-              className="text-[10px] font-medium uppercase tracking-[0.12em] mb-1"
-              style={{ color: "var(--text-label)" }}
-            >
-              Menu
-            </p>
+            <p className="text-[10px] font-medium uppercase tracking-[0.12em] mb-1" style={{ color: "var(--text-label)" }}>Menu</p>
             <p className="text-xs font-semibold mb-3" style={{ color: "var(--text-secondary)" }}>Navigasi</p>
             <div className="h-px w-7 rounded mb-4" style={{ background: "var(--gradient-brand)" }} />
             <ul className="space-y-3">
               {navLinks.map((link) => (
                 <li key={link.label}>
-                  <a
-                    href={link.href}
-                    className="text-xs transition-colors duration-200 block py-0.5"
+                  <a href={link.href} className="text-xs transition-colors duration-200 block py-0.5"
                     style={{ color: "var(--text-muted)" }}
                     onMouseEnter={(e) => { e.currentTarget.style.color = "var(--accent-light)"; }}
                     onMouseLeave={(e) => { e.currentTarget.style.color = "var(--text-muted)"; }}
@@ -229,29 +193,17 @@ export default function FooterSection() {
             viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.2 }}
             className="col-span-1"
           >
-            <p
-              className="text-[10px] font-medium uppercase tracking-[0.12em] mb-1"
-              style={{ color: "var(--text-label)" }}
-            >
-              Kontak
-            </p>
+            <p className="text-[10px] font-medium uppercase tracking-[0.12em] mb-1" style={{ color: "var(--text-label)" }}>Kontak</p>
             <p className="text-xs font-semibold mb-3" style={{ color: "var(--text-secondary)" }}>Hubungi Kami</p>
             <div className="h-px w-7 rounded mb-4" style={{ background: "var(--gradient-brand)" }} />
             <ul className="space-y-3">
               {contacts.map(({ icon: Icon, text }) => (
                 <li key={text} className="flex items-start gap-2">
-                  <div
-                    className="mt-0.5 flex-shrink-0 w-5 h-5 rounded-md flex items-center justify-center"
-                    style={{
-                      background: "var(--accent-bg)",
-                      border: "1px solid var(--accent-border)",
-                    }}
-                  >
+                  <div className="mt-0.5 flex-shrink-0 w-5 h-5 rounded-md flex items-center justify-center"
+                    style={{ background: "var(--accent-bg)", border: "1px solid var(--accent-border)" }}>
                     <Icon size={10} style={{ color: "var(--accent)" }} />
                   </div>
-                  <span className="text-xs leading-snug break-all" style={{ color: "var(--text-muted)" }}>
-                    {text}
-                  </span>
+                  <span className="text-xs leading-snug break-all" style={{ color: "var(--text-muted)" }}>{text}</span>
                 </li>
               ))}
             </ul>

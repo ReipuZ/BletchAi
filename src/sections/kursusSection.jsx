@@ -1,13 +1,9 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronRight, Star, Users, Clock, Award, X, ArrowUpRight, Sparkles } from "lucide-react";
-import KursusRPL from "../assets/image/kursusRPL.jpg";
-import KursusDesain from "../assets/image/kursusDesain.jpg";
-import KursusAkuntansi from "../assets/image/kursusAkuntansi.jpg";
-import KursusOtomotif from "../assets/image/kursusOtomotif.jpg";
-import KursusTataboga from "../assets/image/kursusTataboga.jpg";
-import KursusEditting from "../assets/image/kursusEditting.jpg";
+import { useNavigate } from "react-router-dom";
+import { ChevronRight, Star, Users, Clock, Award, X, ArrowUpRight } from "lucide-react";
 import Reveal, { RevealGroup, revealItem } from "../components/Reveal.jsx";
+import { courses } from "../components/kursus.js";
 
 const isTouchDevice = () =>
   typeof window !== "undefined" &&
@@ -48,123 +44,6 @@ const benefits = [
   },
 ];
 
-const courses = [
-  {
-    id: 1,
-    title: "Web Development dengan React",
-    category: "Rekayasa Perangkat Lunak",
-    level: "Pemula",
-    rating: 4.9,
-    students: "1.2k",
-    duration: "24 jam",
-    sessions: "12 Pertemuan",
-    ageRange: "15–18 tahun",
-    desc: "Pelajari cara membangun aplikasi web modern menggunakan React. Mulai dari dasar hingga deploy project nyata.",
-    mentor: "Budi Santoso",
-    price: "Rp 180.000",
-    badge: "Terlaris",
-    online: true,
-    image: KursusRPL,
-    accent: "#185FA5",
-    accentRgb: "24,95,165",
-  },
-  {
-    id: 2,
-    title: "Desain UI/UX Profesional",
-    category: "Desain Grafis",
-    level: "Menengah",
-    rating: 4.8,
-    students: "980",
-    duration: "18 jam",
-    sessions: "10 Pertemuan",
-    ageRange: "15–18 tahun",
-    desc: "Kuasai Figma dan prinsip desain UI/UX dari nol. Buat portofolio desain yang siap kerja.",
-    mentor: "Sari Dewi",
-    price: "Rp 150.000",
-    badge: "Populer",
-    online: true,
-    image: KursusDesain,
-    accent: "#993356",
-    accentRgb: "153,51,86",
-  },
-  {
-    id: 3,
-    title: "Akuntansi Digital & Excel",
-    category: "Akuntansi",
-    level: "Pemula",
-    rating: 4.7,
-    students: "2.1k",
-    duration: "20 jam",
-    sessions: "8 Pertemuan",
-    ageRange: "15–18 tahun",
-    desc: "Kuasai pembukuan digital dan Excel untuk kebutuhan akuntansi modern di dunia kerja.",
-    mentor: "Rina Marlina",
-    price: "Rp 120.000",
-    badge: "Terlaris",
-    online: true,
-    image: KursusAkuntansi,
-    accent: "#0F6E56",
-    accentRgb: "15,110,86",
-  },
-  {
-    id: 4,
-    title: "Teknik Perawatan Mesin",
-    category: "Teknik Otomotif",
-    level: "Menengah",
-    rating: 4.8,
-    students: "760",
-    duration: "30 jam",
-    sessions: "15 Pertemuan",
-    ageRange: "15–18 tahun",
-    desc: "Pelajari teknik servis dan perawatan mesin kendaraan dari mekanik berpengalaman.",
-    mentor: "Doni Prasetyo",
-    price: "Rp 200.000",
-    badge: "Baru",
-    online: false,
-    image: KursusOtomotif,
-    accent: "#854F0B",
-    accentRgb: "133,79,11",
-  },
-  {
-    id: 5,
-    title: "Editing Video & Motion",
-    category: "Multimedia",
-    level: "Pemula",
-    rating: 4.9,
-    students: "1.5k",
-    duration: "22 jam",
-    sessions: "11 Pertemuan",
-    ageRange: "15–18 tahun",
-    desc: "Kuasai Adobe Premiere dan After Effects untuk editing video profesional dan motion graphic.",
-    mentor: "Fajar Nugroho",
-    price: "Rp 165.000",
-    badge: "Populer",
-    online: true,
-    image: KursusEditting,
-    accent: "#534AB7",
-    accentRgb: "83,74,183",
-  },
-  {
-    id: 6,
-    title: "Pastry & Bakery Modern",
-    category: "Tata Boga",
-    level: "Pemula",
-    rating: 4.6,
-    students: "640",
-    duration: "16 jam",
-    sessions: "8 Pertemuan",
-    ageRange: "15–18 tahun",
-    desc: "Belajar membuat kue dan roti modern dari chef berpengalaman. Cocok untuk pemula.",
-    mentor: "Chef Maya",
-    price: "Rp 135.000",
-    badge: "Online",
-    online: true,
-    image: KursusTataboga,
-    accent: "#993C1D",
-    accentRgb: "153,60,29",
-  },
-];
-
 const loopedCourses = [...courses, ...courses, ...courses];
 const CARD_W = 220;
 const CARD_GAP = 12;
@@ -172,6 +51,8 @@ const STEP = CARD_W + CARD_GAP;
 
 /* ─── Detail Panel ─────────────────────────────────────────── */
 function CourseDetailPanel({ course, onClose }) {
+  const navigate = useNavigate();
+
   return (
     <AnimatePresence>
       {course && (
@@ -190,7 +71,6 @@ function CourseDetailPanel({ course, onClose }) {
               backdropFilter: "blur(28px)",
               WebkitBackdropFilter: "blur(28px)",
               border: "1px solid var(--border-md)",
-              // ✅ Gunakan var(--shadow-card-lg) agar adaptif light/dark
               boxShadow: `0 8px 40px var(--shadow-card-lg), 0 0 0 1px rgba(${course.accentRgb},0.12), inset 0 1px 0 var(--card-inset)`,
             }}
           >
@@ -204,7 +84,6 @@ function CourseDetailPanel({ course, onClose }) {
               {/* Image side */}
               <div className="relative sm:w-52 flex-shrink-0 h-40 sm:h-auto overflow-hidden">
                 <img src={course.image} alt={course.title} className="w-full h-full object-cover" />
-                {/* Overlay gelap tetap di atas foto — intentional */}
                 <div className="absolute inset-0"
                   style={{ background: "linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.90)), linear-gradient(to right, transparent 55%, rgba(0,0,0,0.85))" }} />
                 <div className="absolute top-3 left-3 flex gap-1.5 flex-wrap">
@@ -233,7 +112,6 @@ function CourseDetailPanel({ course, onClose }) {
                       {course.mentor[0]}
                     </div>
                     <span className="text-[11px]" style={{ color: "var(--text-muted)" }}>{course.mentor}</span>
-                    {/* ✅ Ganti text-faint → text-muted supaya lebih terbaca di light mode */}
                     <span className="text-[10px] ml-auto" style={{ color: "var(--text-muted)" }}>{course.category}</span>
                   </div>
 
@@ -251,7 +129,6 @@ function CourseDetailPanel({ course, onClose }) {
                         style={{
                           background: "var(--bg-surface-md)",
                           border: "1px solid var(--border-md)",
-                          // ✅ Ganti text-muted → text-secondary supaya lebih terbaca di light mode
                           color: "var(--text-secondary)",
                         }}>
                         {Icon && <Icon size={9} />}
@@ -280,6 +157,7 @@ function CourseDetailPanel({ course, onClose }) {
                       <X size={13} style={{ color: "var(--text-muted)" }} />
                     </button>
                     <button
+                      onClick={() => navigate(`/kursus/${course.id}`)}
                       className="text-xs font-semibold px-4 py-2.5 rounded-xl flex items-center gap-1.5 transition-all active:scale-[0.97] flex-shrink-0"
                       style={{
                         background: `rgba(${course.accentRgb},0.14)`, color: course.accent,
@@ -348,7 +226,6 @@ function CourseCard({ course, isSelected, onSelect, pausedRef }) {
           backdropFilter: "blur(20px)",
           WebkitBackdropFilter: "blur(20px)",
           border: isSelected ? `1px solid rgba(${course.accentRgb},0.28)` : "1px solid var(--border-md)",
-          // ✅ Gunakan CSS var untuk shadow agar adaptif light/dark
           boxShadow: isSelected
             ? `0 4px 24px var(--shadow-card), inset 0 1px 0 rgba(${course.accentRgb},0.12)`
             : `0 4px 16px var(--shadow-card), inset 0 1px 0 var(--card-inset)`,
@@ -373,10 +250,8 @@ function CourseCard({ course, isSelected, onSelect, pausedRef }) {
               <span className="text-4xl select-none">📚</span>
             </div>
           )}
-          {/* Overlay di atas foto — tetap gelap karena di atas gambar */}
           <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.88) 0%, transparent 55%)" }} />
           <div className="absolute top-2.5 left-2.5">
-            {/* Level badge di atas foto — tetap dark bg intentional */}
             <span className="text-[10px] font-semibold px-2.5 py-[3px] rounded-full"
               style={{ background: "rgba(0,0,0,0.82)", color: "rgba(255,255,255,0.90)", border: "1px solid rgba(255,255,255,0.18)" }}>
               {course.level}
@@ -385,20 +260,17 @@ function CourseCard({ course, isSelected, onSelect, pausedRef }) {
           {!isTouch.current && (
             <motion.div className="absolute inset-0 pointer-events-none"
               animate={{ opacity: hovered ? 1 : 0 }} transition={{ duration: 0.2 }}
-              // ✅ Ganti hardcode putih → var(--card-inset) supaya shimmer terlihat di dark, halus di light
               style={{ background: `radial-gradient(circle at ${50 + mousePos.x * 35}% ${50 + mousePos.y * 35}%, var(--card-inset) 0%, transparent 65%)` }} />
           )}
         </div>
 
         {/* Body */}
         <div className="px-3 py-2.5">
-          {/* ✅ Ganti text-faint → text-muted untuk category agar terbaca di light mode */}
           <p className="text-[10px] font-semibold mb-0.5 uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>{course.category}</p>
           <p className="text-xs font-medium leading-snug mb-2 line-clamp-2" style={{ color: "var(--text-secondary)" }}>{course.title}</p>
           <div className="flex items-center gap-1.5 text-[10px]" style={{ color: "var(--text-muted)" }}>
             <Star size={9} className="fill-amber-400 text-amber-400 flex-shrink-0" />
             <span className="font-medium" style={{ color: "var(--text-secondary)" }}>{course.rating}</span>
-            {/* ✅ Separator dot pakai text-muted bukan text-faint */}
             <span style={{ color: "var(--text-muted)" }}>·</span>
             <span style={{ color: "var(--text-muted)" }}>{course.students} siswa</span>
             <span style={{ color: "var(--text-muted)" }}>·</span>
@@ -527,7 +399,6 @@ export default function CourseRecommendation() {
                   backdropFilter: "blur(20px)",
                   WebkitBackdropFilter: "blur(20px)",
                   border: "1px solid var(--border-md)",
-                  // ✅ Gunakan var(--shadow-card) & var(--card-inset) agar adaptif
                   boxShadow: `0 4px 20px var(--shadow-card), inset 0 1px 0 var(--card-inset)`,
                   transition: "box-shadow 0.25s ease, background 0.25s ease",
                 }}
@@ -575,7 +446,6 @@ export default function CourseRecommendation() {
                 backdropFilter: "blur(28px)",
                 WebkitBackdropFilter: "blur(28px)",
                 border: "1px solid var(--border-md)",
-                // ✅ Modal shadow tetap bisa lebih kuat karena ada overlay gelap di belakangnya
                 boxShadow: `0 40px 100px var(--shadow-search), inset 0 1px 0 var(--card-inset)`,
               }}
               onClick={e => e.stopPropagation()}>
@@ -605,7 +475,6 @@ export default function CourseRecommendation() {
                       style={{
                         background: "var(--bg-surface)",
                         border: "1px solid var(--border-soft)",
-                        // ✅ Gunakan var(--card-inset) bukan rgba putih hardcode
                         boxShadow: `inset 0 1px 0 var(--card-inset)`,
                       }}
                       onMouseEnter={e => {
@@ -631,10 +500,8 @@ export default function CourseRecommendation() {
                             <span className="text-4xl select-none">📚</span>
                           </div>
                         )}
-                        {/* Overlay di atas foto — tetap gelap intentional */}
                         <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.82) 0%, transparent 55%)" }} />
                         <div className="absolute top-2.5 left-2.5">
-                          {/* Level badge di atas foto — dark bg intentional */}
                           <span className="text-[10px] font-semibold px-2.5 py-[3px] rounded-full"
                             style={{ background: "rgba(0,0,0,0.82)", color: "rgba(255,255,255,0.90)", border: "1px solid rgba(255,255,255,0.18)" }}>
                             {course.level}
@@ -643,7 +510,6 @@ export default function CourseRecommendation() {
                       </div>
 
                       <div className="px-3 py-2.5">
-                        {/* ✅ Ganti text-faint → text-muted untuk category */}
                         <p className="text-[10px] font-semibold mb-0.5 uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>{course.category}</p>
                         <p className="text-xs font-medium leading-snug mb-2 line-clamp-2" style={{ color: "var(--text-secondary)" }}>{course.title}</p>
                         <div className="flex items-center gap-1.5 text-[10px]" style={{ color: "var(--text-muted)" }}>
