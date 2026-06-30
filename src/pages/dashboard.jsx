@@ -5,7 +5,7 @@ import KursusSection from "../sections/kursusSection";
 import InterviewSection from "../sections/interviewSection";
 import FaqSection from "../sections/faqSection";
 import AboutSection from "../sections/aboutSection";
-import FloatingMascot from "../components/FloatingMascot";
+import FloatingMascot from "../components/floatingMascot";
 
 export default function Dashboard({ onLogout, onLogin, localUser, isLogin }) {
   const interviewRef = useRef(null);

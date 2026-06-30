@@ -1,4 +1,4 @@
-import JurusanPage from "../../components/JurusanPage.jsx";
+import JurusanPage from "../../components/jurusanPage.jsx";
 import { getJurusanById } from "../../components/jurusan.js";
 
 export default function MultimediaPage() {
