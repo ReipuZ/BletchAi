@@ -4,6 +4,23 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Send, X, Search } from "lucide-react";
 import { saveSession, updateSession } from "../components/chatHistoryStore";
 
+// NEW: generator sessionId yang aman dipakai di context apa pun.
+// crypto.randomUUID() cuma tersedia di secure context (https / localhost).
+// Kalau dipanggil di http biasa, dia throw error dan bikin sessionId
+// gagal ke-generate selamanya (itu sebabnya backend selalu bilang
+// "sessionId wajib dikirim..."). Fallback ini memastikan kita selalu
+// punya id unik walau crypto.randomUUID tidak tersedia / error.
+function generateSessionId() {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    try {
+      return crypto.randomUUID();
+    } catch {
+      // lanjut ke fallback di bawah
+    }
+  }
+  return "sess-" + Date.now() + "-" + Math.random().toString(36).slice(2, 10);
+}
+
 // CHANGED: ChatOverlay sekarang menerima dua prop baru:
 // - initialMessages: riwayat pesan lama, dipakai saat user menekan
 //   "Lanjutkan chat" dari HistoryPage. Kalau kosong/undefined, overlay
@@ -50,8 +67,11 @@ export default function ChatOverlay({
         // backend supaya Anty mengingat konteks percakapan selama overlay
         // ini terbuka, terlepas dari sessionId riwayat lokal di
         // chatHistoryStore (dua hal yang berbeda, kebetulan bisa sama).
+        // FIXED: pakai generateSessionId() (punya fallback) bukan langsung
+        // crypto.randomUUID(), supaya tidak throw di non-secure context
+        // (http) dan menyebabkan sessionId gagal ke-set selamanya.
         if (!activeSessionIdRef.current) {
-          activeSessionIdRef.current = crypto.randomUUID();
+          activeSessionIdRef.current = generateSessionId();
         }
 
         didSendInitial.current = true;
@@ -88,6 +108,15 @@ export default function ChatOverlay({
   const sendMessage = async (text) => {
     const msg = text.trim();
     if (!msg || isLoading) return;
+
+    // NEW: safety net — kalau karena suatu sebab sessionId masih belum
+    // ada saat sendMessage dipanggil (mis. urutan render yang tidak
+    // terduga), generate di sini juga supaya pesan tidak pernah dikirim
+    // tanpa sessionId.
+    if (!activeSessionIdRef.current) {
+      activeSessionIdRef.current = generateSessionId();
+    }
+
     setInputValue("");
     setMessages((prev) => [...prev, { role: "user", text: msg }]);
     setIsLoading(true);
