@@ -1,13 +1,19 @@
 import { useState, useEffect, useRef } from "react";
+import { useNavigate, useLocation } from "react-router-dom"; // CHANGED: tambahan import
 import {
   House, Mic, CircleHelp, BookOpen,
-  LogOut, UserRound, Bell, Search, MessageCircle,
+  LogOut, UserRound, Search, MessageCircle,
   BarChart2, ChevronDown, ChevronUp, X, Menu,
+  History, // CHANGED: icon untuk menu History
+  Sun, Moon, // CHANGED: icon untuk theme toggle (ganti Bell)
 } from "lucide-react";
 import { auth } from "../firebase";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 
 export default function Navbar({ onLogout, onLogin, localUser, isLogin, openStatsRef }) {
+  const navigate = useNavigate(); // CHANGED
+  const location = useLocation(); // CHANGED — dipakai untuk tahu apakah kita sedang di /history
+
   const [firebaseUser, setFirebaseUser]           = useState(null);
   const [open, setOpen]                           = useState(false);
   const [search, setSearch]                       = useState("");
@@ -16,6 +22,7 @@ export default function Navbar({ onLogout, onLogin, localUser, isLogin, openStat
   const [active, setActive]                       = useState("home");
   const [scrolled, setScrolled]                   = useState(false);
   const [interviewDropOpen, setInterviewDropOpen] = useState(false);
+  const [isDark, setIsDark]                       = useState(true); // CHANGED: state theme (gabungan dari ThemeToggle)
   const isClicking       = useRef(false);
   const dropdownRef      = useRef(null);
   const searchRef        = useRef(null);
@@ -44,6 +51,51 @@ export default function Navbar({ onLogout, onLogin, localUser, isLogin, openStat
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // CHANGED: logic theme toggle dipindahkan ke sini (dari komponen ThemeToggle terpisah)
+  // supaya tombolnya bisa langsung dipasang di navbar (gantiin lonceng), tidak perlu
+  // render komponen mengambang terpisah lagi.
+  const applyTheme = (dark) => {
+    if (dark) {
+      document.documentElement.classList.remove("light");
+    } else {
+      document.documentElement.classList.add("light");
+    }
+  };
+
+  useEffect(() => {
+    const saved = localStorage.getItem("theme");
+    if (saved) {
+      const dark = saved === "dark";
+      setIsDark(dark);
+      applyTheme(dark);
+    } else {
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      setIsDark(prefersDark);
+      applyTheme(prefersDark);
+    }
+
+    const mq = window.matchMedia("(prefers-color-scheme: dark)");
+    const handler = (e) => {
+      if (!localStorage.getItem("theme")) {
+        setIsDark(e.matches);
+        applyTheme(e.matches);
+      }
+    };
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+
+  const toggleTheme = () => {
+    const next = !isDark;
+    setIsDark(next);
+    applyTheme(next);
+    localStorage.setItem("theme", next ? "dark" : "light");
+  };
+
+  // CHANGED: History dikeluarkan dari menuItems — dia route (pindah halaman),
+  // bukan scroll-to-section, jadi nggak pernah pas dengan logic active-color
+  // berbasis IntersectionObserver yang dipakai item-item lain di sini.
+  // History sekarang dipindah ke dropdown avatar (account menu).
   const menuItems = [
     { name: "Dashboard",    icon: House,      target: "home" },
     { name: "Kursus",       icon: BookOpen,   target: "kursus" },
@@ -51,8 +103,21 @@ export default function Navbar({ onLogout, onLogin, localUser, isLogin, openStat
     { name: "FAQ",          icon: CircleHelp, target: "faq" },
   ];
 
+  // CHANGED: item khusus History, dipakai di dropdown avatar (desktop & mobile)
+  const historyItem = { name: "History", icon: History, target: "/history", isRoute: true };
+
   useEffect(() => {
-    const targets = menuItems.map((m) => document.getElementById(m.target)).filter(Boolean);
+    // CHANGED: kalau kita lagi di halaman /history, jangan jalankan observer
+    // scroll-to-section (section-section itu tidak ada di halaman ini).
+    if (location.pathname.startsWith("/history")) {
+      setActive("/history");
+      return;
+    }
+
+    const targets = menuItems
+      .filter((m) => !m.isRoute) // CHANGED: skip item yang berupa route, bukan section
+      .map((m) => document.getElementById(m.target))
+      .filter(Boolean);
     if (!targets.length) return;
     const obs = new IntersectionObserver(
       (entries) => {
@@ -68,7 +133,48 @@ export default function Navbar({ onLogout, onLogin, localUser, isLogin, openStat
     );
     targets.forEach((el) => obs.observe(el));
     return () => obs.disconnect();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname]);
+
+  // CHANGED: fungsi navigasi terpadu — item dengan isRoute pindah halaman,
+  // selain itu tetap scroll-to-section seperti semula. Kalau dipanggil dari
+  // halaman selain "/", scroll-to-section perlu balik ke "/" dulu dan
+  // MENUNGGU section-nya benar-benar muncul di DOM (bukan delay tetap),
+  // karena waktu render halaman utama setelah navigate() tidak pasti.
+  const goTo = (item) => {
+    setMobileMenuOpen(false);
+    setInterviewDropOpen(false);
+
+    if (item.isRoute) {
+      isClicking.current = true;
+      setActive(item.target);
+      navigate(item.target);
+      setTimeout(() => { isClicking.current = false; }, 700);
+      return;
+    }
+
+    if (location.pathname !== "/") {
+      navigate("/");
+      waitForElementThenScroll(item.target);
+      return;
+    }
+
+    scrollTo(item.target);
+  };
+
+  // CHANGED: helper — coba cari elemen section tiap frame (requestAnimationFrame)
+  // sampai ketemu atau sampai batas waktu (2 detik) terlampaui, baru menyerah.
+  // Ini menggantikan delay tetap (mis. setTimeout 80ms) yang tidak reliable
+  // ketika halaman tujuan butuh waktu render lebih lama dari itu.
+  const waitForElementThenScroll = (id, deadline = Date.now() + 2000) => {
+    const el = document.getElementById(id);
+    if (el) {
+      scrollTo(id);
+      return;
+    }
+    if (Date.now() >= deadline) return; // section tidak pernah muncul, diamkan saja
+    requestAnimationFrame(() => waitForElementThenScroll(id, deadline));
+  };
 
   const scrollTo = (id) => {
     isClicking.current = true;
@@ -82,6 +188,31 @@ export default function Navbar({ onLogout, onLogin, localUser, isLogin, openStat
   const handleLihatStatistik = () => {
     setInterviewDropOpen(false);
     setMobileMenuOpen(false);
+
+    // CHANGED: kalau lagi bukan di halaman utama, balik dulu sebelum scroll —
+    // pakai helper yang sama (tunggu elemen muncul, bukan delay tetap)
+    if (location.pathname !== "/") {
+      navigate("/");
+      const deadline = Date.now() + 2000;
+      const tryOpen = () => {
+        const el = document.getElementById("interview");
+        if (el) {
+          isClicking.current = true;
+          setActive("interview");
+          el.scrollIntoView({ behavior: "smooth", block: "start" });
+          setTimeout(() => { isClicking.current = false; }, 700);
+          setTimeout(() => {
+            if (openStatsRef?.current) openStatsRef.current();
+          }, 500);
+          return;
+        }
+        if (Date.now() >= deadline) return;
+        requestAnimationFrame(tryOpen);
+      };
+      tryOpen();
+      return;
+    }
+
     isClicking.current = true;
     setActive("interview");
     document.getElementById("interview")?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -105,11 +236,14 @@ export default function Navbar({ onLogout, onLogin, localUser, isLogin, openStat
     if (onLogout) onLogout();
   };
 
+  // CHANGED: tambahan satu entri "Lihat Riwayat" di quick search, konsisten
+  // dengan entri search lain yang sudah ada (Chatbot, Interview, Statistik, FAQ)
   const searchMenus = [
-    { icon: <MessageCircle size={14} style={{ color: "#60A5FA" }} />, label: "Coba berbicara dengan Chatbot", desc: "Tanyakan apa saja seputar BletchAI",         action: () => scrollTo("home") },
-    { icon: <Mic            size={14} style={{ color: "#22D3EE" }} />, label: "Mulai Interview",               desc: "Latih kemampuan interview kamu bersama AI", action: () => scrollTo("interview") },
+    { icon: <MessageCircle size={14} style={{ color: "#60A5FA" }} />, label: "Coba berbicara dengan Chatbot", desc: "Tanyakan apa saja seputar BletchAI",         action: () => goTo({ target: "home" }) },
+    { icon: <Mic            size={14} style={{ color: "#22D3EE" }} />, label: "Mulai Interview",               desc: "Latih kemampuan interview kamu bersama AI", action: () => goTo({ target: "interview" }) },
     { icon: <BarChart2      size={14} style={{ color: "#A78BFA" }} />, label: "Lihat Statistik",               desc: "Pantau perkembangan kemampuan kamu",        action: handleLihatStatistik },
-    { icon: <CircleHelp     size={14} style={{ color: "#60A5FA" }} />, label: "FAQ",                           desc: "Pertanyaan yang sering ditanyakan",         action: () => scrollTo("faq") },
+    { icon: <History         size={14} style={{ color: "#34D399" }} />, label: "Lihat Riwayat Chat",            desc: "Buka kembali percakapan sebelumnya",        action: () => goTo(historyItem) }, // CHANGED
+    { icon: <CircleHelp     size={14} style={{ color: "#60A5FA" }} />, label: "FAQ",                           desc: "Pertanyaan yang sering ditanyakan",         action: () => goTo({ target: "faq" }) },
   ];
 
   const filteredMenus = search.trim()
@@ -155,26 +289,47 @@ export default function Navbar({ onLogout, onLogin, localUser, isLogin, openStat
       : "0 4px 24px var(--shadow-card), inset 0 1px 0 var(--card-inset)",
   });
 
+  // CHANGED: tombol theme toggle reusable, dipakai di versi desktop & mobile
+  // (menggantikan posisi tombol lonceng/Bell sebelumnya)
+  const ThemeToggleButton = ({ size = 15, className = "" }) => (
+    <button
+      onClick={toggleTheme}
+      aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+      className={`relative flex items-center justify-center rounded-xl transition-all duration-200 ${className}`}
+      style={{ color: inactiveColor, background: "transparent", border: inactiveBorder }}
+      onMouseEnter={e => { e.currentTarget.style.color = inactiveHover; e.currentTarget.style.background = inactiveHoverBg; e.currentTarget.style.border = inactiveHoverBorder; }}
+      onMouseLeave={e => { e.currentTarget.style.color = inactiveColor; e.currentTarget.style.background = "transparent"; e.currentTarget.style.border = inactiveBorder; }}
+    >
+      {isDark
+        ? <Sun size={size} strokeWidth={1.8} />
+        : <Moon size={size} strokeWidth={1.8} />
+      }
+    </button>
+  );
+
   const InterviewDropdown = ({ isMobile = false }) => (
-    <div style={{
-      ...dropdownStyle,
-      width: "240px",
-      right: isMobile ? "auto" : "50%",
-      left: isMobile ? "50%" : "auto",
-      top: "36px",
-      transform: interviewDropOpen
-        ? `translateX(${isMobile ? "-50%" : "50%"}) translateY(0) scale(1)`
-        : `translateX(${isMobile ? "-50%" : "50%"}) translateY(-8px) scale(0.96)`,
-      opacity: interviewDropOpen ? 1 : 0,
-      pointerEvents: interviewDropOpen ? "auto" : "none",
-    }}>
+    <div
+      onMouseDown={(e) => e.stopPropagation()}
+      style={{
+        ...dropdownStyle,
+        width: "240px",
+        right: isMobile ? "auto" : "50%",
+        left: isMobile ? "50%" : "auto",
+        top: "36px",
+        transform: interviewDropOpen
+          ? `translateX(${isMobile ? "-50%" : "50%"}) translateY(0) scale(1)`
+          : `translateX(${isMobile ? "-50%" : "50%"}) translateY(-8px) scale(0.96)`,
+        opacity: interviewDropOpen ? 1 : 0,
+        pointerEvents: interviewDropOpen ? "auto" : "none",
+      }}
+    >
       <div className="px-4 pt-3 pb-2" style={{ borderBottom: "1px solid var(--border-soft)" }}>
         <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "var(--text-label)", letterSpacing: "0.08em" }}>
           Interview AI
         </p>
       </div>
       <button
-        onClick={() => scrollTo("interview")}
+        onClick={() => goTo({ target: "interview" })}
         className="w-full flex items-center gap-3 px-4 py-3 text-left transition-all"
         style={{ background: "transparent", borderBottom: "1px solid var(--border-soft)" }}
         onMouseEnter={e => e.currentTarget.style.background = "rgba(34,211,238,0.06)"}
@@ -219,7 +374,10 @@ export default function Navbar({ onLogout, onLogin, localUser, isLogin, openStat
         style={navBarStyle(false)}
       >
         {/* Logo */}
-        <div className="flex items-center gap-1.5 flex-shrink-0">
+        <div
+          className="flex items-center gap-1.5 flex-shrink-0 cursor-pointer" /* CHANGED: cursor-pointer + onClick agar logo selalu balik ke home */
+          onClick={() => goTo({ target: "home" })}
+        >
           <div className="w-5 h-5 rounded-md flex items-center justify-center"
             style={{ background: "var(--accent-bg)", border: "1px solid var(--accent-border)" }}>
             <span style={{ fontSize: "10px", fontWeight: 700, color: "var(--accent-light)", lineHeight: 1 }}>B</span>
@@ -284,10 +442,11 @@ export default function Navbar({ onLogout, onLogin, localUser, isLogin, openStat
               );
             }
 
+            // CHANGED: dari scrollTo(item.target) jadi goTo(item) — supaya item route (History) bisa pindah halaman
             return (
               <button
                 key={item.name}
-                onClick={() => scrollTo(item.target)}
+                onClick={() => goTo(item)}
                 className="relative flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[13px] font-medium transition-all duration-200"
                 style={isActive ? activeStyle : { color: inactiveColor, border: inactiveBorder, background: "transparent" }}
                 onMouseEnter={e => {
@@ -329,14 +488,17 @@ export default function Navbar({ onLogout, onLogin, localUser, isLogin, openStat
             >
               <Search size={15} />
             </button>
-            <div style={{
-              ...dropdownStyle,
-              width: "280px",
-              top: "40px",
-              opacity: searchOpen ? 1 : 0,
-              pointerEvents: searchOpen ? "auto" : "none",
-              transform: searchOpen ? "translateY(0) scale(1)" : "translateY(-8px) scale(0.96)",
-            }}>
+            <div
+              onMouseDown={(e) => e.stopPropagation()}
+              style={{
+                ...dropdownStyle,
+                width: "280px",
+                top: "40px",
+                opacity: searchOpen ? 1 : 0,
+                pointerEvents: searchOpen ? "auto" : "none",
+                transform: searchOpen ? "translateY(0) scale(1)" : "translateY(-8px) scale(0.96)",
+              }}
+            >
               <div className="relative px-3 pt-3 pb-2" style={{ borderBottom: "1px solid var(--border-soft)" }}>
                 <Search size={13} className="absolute left-6 top-1/2 -translate-y-1/2" style={{ color: "var(--text-muted)" }} />
                 <input type="text" value={search} onChange={(e) => setSearch(e.target.value)}
@@ -378,16 +540,8 @@ export default function Navbar({ onLogout, onLogin, localUser, isLogin, openStat
             </div>
           </div>
 
-          {/* Notif */}
-          <button className="relative w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-200"
-            style={{ color: inactiveColor, background: "transparent", border: inactiveBorder }}
-            onMouseEnter={e => { e.currentTarget.style.color = inactiveHover; e.currentTarget.style.background = inactiveHoverBg; e.currentTarget.style.border = inactiveHoverBorder; }}
-            onMouseLeave={e => { e.currentTarget.style.color = inactiveColor; e.currentTarget.style.background = "transparent"; e.currentTarget.style.border = inactiveBorder; }}
-          >
-            <Bell size={15} />
-            <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full"
-              style={{ background: "var(--accent)", boxShadow: "0 0 5px var(--accent)" }} />
-          </button>
+          {/* CHANGED: tombol lonceng diganti tombol theme toggle (sun/moon) */}
+          <ThemeToggleButton size={15} className="w-8 h-8" />
 
           {/* Avatar */}
           <div className="relative" ref={dropdownRef}>
@@ -423,13 +577,16 @@ export default function Navbar({ onLogout, onLogin, localUser, isLogin, openStat
               }} />
             </button>
 
-            <div style={{
-              ...dropdownStyle,
-              width: "260px",
-              opacity: open ? 1 : 0,
-              pointerEvents: open ? "auto" : "none",
-              transform: open ? "translateY(0) scale(1)" : "translateY(-8px) scale(0.96)",
-            }}>
+            <div
+              onMouseDown={(e) => e.stopPropagation()}
+              style={{
+                ...dropdownStyle,
+                width: "260px",
+                opacity: open ? 1 : 0,
+                pointerEvents: open ? "auto" : "none",
+                transform: open ? "translateY(0) scale(1)" : "translateY(-8px) scale(0.96)",
+              }}
+            >
               {loggedIn ? (
                 <>
                   <div className="px-4 py-3 flex items-center gap-3" style={{ borderBottom: "1px solid var(--border-soft)" }}>
@@ -440,6 +597,15 @@ export default function Navbar({ onLogout, onLogin, localUser, isLogin, openStat
                       <p className="text-xs truncate" style={{ color: "var(--text-muted)" }}>{displayEmail}</p>
                     </div>
                   </div>
+                  <button
+                    onClick={() => { setOpen(false); goTo(historyItem); }}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-all"
+                    style={{ color: "var(--text-secondary)", borderBottom: "1px solid var(--border-soft)", background: "transparent" }}
+                    onMouseEnter={e => { e.currentTarget.style.color = "var(--text-primary)"; e.currentTarget.style.background = "var(--bg-surface)"; }}
+                    onMouseLeave={e => { e.currentTarget.style.color = "var(--text-secondary)"; e.currentTarget.style.background = "transparent"; }}
+                  >
+                    <History size={15} /> Riwayat Chat
+                  </button>
                   <button
                     onClick={() => { setOpen(false); if (onLogin) onLogin("login"); }}
                     className="w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-all"
@@ -497,7 +663,10 @@ export default function Navbar({ onLogout, onLogin, localUser, isLogin, openStat
         style={navBarStyle(true)}
       >
         {/* Logo */}
-        <div className="flex items-center gap-1 flex-shrink-0">
+        <div
+          className="flex items-center gap-1 flex-shrink-0 cursor-pointer" /* CHANGED: cursor-pointer + onClick */
+          onClick={() => goTo({ target: "home" })}
+        >
           <div className="w-5 h-5 rounded-md flex items-center justify-center"
             style={{ background: "var(--accent-bg)", border: "1px solid var(--accent-border)" }}>
             <span style={{ fontSize: "10px", fontWeight: 700, color: "var(--accent-light)", lineHeight: 1 }}>B</span>
@@ -545,10 +714,11 @@ export default function Navbar({ onLogout, onLogin, localUser, isLogin, openStat
               );
             }
 
+            // CHANGED: dari scrollTo(item.target) jadi goTo(item)
             return (
               <button
                 key={item.name}
-                onClick={() => scrollTo(item.target)}
+                onClick={() => goTo(item)}
                 className="relative flex items-center justify-center w-8 h-8 rounded-xl transition-all duration-200"
                 style={isActive ? mobileActiveStyle : { color: inactiveColor, border: inactiveBorder, background: "transparent" }}
               >
@@ -564,7 +734,7 @@ export default function Navbar({ onLogout, onLogin, localUser, isLogin, openStat
 
         <div className="w-px h-4 flex-shrink-0" style={{ background: "var(--border-soft)" }} />
 
-        {/* Right — search + notif + avatar */}
+        {/* Right — search + theme toggle + avatar */}
         <div className="flex items-center gap-0.5 flex-shrink-0">
           {/* Search */}
           <div className="relative" ref={searchRef}>
@@ -581,22 +751,25 @@ export default function Navbar({ onLogout, onLogin, localUser, isLogin, openStat
             </button>
 
             {searchOpen && (
-              <div style={{
-                position: "fixed",
-                top: "52px",
-                left: "50%",
-                transform: "translateX(-50%)",
-                width: "calc(100vw - 2rem)",
-                maxWidth: "440px",
-                background: "var(--bg-card)",
-                backdropFilter: "blur(28px)",
-                WebkitBackdropFilter: "blur(28px)",
-                border: "1px solid var(--border-md)",
-                borderRadius: "16px",
-                boxShadow: "0 20px 48px var(--shadow-search), inset 0 1px 0 var(--card-inset)",
-                overflow: "hidden",
-                zIndex: 60,
-              }}>
+              <div
+                onMouseDown={(e) => e.stopPropagation()}
+                style={{
+                  position: "fixed",
+                  top: "52px",
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                  width: "calc(100vw - 2rem)",
+                  maxWidth: "440px",
+                  background: "var(--bg-card)",
+                  backdropFilter: "blur(28px)",
+                  WebkitBackdropFilter: "blur(28px)",
+                  border: "1px solid var(--border-md)",
+                  borderRadius: "16px",
+                  boxShadow: "0 20px 48px var(--shadow-search), inset 0 1px 0 var(--card-inset)",
+                  overflow: "hidden",
+                  zIndex: 60,
+                }}
+              >
                 <div className="relative px-3 pt-3 pb-2" style={{ borderBottom: "1px solid var(--border-soft)" }}>
                   <Search size={13} style={{ color: "var(--text-muted)", position: "absolute", left: "22px", top: "50%", transform: "translateY(-50%)" }} />
                   <input type="text" value={search} onChange={(e) => setSearch(e.target.value)}
@@ -638,14 +811,8 @@ export default function Navbar({ onLogout, onLogin, localUser, isLogin, openStat
             )}
           </div>
 
-          {/* Notif */}
-          <button className="relative w-7 h-7 rounded-xl flex items-center justify-center transition-all duration-200"
-            style={{ color: inactiveColor, background: "transparent", border: inactiveBorder }}
-          >
-            <Bell size={13} />
-            <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full"
-              style={{ background: "var(--accent)", boxShadow: "0 0 5px var(--accent)" }} />
-          </button>
+          {/* CHANGED: tombol lonceng diganti tombol theme toggle (sun/moon) */}
+          <ThemeToggleButton size={13} className="w-7 h-7" />
 
           {/* Avatar */}
           <div className="relative" ref={mobileAvatarRef}>
@@ -684,21 +851,24 @@ export default function Navbar({ onLogout, onLogin, localUser, isLogin, openStat
                   style={{ background: "var(--overlay)" }}
                   onClick={() => setMobileMenuOpen(false)}
                 />
-                <div style={{
-                  position: "fixed",
-                  top: "52px",
-                  right: "1rem",
-                  width: "220px",
-                  background: "var(--bg-card)",
-                  backdropFilter: "blur(28px)",
-                  WebkitBackdropFilter: "blur(28px)",
-                  border: "1px solid var(--border-md)",
-                  borderRadius: "16px",
-                  boxShadow: "0 20px 48px var(--shadow-card-lg), inset 0 1px 0 var(--card-inset)",
-                  overflow: "hidden",
-                  zIndex: 60,
-                  animation: "dropIn 0.2s cubic-bezier(0.16,1,0.3,1)",
-                }}>
+                <div
+                  onMouseDown={(e) => e.stopPropagation()}
+                  style={{
+                    position: "fixed",
+                    top: "52px",
+                    right: "1rem",
+                    width: "220px",
+                    background: "var(--bg-card)",
+                    backdropFilter: "blur(28px)",
+                    WebkitBackdropFilter: "blur(28px)",
+                    border: "1px solid var(--border-md)",
+                    borderRadius: "16px",
+                    boxShadow: "0 20px 48px var(--shadow-card-lg), inset 0 1px 0 var(--card-inset)",
+                    overflow: "hidden",
+                    zIndex: 60,
+                    animation: "dropIn 0.2s cubic-bezier(0.16,1,0.3,1)",
+                  }}
+                >
                   {loggedIn ? (
                     <>
                       <div className="px-4 py-3 flex items-center gap-3" style={{ borderBottom: "1px solid var(--border-soft)" }}>
@@ -709,6 +879,15 @@ export default function Navbar({ onLogout, onLogin, localUser, isLogin, openStat
                           <p className="text-[10px] truncate" style={{ color: "var(--text-muted)" }}>{displayEmail}</p>
                         </div>
                       </div>
+                      <button
+                        onClick={() => { setMobileMenuOpen(false); goTo(historyItem); }}
+                        className="w-full flex items-center gap-2.5 px-4 py-2.5 text-xs transition-all"
+                        style={{ color: "var(--text-secondary)", borderBottom: "1px solid var(--border-soft)", background: "transparent" }}
+                        onMouseEnter={e => { e.currentTarget.style.color = "var(--text-primary)"; e.currentTarget.style.background = "var(--bg-surface)"; }}
+                        onMouseLeave={e => { e.currentTarget.style.color = "var(--text-secondary)"; e.currentTarget.style.background = "transparent"; }}
+                      >
+                        <History size={13} /> Riwayat Chat
+                      </button>
                       <button
                         onClick={() => { setMobileMenuOpen(false); if (onLogin) onLogin("login"); }}
                         className="w-full flex items-center gap-2.5 px-4 py-2.5 text-xs transition-all"

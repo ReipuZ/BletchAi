@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
+import { Routes, Route } from "react-router-dom";
 import AuthModal from "./components/AuthModal";
 import Dashboard from "./pages/dashboard";
+import HistoryPage from "./pages/historyPage";
 import LoadingScreen from "./components/LoadingScreen";
 
 export default function App() {
@@ -41,12 +43,20 @@ export default function App() {
 
   return (
     <>
-      <Dashboard
-        onLogout={logout}
-        onLogin={handleOpenAuth}
-        localUser={isLogin ? localUser : null}
-        isLogin={isLogin}
-      />
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <Dashboard
+              onLogout={logout}
+              onLogin={handleOpenAuth}
+              localUser={isLogin ? localUser : null}
+              isLogin={isLogin}
+            />
+          }
+        />
+        <Route path="/history/:sessionId?" element={<HistoryPage />} />
+      </Routes>
 
       <AuthModal
         isOpen={authOpen}
@@ -55,7 +65,7 @@ export default function App() {
         onSuccess={handleLoginSuccess}
       />
 
-       <LoadingScreen />
+      <LoadingScreen />
     </>
   );
 }

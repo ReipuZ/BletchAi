@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Send, Star, BookOpen, Mic, FileText, ChevronRight, ArrowUpRight } from "lucide-react";
+import { Search, Send, Star, BookOpen, Mic, FileText, ChevronRight, ArrowUpRight, Wrench, Palette, Calculator, ChefHat, Camera, X } from "lucide-react";
 import homePageImg from "../assets/image/home_page1.png";
 import homePageImg2 from "../assets/image/home_page2.jpg";
 import homePageImg4 from "../assets/image/home_page4.png";
@@ -15,6 +16,61 @@ export default function HomeSection() {
   const [clickWave, setClickWave] = useState(null);
   const [showOverlay, setShowOverlay] = useState(false);
   const [overlayInitMsg, setOverlayInitMsg] = useState("");
+
+  // NEW: dipakai saat user melanjutkan sesi lama dari HistoryPage.
+  // overlayInitMessages = riwayat pesan sesi tsb, overlaySessionId = id-nya
+  // (supaya ChatOverlay tahu harus UPDATE sesi ini, bukan bikin sesi baru).
+  const [overlayInitMessages, setOverlayInitMessages] = useState(null);
+  const [overlaySessionId, setOverlaySessionId] = useState(null);
+
+  // NEW: kontrol overlay "Lihat semua" materi (modal, sama seperti CourseRecommendation)
+  const [showAllModal, setShowAllModal] = useState(false);
+
+  // CHANGED: deteksi sinyal dari HistoryPage saat tombol "Mulai chat baru" /
+  // "Lanjutkan chat" / tombol kembali diklik (navigate("/", { state: {...} })).
+  //
+  // BUGFIX: sebelumnya overlay bisa muncul tiba-tiba tanpa diminta saat user
+  // menavigasi balik (tombol back browser/perangkat) ke halaman beranda,
+  // karena history entry lama di browser masih menyimpan state.openChat=true
+  // dari kunjungan sebelumnya, lalu effect ini ke-trigger ulang.
+  //
+  // Perbaikan: setiap sinyal dari HistoryPage sekarang dibungkus dengan
+  // `navId` unik (Date.now()+random). Kita simpan id sinyal yang TERAKHIR
+  // KALI sudah diproses di sessionStorage. Kalau navId yang datang sama
+  // dengan yang sudah pernah diproses, effect ini diabaikan — jadi replay
+  // dari history/back-forward tidak akan membuka overlay lagi.
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const signal = location.state;
+    if (signal?.openChat && signal?.navId) {
+      const lastProcessed = sessionStorage.getItem("bletch_last_openchat_navid");
+      if (lastProcessed === String(signal.navId)) {
+        // Sinyal ini sudah pernah diproses sebelumnya (kemungkinan besar
+        // hasil back/forward browser membawa state lama) — abaikan.
+        return;
+      }
+      sessionStorage.setItem("bletch_last_openchat_navid", String(signal.navId));
+
+      if (signal.continueSession && signal.sessionMessages) {
+        // Melanjutkan sesi lama dari HistoryPage
+        setOverlayInitMessages(signal.sessionMessages);
+        setOverlaySessionId(signal.sessionId || null);
+        setOverlayInitMsg("");
+      } else {
+        // Chat baru biasa
+        setOverlayInitMessages(null);
+        setOverlaySessionId(null);
+        setOverlayInitMsg("");
+      }
+
+      setShowOverlay(true);
+      // Bersihkan state URL supaya tidak ke-trigger lagi saat halaman di-refresh
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.state]);
 
   const heroImages = [homePageImg, homePageImg2, homePageImg4];
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -47,9 +103,21 @@ export default function HomeSection() {
   const openChat = (msg) => {
     const text = msg || inputValue;
     if (!text.trim()) return;
+    // Chat baru biasa dari beranda — pastikan tidak membawa sisa riwayat
+    // sesi lama dari percobaan "lanjutkan chat" sebelumnya.
+    setOverlayInitMessages(null);
+    setOverlaySessionId(null);
     setOverlayInitMsg(text.trim());
     setInputValue("");
     setShowOverlay(true);
+  };
+
+  // NEW: ketika jurusan diklik, langsung kirim pertanyaan otomatis ke AI
+  const handleCategoryClick = (cat) => {
+    triggerClickWave(cat);
+    setActiveCategory(cat);
+    const prompt = `Jelaskan tentang jurusan ${cat}: apa saja yang dipelajari, prospek karier, dan skill yang dibutuhkan.`;
+    openChat(prompt);
   };
 
   const categories = [
@@ -102,6 +170,78 @@ export default function HomeSection() {
       accentLine: "rgba(139,92,246,0.5)",
     },
   ];
+
+  // NEW: daftar materi tambahan yang muncul saat "Lihat semua" diklik
+  const moreTopics = [
+    {
+      icon: Wrench,
+      title: "Dasar-Dasar Teknik Otomotif",
+      desc: "Pengenalan komponen mesin, perawatan, dan diagnosis kendaraan.",
+      badge: "🔧 Teknik",
+      color: "from-[#F97316]/30 to-transparent",
+      accentBorder: "rgba(249,115,22,0.20)",
+      iconColor: "text-[#F97316]",
+      badgeClass: "bg-[#F97316]/10 text-[#F97316] border border-[#F97316]/20",
+      accentLine: "rgba(249,115,22,0.5)",
+    },
+    {
+      icon: Palette,
+      title: "Prinsip Dasar Desain Grafis",
+      desc: "Teori warna, tipografi, dan layout untuk desain yang efektif.",
+      badge: "🎨 Desain",
+      color: "from-[#EC4899]/30 to-transparent",
+      accentBorder: "rgba(236,72,153,0.20)",
+      iconColor: "text-[#EC4899]",
+      badgeClass: "bg-[#EC4899]/10 text-[#EC4899] border border-[#EC4899]/20",
+      accentLine: "rgba(236,72,153,0.5)",
+    },
+    {
+      icon: Calculator,
+      title: "Akuntansi Dasar untuk Pemula",
+      desc: "Memahami laporan keuangan, neraca, dan pencatatan transaksi.",
+      badge: "📊 Akuntansi",
+      color: "from-[#10B981]/30 to-transparent",
+      accentBorder: "rgba(16,185,129,0.20)",
+      iconColor: "text-[#10B981]",
+      badgeClass: "bg-[#10B981]/10 text-[#10B981] border border-[#10B981]/20",
+      accentLine: "rgba(16,185,129,0.5)",
+    },
+    {
+      icon: ChefHat,
+      title: "Pengantar Tata Boga",
+      desc: "Teknik memasak dasar, sanitasi dapur, dan manajemen menu.",
+      badge: "🍳 Boga",
+      color: "from-[#F59E0B]/30 to-transparent",
+      accentBorder: "rgba(245,158,11,0.20)",
+      iconColor: "text-[#F59E0B]",
+      badgeClass: "bg-[#F59E0B]/10 text-[#F59E0B] border border-[#F59E0B]/20",
+      accentLine: "rgba(245,158,11,0.5)",
+    },
+    {
+      icon: Camera,
+      title: "Produksi Konten Multimedia",
+      desc: "Dasar videografi, editing, dan storytelling visual.",
+      badge: "🎬 Multimedia",
+      color: "from-[#6366F1]/30 to-transparent",
+      accentBorder: "rgba(99,102,241,0.20)",
+      iconColor: "text-[#6366F1]",
+      badgeClass: "bg-[#6366F1]/10 text-[#6366F1] border border-[#6366F1]/20",
+      accentLine: "rgba(99,102,241,0.5)",
+    },
+    {
+      icon: Mic,
+      title: "Public Speaking & Presentasi",
+      desc: "Bangun rasa percaya diri tampil dan menyampaikan ide dengan jelas.",
+      badge: "🎤 Soft Skill",
+      color: "from-[#14B8A6]/30 to-transparent",
+      accentBorder: "rgba(20,184,166,0.20)",
+      iconColor: "text-[#14B8A6]",
+      badgeClass: "bg-[#14B8A6]/10 text-[#14B8A6] border border-[#14B8A6]/20",
+      accentLine: "rgba(20,184,166,0.5)",
+    },
+  ];
+
+  const allTopics = [...popularTopics, ...moreTopics];
 
   return (
     <section
@@ -178,7 +318,13 @@ export default function HomeSection() {
       <div className="absolute inset-0 bg-cover bg-center bg-no-repeat md:bg-fixed"
         style={{ backgroundImage: `url(${backgroundImg})`, opacity: 0.03 }} />
 
-      <ChatOverlay show={showOverlay} onClose={() => setShowOverlay(false)} initialMessage={overlayInitMsg} />
+      <ChatOverlay
+        show={showOverlay}
+        onClose={() => setShowOverlay(false)}
+        initialMessage={overlayInitMsg}
+        initialMessages={overlayInitMessages}
+        sessionId={overlaySessionId}
+      />
 
       <div className="relative z-10">
 
@@ -326,7 +472,7 @@ export default function HomeSection() {
                   const isHovered = hoveredCategory === cat;
                   return (
                     <button key={cat}
-                      onClick={() => { triggerClickWave(cat); setActiveCategory(cat); }}
+                      onClick={() => handleCategoryClick(cat)}
                       onPointerEnter={() => setHoveredCategory(cat)}
                       onPointerLeave={() => setHoveredCategory(null)}
                       className="relative shrink-0 overflow-hidden text-[10px] md:text-xs font-medium px-2.5 py-1 md:px-4 md:py-2 rounded-full whitespace-nowrap transition-all duration-200"
@@ -481,6 +627,7 @@ export default function HomeSection() {
               <h3 className="text-xs md:text-base font-semibold" style={{ color: "var(--text-secondary)" }}>Materi Populer</h3>
             </div>
             <button
+              onClick={() => setShowAllModal(true)}
               className="flex items-center gap-1 text-[10px] md:text-xs font-medium px-3 py-1.5 rounded-full transition-all duration-200"
               style={{
                 color: "var(--text-muted)",
@@ -502,23 +649,109 @@ export default function HomeSection() {
           </div>
 
           <RevealGroup className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-5" stagger={0.1} amount={0.15}>
-            {popularTopics.map((topic) => <DesktopCard key={topic.title} {...topic} />)}
+            {popularTopics.map((topic) => <DesktopCard key={topic.title} {...topic} onClick={() => openChat(`Jelaskan lebih lanjut tentang materi "${topic.title}".`)} />)}
           </RevealGroup>
 
           <div className="md:hidden flex gap-3 overflow-x-auto pb-2 [&::-webkit-scrollbar]:hidden snap-x snap-mandatory">
-            {popularTopics.map((topic) => <MobileCard key={topic.title} {...topic} />)}
+            {popularTopics.map((topic) => <MobileCard key={topic.title} {...topic} onClick={() => openChat(`Jelaskan lebih lanjut tentang materi "${topic.title}".`)} />)}
           </div>
         </Reveal>
       </div>
+
+      {/* Modal: Semua Materi — sama seperti modal "Semua Kursus" di CourseRecommendation */}
+      <AnimatePresence>
+        {showAllModal && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-50 flex items-center justify-center px-3 sm:px-4"
+            style={{ background: "var(--overlay)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)" }}
+            onClick={() => setShowAllModal(false)}>
+            <motion.div initial={{ opacity: 0, scale: 0.96, y: 14 }} animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.96, y: 14 }} transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+              className="w-full max-w-3xl max-h-[86vh] flex flex-col overflow-hidden rounded-2xl sm:rounded-3xl"
+              style={{
+                background: "var(--bg-card)",
+                backdropFilter: "blur(28px)",
+                WebkitBackdropFilter: "blur(28px)",
+                border: "1px solid var(--border-md)",
+                boxShadow: `0 40px 100px var(--shadow-search), inset 0 1px 0 var(--card-inset)`,
+              }}
+              onClick={e => e.stopPropagation()}>
+
+              {/* Modal header */}
+              <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 sm:py-4 flex-shrink-0"
+                style={{ borderBottom: "1px solid var(--border-soft)" }}>
+                <div>
+                  <p className="text-[10px] font-medium uppercase tracking-[0.12em] mb-0.5" style={{ color: "var(--border-strong)" }}>Kurikulum</p>
+                  <h2 className="text-sm font-semibold" style={{ color: "var(--text-secondary)" }}>Semua Materi</h2>
+                </div>
+                <button onClick={() => setShowAllModal(false)}
+                  className="w-8 h-8 rounded-full flex items-center justify-center transition-colors flex-shrink-0"
+                  style={{ background: "var(--bg-surface)", border: "1px solid var(--border-md)" }}
+                  onMouseEnter={e => e.currentTarget.style.background = "var(--bg-surface-md)"}
+                  onMouseLeave={e => e.currentTarget.style.background = "var(--bg-surface)"}>
+                  <X size={13} style={{ color: "var(--text-muted)" }} />
+                </button>
+              </div>
+
+              {/* Modal body */}
+              <div className="overflow-y-auto p-4 sm:p-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {allTopics.map((topic) => (
+                    <div key={topic.title}
+                      className="cursor-pointer group rounded-2xl overflow-hidden transition-all duration-200 active:scale-[0.98] relative p-4"
+                      style={{
+                        background: "var(--bg-surface)",
+                        border: "1px solid var(--border-soft)",
+                        boxShadow: `inset 0 1px 0 var(--card-inset)`,
+                      }}
+                      onMouseEnter={e => {
+                        e.currentTarget.style.border = "1px solid var(--border-strong)";
+                        e.currentTarget.style.background = "var(--bg-surface-md)";
+                        e.currentTarget.style.boxShadow = `0 4px 20px var(--shadow-card), inset 0 1px 0 var(--card-inset)`;
+                      }}
+                      onMouseLeave={e => {
+                        e.currentTarget.style.border = "1px solid var(--border-soft)";
+                        e.currentTarget.style.background = "var(--bg-surface)";
+                        e.currentTarget.style.boxShadow = `inset 0 1px 0 var(--card-inset)`;
+                      }}
+                      onClick={() => {
+                        setShowAllModal(false);
+                        openChat(`Jelaskan lebih lanjut tentang materi "${topic.title}".`);
+                      }}>
+
+                      <div className="absolute inset-x-0 top-0 h-[1.5px]"
+                        style={{ background: `linear-gradient(to right, ${topic.accentLine}, transparent 70%)` }} />
+
+                      <div className={`w-9 h-9 rounded-xl flex items-center justify-center mb-3 ${topic.iconColor}`}
+                        style={{
+                          background: "var(--bg-surface)",
+                          border: `1px solid ${topic.accentBorder}`,
+                          boxShadow: `inset 0 1px 0 var(--card-inset)`,
+                        }}>
+                        <topic.icon size={16} />
+                      </div>
+
+                      <p className="text-xs font-semibold mb-1.5 leading-snug" style={{ color: "var(--text-primary)" }}>{topic.title}</p>
+                      <p className="text-[11px] leading-relaxed mb-2.5 line-clamp-2" style={{ color: "var(--text-muted)" }}>{topic.desc}</p>
+                      <span className={`inline-block text-[10px] font-medium px-2 py-0.5 rounded-full ${topic.badgeClass}`}>{topic.badge}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 }
 
-function DesktopCard({ icon: Icon, title, desc, badge, color, accentBorder, iconColor, badgeClass, accentLine }) {
+function DesktopCard({ icon: Icon, title, desc, badge, color, accentBorder, iconColor, badgeClass, accentLine, onClick }) {
   return (
     <motion.div
       variants={revealItem}
       whileHover={{ y: -4, scale: 1.010 }}
+      onClick={onClick}
       className="group relative overflow-hidden rounded-2xl p-5 cursor-pointer transition-all duration-300"
       style={{
         background: "var(--bg-surface)",
@@ -562,9 +795,10 @@ function DesktopCard({ icon: Icon, title, desc, badge, color, accentBorder, icon
   );
 }
 
-function MobileCard({ icon: Icon, title, desc, badge, color, accentBorder, iconColor, badgeClass, accentLine }) {
+function MobileCard({ icon: Icon, title, desc, badge, color, accentBorder, iconColor, badgeClass, accentLine, onClick }) {
   return (
     <div
+      onClick={onClick}
       className="relative overflow-hidden rounded-xl p-3.5 cursor-pointer flex-shrink-0 snap-start"
       style={{
         width: "calc(75vw)",

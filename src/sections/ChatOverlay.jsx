@@ -2,29 +2,75 @@ import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Send, X, Search } from "lucide-react";
+import { saveSession, updateSession } from "../components/chatHistoryStore";
 
-export default function ChatOverlay({ show, onClose, initialMessage = "" }) {
+// CHANGED: ChatOverlay sekarang menerima dua prop baru:
+// - initialMessages: riwayat pesan lama, dipakai saat user menekan
+//   "Lanjutkan chat" dari HistoryPage. Kalau kosong/undefined, overlay
+//   mulai dari percakapan kosong seperti biasa.
+// - sessionId: id sesi yang sedang dilanjutkan. Kalau ada, saat overlay
+//   ditutup kita UPDATE sesi itu (updateSession) supaya percakapan
+//   menyambung di entri yang sama, bukan membuat duplikat baru.
+export default function ChatOverlay({
+  show,
+  onClose,
+  initialMessage = "",
+  initialMessages = null,
+  sessionId = null,
+}) {
   const [inputValue, setInputValue] = useState("");
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const bottomRef = useRef(null);
   const didSendInitial = useRef(false);
+  // NEW: simpan sessionId yang sedang aktif di overlay ini. Dipisah dari
+  // prop supaya tidak berubah di tengah sesi kalau parent re-render dengan
+  // prop sessionId yang berbeda sebelum overlay sempat ditutup.
+  const activeSessionIdRef = useRef(null);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isLoading]);
 
   useEffect(() => {
-    if (show && initialMessage && !didSendInitial.current) {
-      didSendInitial.current = true;
-      sendMessage(initialMessage);
+    if (show) {
+      // CHANGED: saat overlay dibuka, tentukan dulu apakah ini melanjutkan
+      // sesi lama (initialMessages diisi) atau chat baru.
+      if (!didSendInitial.current) {
+        if (initialMessages && initialMessages.length > 0) {
+          setMessages(initialMessages);
+          activeSessionIdRef.current = sessionId || null;
+        }
+        didSendInitial.current = true;
+
+        if (initialMessage) {
+          sendMessage(initialMessage);
+        }
+      }
     }
+
     if (!show) {
       didSendInitial.current = false;
+
+      // CHANGED: sebelum messages direset ke kosong, simpan/update dulu
+      // sesi ini ke riwayat (kalau ada isinya).
+      // - Kalau activeSessionIdRef terisi (sedang melanjutkan sesi lama),
+      //   pakai updateSession supaya menyambung di entri yang sama.
+      // - Kalau tidak, pakai saveSession seperti biasa (sesi baru).
+      if (messages.length > 0) {
+        if (activeSessionIdRef.current) {
+          updateSession(activeSessionIdRef.current, messages);
+        } else {
+          saveSession(messages);
+        }
+      }
+
+      activeSessionIdRef.current = null;
       setMessages([]);
       setInputValue("");
     }
-  }, [show, initialMessage]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [show, initialMessage, initialMessages, sessionId]);
 
   const sendMessage = async (text) => {
     const msg = text.trim();

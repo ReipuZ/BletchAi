@@ -4,7 +4,6 @@ import KursusSection from "../sections/kursusSection";
 import InterviewSection from "../sections/interviewSection";
 import FaqSection from "../sections/faqSection";
 import AboutSection from "../sections/aboutSection";
-import ThemeToggle from "../components/Themetoggle";
 
 export default function Dashboard({ onLogout, onLogin, localUser, isLogin }) {
   return (
@@ -24,8 +23,6 @@ export default function Dashboard({ onLogout, onLogin, localUser, isLogin }) {
         <AboutSection />
       </main>
 
-      {/* Floating dark/light toggle */}
-      <ThemeToggle />
     </div>
   );
 }

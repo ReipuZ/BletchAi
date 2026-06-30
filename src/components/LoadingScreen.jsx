@@ -35,8 +35,8 @@ export default function LoadingScreen() {
           100% { left: 160%; }
         }
         @keyframes bl-cornerFade {
-          0%, 100% { opacity: 0.08; }
-          50%       { opacity: 0.22; }
+          0%, 100% { opacity: 0.04; }
+          50%       { opacity: 0.45; }
         }
         @keyframes bl-titleShimmer {
           0%   { background-position: -400px 0; }
@@ -85,7 +85,7 @@ export default function LoadingScreen() {
             linear-gradient(90deg, var(--border-soft) 1px, transparent 1px)
           `,
           backgroundSize: "60px 60px",
-          opacity: 0.5,
+          opacity: "calc(var(--grid-opacity) * 12)",
         }} />
 
         {/* Blob biru */}
@@ -93,8 +93,8 @@ export default function LoadingScreen() {
           position: "absolute", borderRadius: "50%",
           filter: "blur(140px)", pointerEvents: "none",
           width: 450, height: 450, top: -100, left: -100,
-          background: "radial-gradient(circle, #3B82F6, transparent 70%)",
-          opacity: 0.10,
+          background: "radial-gradient(circle, var(--blob-blue), transparent 70%)",
+          opacity: "var(--blob-opacity-blue)",
           animation: "bl-blobPulse 7s ease-in-out infinite",
         }} />
 
@@ -103,8 +103,8 @@ export default function LoadingScreen() {
           position: "absolute", borderRadius: "50%",
           filter: "blur(140px)", pointerEvents: "none",
           width: 380, height: 380, bottom: -80, right: -80,
-          background: "radial-gradient(circle, #8B5CF6, transparent 70%)",
-          opacity: 0.08,
+          background: "radial-gradient(circle, var(--blob-purple), transparent 70%)",
+          opacity: "var(--blob-opacity-purple)",
           animation: "bl-blobPulse 7s ease-in-out infinite 3.5s",
         }} />
 
@@ -113,8 +113,8 @@ export default function LoadingScreen() {
           position: "absolute", borderRadius: "50%",
           filter: "blur(140px)", pointerEvents: "none",
           width: 320, height: 220, bottom: "18%", left: "50%",
-          background: "radial-gradient(circle, #06B6D4, transparent 70%)",
-          opacity: 0.07,
+          background: "radial-gradient(circle, var(--blob-cyan), transparent 70%)",
+          opacity: "var(--blob-opacity-cyan)",
           animation: "bl-blobPulseCyan 7s ease-in-out infinite 1.5s",
         }} />
 
@@ -127,7 +127,7 @@ export default function LoadingScreen() {
         ].map((s, i) => (
           <div key={i} className="bl-corner" style={{
             position: "absolute", width: 20, height: 20,
-            animation: "bl-cornerFade 2.5s ease-in-out infinite",
+            animation: "bl-cornerFade 1s ease-in-out infinite",
             animationDelay: `${i * 0.4}s`,
             ...s,
           }} />

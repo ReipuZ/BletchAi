@@ -267,7 +267,7 @@ export default function FooterSection() {
           </p>
           <div className="hidden sm:block w-1 h-1 rounded-full" style={{ background: "var(--border-md)" }} />
           <p className="text-[10px] italic" style={{ color: "var(--text-muted)" }}>
-            Built with ❤️ by Team BletchAI
+            Built by Team BletchAI
           </p>
         </div>
       </div>
