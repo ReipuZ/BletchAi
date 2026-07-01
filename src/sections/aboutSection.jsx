@@ -1,11 +1,12 @@
 import { motion } from "framer-motion";
 import { Mail, Phone, MapPin } from "lucide-react";
+import { useNavigate, useLocation } from "react-router-dom"; // ADDED: dipakai untuk smooth scroll + navigasi lintas halaman
 import logo from "../assets/image/logo.png";
 
 const navLinks = [
   { label: "Home",      href: "#home"      },
   { label: "Interview", href: "#interview" },
-  { label: "Progress",  href: "#stats"     },
+  { label: "Progress",  href: "#interview", isStats: true }, // CHANGED: target section-nya "interview", tapi buka panel statistik
   { label: "FAQ",       href: "#faq"       },
 ];
 
@@ -30,9 +31,71 @@ const socials = [
   },
 ];
 
-export default function FooterSection() {
+export default function FooterSection({ openStatsRef }) {
   // Deteksi light mode dari class di <html>
   const isLight = document.documentElement.classList.contains("light");
+
+  const navigate = useNavigate(); // ADDED
+  const location = useLocation(); // ADDED
+
+  // ADDED: helper yang sama dengan Navbar — nunggu section muncul di DOM
+  // (dipakai kalau footer di-klik dari halaman selain "/")
+  const waitForElementThenScroll = (id, deadline = Date.now() + 2000) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+      return;
+    }
+    if (Date.now() >= deadline) return;
+    requestAnimationFrame(() => waitForElementThenScroll(id, deadline));
+  };
+
+  // ADDED: handler klik nav footer — preventDefault supaya <a href="#..">
+  // tidak jump instan, lalu scroll smooth ke section-nya
+  const handleNavClick = (e, href) => {
+    e.preventDefault();
+    const id = href.replace("#", "");
+
+    if (location.pathname !== "/") {
+      navigate("/");
+      waitForElementThenScroll(id);
+      return;
+    }
+
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  // ADDED: handler khusus "Progress" — scroll ke section Interview, lalu
+  // buka panel statistik lewat openStatsRef (sama seperti handleLihatStatistik di Navbar)
+  const handleProgressClick = (e) => {
+    e.preventDefault();
+
+    const openStats = () => {
+      setTimeout(() => {
+        if (openStatsRef?.current) openStatsRef.current();
+      }, 500);
+    };
+
+    if (location.pathname !== "/") {
+      navigate("/");
+      const deadline = Date.now() + 2000;
+      const tryOpen = () => {
+        const el = document.getElementById("interview");
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth", block: "start" });
+          openStats();
+          return;
+        }
+        if (Date.now() >= deadline) return;
+        requestAnimationFrame(tryOpen);
+      };
+      tryOpen();
+      return;
+    }
+
+    document.getElementById("interview")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    openStats();
+  };
 
   return (
     <footer
@@ -175,7 +238,11 @@ export default function FooterSection() {
             <ul className="space-y-3">
               {navLinks.map((link) => (
                 <li key={link.label}>
-                  <a href={link.href} className="text-xs transition-colors duration-200 block py-0.5"
+                  {/* CHANGED: link Progress pakai handleProgressClick (scroll + buka statistik), sisanya tetap handleNavClick */}
+                  <a
+                    href={link.href}
+                    onClick={(e) => (link.isStats ? handleProgressClick(e) : handleNavClick(e, link.href))}
+                    className="text-xs transition-colors duration-200 block py-0.5"
                     style={{ color: "var(--text-muted)" }}
                     onMouseEnter={(e) => { e.currentTarget.style.color = "var(--accent-light)"; }}
                     onMouseLeave={(e) => { e.currentTarget.style.color = "var(--text-muted)"; }}

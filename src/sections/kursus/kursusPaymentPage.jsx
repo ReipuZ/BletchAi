@@ -15,6 +15,7 @@ import {
 import Reveal from "../../components/Reveal.jsx";
 import { getCourseById } from "../../components/kursus.js";
 import { getJurusanByCategory } from "../../components/jurusan.js";
+import { markCoursePurchased } from "./kursusPurchased.js";
 
 const METHODS = [
   {
@@ -118,6 +119,15 @@ export default function KursusPaymentPage() {
   const [selected, setSelected] = useState(null);
   const [copied, setCopied] = useState(false);
   const vaNumber = "8808 1234 5678 9012";
+
+  // ADDED: begitu step masuk "success", catat kursus ini sebagai sudah dibeli
+  // supaya di halaman lain (carousel, detail, modal) tombolnya berubah jadi
+  // "Lanjutkan Belajar" dan tidak mengarahkan ke pembayaran lagi.
+  useEffect(() => {
+    if (step === "success" && course) {
+      markCoursePurchased(course.id);
+    }
+  }, [step, course]);
 
   if (!course) {
     return (
@@ -419,28 +429,67 @@ export default function KursusPaymentPage() {
         {step === "success" && (
           <Reveal>
             <div className="max-w-[420px] mx-auto mt-8 text-center">
-              <div
-                className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4 relative"
-                style={{ background: `rgba(${course.accentRgb},0.14)`, border: `1px solid rgba(${course.accentRgb},0.25)` }}
-              >
-                <div className="absolute inset-0 rounded-full kursus-pulse-glow"
-                  style={{ boxShadow: `0 0 0 6px rgba(${course.accentRgb},0.08)` }} />
-                <Check size={26} style={{ color: course.accent }} />
+              {/* Check icon — ring berlapis + animasi masuk */}
+              <div className="relative w-16 h-16 mx-auto mb-5">
+                <div
+                  className="absolute inset-0 rounded-full kursus-pulse-glow"
+                  style={{ boxShadow: `0 0 0 8px rgba(${course.accentRgb},0.06)` }}
+                />
+                <div
+                  className="absolute inset-0 rounded-full"
+                  style={{ background: `rgba(${course.accentRgb},0.12)`, border: `1px solid rgba(${course.accentRgb},0.28)` }}
+                />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Check size={28} strokeWidth={2.5} style={{ color: course.accent }} />
+                </div>
               </div>
-              <h2 className="text-[17px] font-semibold mb-1.5" style={{ color: "var(--text-primary)" }}>Pembayaran berhasil</h2>
-              <p className="text-[12px] mb-5" style={{ color: "var(--text-muted)" }}>
-                Kamu sekarang punya akses ke "{course.title}".
+
+              <h2 className="text-[18px] font-semibold mb-1.5" style={{ color: "var(--text-primary)" }}>
+                Pembayaran berhasil
+              </h2>
+              <p className="text-[12px] mb-6 px-2 leading-relaxed" style={{ color: "var(--text-muted)" }}>
+                Kamu sekarang punya akses ke <span style={{ color: "var(--text-secondary)", fontWeight: 500 }}>"{course.title}"</span>.
               </p>
+
+              {/* Receipt card */}
               <div
-                className="rounded-2xl p-4.5 text-left mb-5 relative overflow-hidden"
-                style={{ background: "var(--bg-card)", border: "1px solid var(--border-md)", boxShadow: `0 0 0 1px rgba(${course.accentRgb},0.10), inset 0 1px 0 var(--card-inset)` }}
+                className="rounded-2xl text-left mb-6 relative overflow-hidden"
+                style={{
+                  background: "var(--bg-card)",
+                  border: "1px solid var(--border-md)",
+                  boxShadow: `0 8px 32px rgba(${course.accentRgb},0.08), inset 0 1px 0 var(--card-inset)`,
+                }}
               >
                 <div className="absolute inset-x-0 top-0 h-[1.5px]"
                   style={{ background: `linear-gradient(to right, ${course.accent}, rgba(${course.accentRgb},0.1) 60%, transparent)` }} />
-                <Row label="Kursus" value={course.title} />
-                <Row label="Metode" value={method ? method.name : "-"} />
-                <Row label="Total" value={course.price} />
+
+                <div className="px-5 pt-5 pb-4 flex flex-col gap-3">
+                  <div className="flex justify-between gap-4">
+                    <span className="text-[12px] shrink-0" style={{ color: "var(--text-muted)" }}>Kursus</span>
+                    <span className="text-[12px] font-medium text-right" style={{ color: "var(--text-primary)" }}>{course.title}</span>
+                  </div>
+                  <div className="flex justify-between gap-4">
+                    <span className="text-[12px] shrink-0" style={{ color: "var(--text-muted)" }}>Metode</span>
+                    <span className="text-[12px] font-medium text-right" style={{ color: "var(--text-primary)" }}>{method ? method.name : "-"}</span>
+                  </div>
+                </div>
+
+                {/* Garis putus-putus gaya struk */}
+                <div className="relative px-5">
+                  <div
+                    className="h-px w-full"
+                    style={{
+                      backgroundImage: `repeating-linear-gradient(to right, var(--border-strong) 0 6px, transparent 6px 12px)`,
+                    }}
+                  />
+                </div>
+
+                <div className="px-5 py-4 flex justify-between items-center">
+                  <span className="text-[13px] font-semibold" style={{ color: "var(--text-primary)" }}>Total dibayar</span>
+                  <span className="text-[16px] font-bold" style={{ color: course.accent }}>{course.price}</span>
+                </div>
               </div>
+
               {jurusanMatch && (
                 <button
                   onClick={() => navigate(`/jurusan/${jurusanMatch.id}`)}

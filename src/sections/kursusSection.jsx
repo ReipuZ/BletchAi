@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { ChevronRight, Star, Users, Clock, Award, X, ArrowUpRight } from "lucide-react";
+import { ChevronRight, Star, Users, Clock, Award, X, ArrowUpRight, CheckCircle2 } from "lucide-react"; // CHANGED: tambah CheckCircle2
 import Reveal, { RevealGroup, revealItem } from "../components/Reveal.jsx";
 import { courses } from "../components/kursus.js";
+import { getPurchasedCourses, PURCHASED_EVENT } from "./kursus/kursusPurchased";
 
 const isTouchDevice = () =>
   typeof window !== "undefined" &&
@@ -49,8 +50,29 @@ const CARD_W = 220;
 const CARD_GAP = 12;
 const STEP = CARD_W + CARD_GAP;
 
+// ADDED: hook kecil supaya semua komponen di file ini bisa tahu status "sudah dibeli"
+// dan otomatis re-render begitu ada pembelian baru (lewat custom event) atau
+// perubahan di tab lain (lewat storage event).
+function usePurchasedCourses() {
+  const [purchasedIds, setPurchasedIds] = useState(() => new Set(getPurchasedCourses()));
+
+  useEffect(() => {
+    const refresh = () => setPurchasedIds(new Set(getPurchasedCourses()));
+    window.addEventListener(PURCHASED_EVENT, refresh);
+    window.addEventListener("storage", refresh);
+    window.addEventListener("focus", refresh); // jaga-jaga kalau user beli di tab lain lalu balik
+    return () => {
+      window.removeEventListener(PURCHASED_EVENT, refresh);
+      window.removeEventListener("storage", refresh);
+      window.removeEventListener("focus", refresh);
+    };
+  }, []);
+
+  return purchasedIds;
+}
+
 /* ─── Detail Panel ─────────────────────────────────────────── */
-function CourseDetailPanel({ course, onClose }) {
+function CourseDetailPanel({ course, onClose, isPurchased }) { // CHANGED: terima isPurchased
   const navigate = useNavigate();
 
   return (
@@ -97,6 +119,13 @@ function CourseDetailPanel({ course, onClose }) {
                     <span className="text-[10px] font-semibold px-2.5 py-[3px] rounded-full"
                       style={{ background: "rgba(255,255,255,0.92)", color: "#111111", letterSpacing: "0.01em" }}>
                       {course.badge}
+                    </span>
+                  )}
+                  {/* ADDED: badge "Sudah Dibeli" di panel detail */}
+                  {isPurchased && (
+                    <span className="text-[10px] font-semibold px-2.5 py-[3px] rounded-full flex items-center gap-1"
+                      style={{ background: "rgba(34,197,94,0.92)", color: "#052e12", letterSpacing: "0.01em" }}>
+                      <CheckCircle2 size={10} /> Sudah Dibeli
                     </span>
                   )}
                 </div>
@@ -147,7 +176,14 @@ function CourseDetailPanel({ course, onClose }) {
 
                 {/* CTA row */}
                 <div className="flex items-center justify-between gap-3">
-                  <p className="text-base font-bold" style={{ color: "var(--text-primary)" }}>{course.price}</p>
+                  {/* CHANGED: kalau sudah dibeli, harga diganti label status */}
+                  {isPurchased ? (
+                    <p className="text-[12px] font-semibold flex items-center gap-1.5" style={{ color: "#22C55E" }}>
+                      <CheckCircle2 size={14} /> Kamu sudah punya akses
+                    </p>
+                  ) : (
+                    <p className="text-base font-bold" style={{ color: "var(--text-primary)" }}>{course.price}</p>
+                  )}
                   <div className="flex items-center gap-2">
                     <button onClick={onClose}
                       className="w-8 h-8 rounded-full flex items-center justify-center transition-colors flex-shrink-0"
@@ -156,17 +192,30 @@ function CourseDetailPanel({ course, onClose }) {
                       onMouseLeave={e => e.currentTarget.style.background = "var(--bg-surface)"}>
                       <X size={13} style={{ color: "var(--text-muted)" }} />
                     </button>
+                    {/* CHANGED: tombol beda kalau sudah dibeli — langsung ke materi, bukan ke halaman pembayaran */}
                     <button
                       onClick={() => navigate(`/kursus/${course.id}`)}
                       className="text-xs font-semibold px-4 py-2.5 rounded-xl flex items-center gap-1.5 transition-all active:scale-[0.97] flex-shrink-0"
-                      style={{
-                        background: `rgba(${course.accentRgb},0.14)`, color: course.accent,
-                        border: `1px solid rgba(${course.accentRgb},0.25)`,
-                        boxShadow: `inset 0 1px 0 rgba(${course.accentRgb},0.18)`, minHeight: "38px",
+                      style={
+                        isPurchased
+                          ? {
+                              background: "rgba(34,197,94,0.14)", color: "#22C55E",
+                              border: "1px solid rgba(34,197,94,0.28)",
+                              boxShadow: "inset 0 1px 0 rgba(34,197,94,0.18)", minHeight: "38px",
+                            }
+                          : {
+                              background: `rgba(${course.accentRgb},0.14)`, color: course.accent,
+                              border: `1px solid rgba(${course.accentRgb},0.25)`,
+                              boxShadow: `inset 0 1px 0 rgba(${course.accentRgb},0.18)`, minHeight: "38px",
+                            }
+                      }
+                      onMouseEnter={e => {
+                        e.currentTarget.style.background = isPurchased ? "rgba(34,197,94,0.22)" : `rgba(${course.accentRgb},0.22)`;
                       }}
-                      onMouseEnter={e => { e.currentTarget.style.background = `rgba(${course.accentRgb},0.22)`; }}
-                      onMouseLeave={e => { e.currentTarget.style.background = `rgba(${course.accentRgb},0.14)`; }}>
-                      Daftar Sekarang <ArrowUpRight size={12} />
+                      onMouseLeave={e => {
+                        e.currentTarget.style.background = isPurchased ? "rgba(34,197,94,0.14)" : `rgba(${course.accentRgb},0.14)`;
+                      }}>
+                      {isPurchased ? "Lanjutkan Belajar" : "Daftar Sekarang"} <ArrowUpRight size={12} />
                     </button>
                   </div>
                 </div>
@@ -180,7 +229,7 @@ function CourseDetailPanel({ course, onClose }) {
 }
 
 /* ─── Course Card ───────────────────────────────────────────── */
-function CourseCard({ course, isSelected, onSelect, pausedRef }) {
+function CourseCard({ course, isSelected, onSelect, pausedRef, isPurchased }) { // CHANGED: terima isPurchased
   const [hovered, setHovered] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const wrapperRef = useRef(null);
@@ -251,12 +300,21 @@ function CourseCard({ course, isSelected, onSelect, pausedRef }) {
             </div>
           )}
           <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.88) 0%, transparent 55%)" }} />
-          <div className="absolute top-2.5 left-2.5">
+          <div className="absolute top-2.5 left-2.5 flex gap-1.5">
             <span className="text-[10px] font-semibold px-2.5 py-[3px] rounded-full"
               style={{ background: "rgba(0,0,0,0.82)", color: "rgba(255,255,255,0.90)", border: "1px solid rgba(255,255,255,0.18)" }}>
               {course.level}
             </span>
           </div>
+          {/* ADDED: badge "Dimiliki" pojok kanan-atas kartu kalau sudah dibeli */}
+          {isPurchased && (
+            <div className="absolute top-2.5 right-2.5">
+              <span className="text-[10px] font-semibold px-2 py-[3px] rounded-full flex items-center gap-1"
+                style={{ background: "rgba(34,197,94,0.92)", color: "#052e12", border: "1px solid rgba(255,255,255,0.18)" }}>
+                <CheckCircle2 size={10} /> Dimiliki
+              </span>
+            </div>
+          )}
           {!isTouch.current && (
             <motion.div className="absolute inset-0 pointer-events-none"
               animate={{ opacity: hovered ? 1 : 0 }} transition={{ duration: 0.2 }}
@@ -290,6 +348,7 @@ export default function CourseRecommendation() {
   const animRef = useRef(null);
   const posRef = useRef(0);
   const pausedRef = useRef(false);
+  const purchasedIds = usePurchasedCourses(); // ADDED
 
   useEffect(() => {
     const totalW = courses.length * STEP;
@@ -371,12 +430,14 @@ export default function CourseRecommendation() {
               {loopedCourses.map((course, idx) => (
                 <CourseCard key={`${course.id}-${idx}`} course={course}
                   isSelected={selectedCourse?.id === course.id}
-                  onSelect={handleSelectCourse} pausedRef={pausedRef} />
+                  onSelect={handleSelectCourse} pausedRef={pausedRef}
+                  isPurchased={purchasedIds.has(course.id)} /* ADDED */ />
               ))}
             </div>
           </div>
 
-          <CourseDetailPanel course={selectedCourse} onClose={handleCloseDetail} />
+          <CourseDetailPanel course={selectedCourse} onClose={handleCloseDetail}
+            isPurchased={selectedCourse ? purchasedIds.has(selectedCourse.id) : false} /* ADDED */ />
 
           <p className="text-[10px] text-center mt-1 mb-8 sm:mb-10" style={{ color: "var(--text-muted)" }}>
             {isTouchDevice() ? "Ketuk kartu untuk melihat detail kursus" : "Klik kartu untuk melihat detail kursus"}
@@ -469,60 +530,72 @@ export default function CourseRecommendation() {
               {/* Modal body */}
               <div className="overflow-y-auto p-4 sm:p-5">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {courses.map((course) => (
-                    <div key={course.id}
-                      className="cursor-pointer group rounded-2xl overflow-hidden transition-all duration-200 active:scale-[0.98] relative"
-                      style={{
-                        background: "var(--bg-surface)",
-                        border: "1px solid var(--border-soft)",
-                        boxShadow: `inset 0 1px 0 var(--card-inset)`,
-                      }}
-                      onMouseEnter={e => {
-                        e.currentTarget.style.border = "1px solid var(--border-strong)";
-                        e.currentTarget.style.background = "var(--bg-surface-md)";
-                        e.currentTarget.style.boxShadow = `0 4px 20px var(--shadow-card), inset 0 1px 0 var(--card-inset)`;
-                      }}
-                      onMouseLeave={e => {
-                        e.currentTarget.style.border = "1px solid var(--border-soft)";
-                        e.currentTarget.style.background = "var(--bg-surface)";
-                        e.currentTarget.style.boxShadow = `inset 0 1px 0 var(--card-inset)`;
-                      }}
-                      onClick={() => { setShowAllModal(false); setSelectedCourse(course); pausedRef.current = true; }}>
+                  {courses.map((course) => {
+                    const owned = purchasedIds.has(course.id); // ADDED
+                    return (
+                      <div key={course.id}
+                        className="cursor-pointer group rounded-2xl overflow-hidden transition-all duration-200 active:scale-[0.98] relative"
+                        style={{
+                          background: "var(--bg-surface)",
+                          border: "1px solid var(--border-soft)",
+                          boxShadow: `inset 0 1px 0 var(--card-inset)`,
+                        }}
+                        onMouseEnter={e => {
+                          e.currentTarget.style.border = "1px solid var(--border-strong)";
+                          e.currentTarget.style.background = "var(--bg-surface-md)";
+                          e.currentTarget.style.boxShadow = `0 4px 20px var(--shadow-card), inset 0 1px 0 var(--card-inset)`;
+                        }}
+                        onMouseLeave={e => {
+                          e.currentTarget.style.border = "1px solid var(--border-soft)";
+                          e.currentTarget.style.background = "var(--bg-surface)";
+                          e.currentTarget.style.boxShadow = `inset 0 1px 0 var(--card-inset)`;
+                        }}
+                        onClick={() => { setShowAllModal(false); setSelectedCourse(course); pausedRef.current = true; }}>
 
-                      <div className="absolute inset-x-0 top-0 h-[1.5px] z-10"
-                        style={{ background: `linear-gradient(to right, ${course.accent}, transparent 60%)` }} />
+                        <div className="absolute inset-x-0 top-0 h-[1.5px] z-10"
+                          style={{ background: `linear-gradient(to right, ${course.accent}, transparent 60%)` }} />
 
-                      <div className="relative h-[120px] sm:h-[128px] overflow-hidden">
-                        {course.image ? (
-                          <img src={course.image} alt={course.title} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center" style={{ background: "var(--bg-surface)" }}>
-                            <span className="text-4xl select-none">📚</span>
+                        <div className="relative h-[120px] sm:h-[128px] overflow-hidden">
+                          {course.image ? (
+                            <img src={course.image} alt={course.title} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center" style={{ background: "var(--bg-surface)" }}>
+                              <span className="text-4xl select-none">📚</span>
+                            </div>
+                          )}
+                          <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.82) 0%, transparent 55%)" }} />
+                          <div className="absolute top-2.5 left-2.5">
+                            <span className="text-[10px] font-semibold px-2.5 py-[3px] rounded-full"
+                              style={{ background: "rgba(0,0,0,0.82)", color: "rgba(255,255,255,0.90)", border: "1px solid rgba(255,255,255,0.18)" }}>
+                              {course.level}
+                            </span>
                           </div>
-                        )}
-                        <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.82) 0%, transparent 55%)" }} />
-                        <div className="absolute top-2.5 left-2.5">
-                          <span className="text-[10px] font-semibold px-2.5 py-[3px] rounded-full"
-                            style={{ background: "rgba(0,0,0,0.82)", color: "rgba(255,255,255,0.90)", border: "1px solid rgba(255,255,255,0.18)" }}>
-                            {course.level}
-                          </span>
+                          {/* ADDED: badge "Dimiliki" di grid modal */}
+                          {owned && (
+                            <div className="absolute top-2.5 right-2.5">
+                              <span className="text-[10px] font-semibold px-2 py-[3px] rounded-full flex items-center gap-1"
+                                style={{ background: "rgba(34,197,94,0.92)", color: "#052e12", border: "1px solid rgba(255,255,255,0.18)" }}>
+                                <CheckCircle2 size={10} /> Dimiliki
+                              </span>
+                            </div>
+                          )}
                         </div>
-                      </div>
 
-                      <div className="px-3 py-2.5">
-                        <p className="text-[10px] font-semibold mb-0.5 uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>{course.category}</p>
-                        <p className="text-xs font-medium leading-snug mb-2 line-clamp-2" style={{ color: "var(--text-secondary)" }}>{course.title}</p>
-                        <div className="flex items-center gap-1.5 text-[10px]" style={{ color: "var(--text-muted)" }}>
-                          <Star size={9} className="fill-amber-400 text-amber-400 flex-shrink-0" />
-                          <span className="font-medium" style={{ color: "var(--text-secondary)" }}>{course.rating}</span>
-                          <span style={{ color: "var(--text-muted)" }}>·</span>
-                          <span style={{ color: "var(--text-muted)" }}>{course.students} siswa</span>
-                          <span style={{ color: "var(--text-muted)" }}>·</span>
-                          <span style={{ color: "var(--text-muted)" }}>{course.duration}</span>
+                        <div className="px-3 py-2.5">
+                          <p className="text-[10px] font-semibold mb-0.5 uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>{course.category}</p>
+                          <p className="text-xs font-medium leading-snug mb-2 line-clamp-2" style={{ color: "var(--text-secondary)" }}>{course.title}</p>
+                          <div className="flex items-center gap-1.5 text-[10px]" style={{ color: "var(--text-muted)" }}>
+                            <Star size={9} className="fill-amber-400 text-amber-400 flex-shrink-0" />
+                            <span className="font-medium" style={{ color: "var(--text-secondary)" }}>{course.rating}</span>
+                            <span style={{ color: "var(--text-muted)" }}>·</span>
+                            <span style={{ color: "var(--text-muted)" }}>{course.students} siswa</span>
+                            <span style={{ color: "var(--text-muted)" }}>·</span>
+                            <span style={{ color: "var(--text-muted)" }}>{course.duration}</span>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             </motion.div>

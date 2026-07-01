@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { auth } from "../firebase";
 import { onAuthStateChanged, signOut } from "firebase/auth";
+import logo from "../assets/image/logo.png"; // FIXED: import logo sebagai modul (sama seperti FooterSection.jsx), bukan hardcoded path "/src/assets/..."
 
 export default function Navbar({ onLogout, onLogin, localUser, isLogin, openStatsRef }) {
   const navigate = useNavigate(); // CHANGED
@@ -381,7 +382,7 @@ export default function Navbar({ onLogout, onLogin, localUser, isLogin, openStat
           onClick={() => goTo({ target: "home" })}
         >
           <img
-            src="/src/assets/image/logo.png"
+            src={logo}
             alt="Bletch AI"
             className="w-7 h-7 object-contain"
             style={{
@@ -686,7 +687,7 @@ export default function Navbar({ onLogout, onLogin, localUser, isLogin, openStat
           onClick={() => goTo({ target: "home" })}
         >
           <img
-            src="/src/assets/image/logo.png"
+            src={logo}
             alt="Bletch AI"
             className="w-6 h-6 object-contain"
             style={{

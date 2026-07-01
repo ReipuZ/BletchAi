@@ -484,7 +484,7 @@ function ResultPanel({ score, maxScore, bidang, totalQ, onRetry, onHome }) {
 }
 
 /* ─── Main export ────────────────────────────────────────────── */
-export default function InterviewSection() {
+export default function InterviewSection({ openStatsRef }) {
   const [isStatsOpen,   setIsStatsOpen]   = useState(false);
   const [activeBidang,  setActiveBidang]  = useState("Rekayasa Perangkat Lunak");
   const [sessionState,  setSessionState]  = useState("idle");
@@ -499,6 +499,17 @@ export default function InterviewSection() {
   const [stats,         setStats]         = useState(() => loadStats() ?? getInitialStats());
   const timerRef           = useRef(null);
   const feedbackTimeoutRef = useRef(null);
+
+  // FIXED: daftarkan fungsi "buka statistik" ke openStatsRef supaya bisa
+  // dipanggil dari komponen luar (Navbar / FooterSection) lewat openStatsRef.current()
+  useEffect(() => {
+    if (openStatsRef) {
+      openStatsRef.current = () => setIsStatsOpen(true);
+    }
+    return () => {
+      if (openStatsRef) openStatsRef.current = null;
+    };
+  }, [openStatsRef]);
 
   const clearTimer    = useCallback(() => { if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; } }, []);
   const clearFeedback = useCallback(() => { if (feedbackTimeoutRef.current) { clearTimeout(feedbackTimeoutRef.current); feedbackTimeoutRef.current = null; } }, []);

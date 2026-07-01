@@ -9,6 +9,7 @@ import FloatingMascot from "../components/floatingMascot";
 
 export default function Dashboard({ onLogout, onLogin, localUser, isLogin }) {
   const interviewRef = useRef(null);
+  const openStatsRef = useRef(null); // ref bersama supaya Navbar & AboutSection bisa memicu buka panel statistik di InterviewSection
   const [isInterviewVisible, setIsInterviewVisible] = useState(false);
 
   const handleGoToInterview = () => {
@@ -42,16 +43,17 @@ export default function Dashboard({ onLogout, onLogin, localUser, isLogin }) {
         onLogin={onLogin}
         localUser={localUser}
         isLogin={isLogin}
+        openStatsRef={openStatsRef} // supaya "Lihat Statistik" di navbar bisa buka panel
       />
 
       <main className="pt-[56px] md:pt-20 pb-24 md:pb-0 overflow-x-hidden">
         <HomeSection />
         <KursusSection />
         <div ref={interviewRef}>
-          <InterviewSection />
+          <InterviewSection openStatsRef={openStatsRef} /> {/* daftarkan fungsi buka statistik ke ref */}
         </div>
         <FaqSection />
-        <AboutSection />
+        <AboutSection openStatsRef={openStatsRef} /> {/* ADDED: supaya link "Progress" bisa buka panel statistik */}
       </main>
 
       <FloatingMascot
