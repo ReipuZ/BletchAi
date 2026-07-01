@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { ChevronRight, Star, Users, Clock, Award, X, ArrowUpRight, CheckCircle2 } from "lucide-react"; // CHANGED: tambah CheckCircle2
 import Reveal, { RevealGroup, revealItem } from "../components/Reveal.jsx";
-import { courses } from "../components/kursus.js";
+import { courses, getJurusanRoute } from "../components/kursus.js"; // CHANGED: tambah getJurusanRoute
 import { getPurchasedCourses, PURCHASED_EVENT } from "./kursus/kursusPurchased";
 
 const isTouchDevice = () =>
@@ -192,9 +192,15 @@ function CourseDetailPanel({ course, onClose, isPurchased }) { // CHANGED: terim
                       onMouseLeave={e => e.currentTarget.style.background = "var(--bg-surface)"}>
                       <X size={13} style={{ color: "var(--text-muted)" }} />
                     </button>
-                    {/* CHANGED: tombol beda kalau sudah dibeli — langsung ke materi, bukan ke halaman pembayaran */}
+                    {/* CHANGED: belum beli -> preview dulu; sudah beli -> langsung roadmap jurusan */}
                     <button
-                      onClick={() => navigate(`/kursus/${course.id}`)}
+                      onClick={() =>
+                        navigate(
+                          isPurchased
+                            ? getJurusanRoute(course)
+                            : `/kursus/${course.id}`
+                        )
+                      }
                       className="text-xs font-semibold px-4 py-2.5 rounded-xl flex items-center gap-1.5 transition-all active:scale-[0.97] flex-shrink-0"
                       style={
                         isPurchased

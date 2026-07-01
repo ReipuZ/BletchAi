@@ -9,8 +9,16 @@ import FloatingMascot from "../components/floatingMascot";
 
 export default function Dashboard({ onLogout, onLogin, localUser, isLogin }) {
   const interviewRef = useRef(null);
-  const openStatsRef = useRef(null); // ref bersama supaya Navbar & AboutSection bisa memicu buka panel statistik di InterviewSection
   const [isInterviewVisible, setIsInterviewVisible] = useState(false);
+
+  // FIXED: ref ini SEBELUMNYA TIDAK PERNAH DIBUAT sama sekali di Dashboard,
+  // padahal Navbar dan InterviewSection sama-sama butuh openStatsRef supaya
+  // bisa "ngobrol" satu sama lain (Navbar manggil openStatsRef.current(),
+  // InterviewSection yang mendaftarkan fungsinya ke openStatsRef.current).
+  // Karena Navbar dipanggil TANPA prop openStatsRef, openStatsRef di dalam
+  // Navbar selalu undefined -> openStatsRef?.current() tidak pernah jalan.
+  // Ini akar masalah kenapa tombol "Lihat Statistik" tidak pernah membuka apa-apa.
+  const openStatsRef = useRef(null);
 
   const handleGoToInterview = () => {
     interviewRef.current?.scrollIntoView({
@@ -43,17 +51,17 @@ export default function Dashboard({ onLogout, onLogin, localUser, isLogin }) {
         onLogin={onLogin}
         localUser={localUser}
         isLogin={isLogin}
-        openStatsRef={openStatsRef} // supaya "Lihat Statistik" di navbar bisa buka panel
+        openStatsRef={openStatsRef}
       />
 
       <main className="pt-[56px] md:pt-20 pb-24 md:pb-0 overflow-x-hidden">
         <HomeSection />
         <KursusSection />
         <div ref={interviewRef}>
-          <InterviewSection openStatsRef={openStatsRef} /> {/* daftarkan fungsi buka statistik ke ref */}
+          <InterviewSection openStatsRef={openStatsRef} />
         </div>
         <FaqSection />
-        <AboutSection openStatsRef={openStatsRef} /> {/* ADDED: supaya link "Progress" bisa buka panel statistik */}
+        <AboutSection />
       </main>
 
       <FloatingMascot

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -10,9 +10,11 @@ import {
   ChevronDown,
   PlayCircle,
   ArrowUpRight,
+  CheckCircle2,
 } from "lucide-react";
 import Reveal from "../../components/Reveal.jsx";
-import { getCourseById } from "../../components/kursus.js";
+import { getCourseById, getJurusanRoute } from "../../components/kursus.js";
+import { getPurchasedCourses, PURCHASED_EVENT } from "./kursusPurchased";
 
 /* ─── Fallback generators (dipakai kalau course belum punya data detail) ─── */
 function buildFallbackCurriculum(course) {
@@ -218,6 +220,20 @@ export default function KursusPreviewPage() {
   const course = getCourseById(id);
   const [tab, setTab] = useState("ringkasan");
 
+  // ADDED: cek status pembelian, sama seperti di CourseRecommendation
+  const [purchasedIds, setPurchasedIds] = useState(() => new Set(getPurchasedCourses()));
+  useEffect(() => {
+    const refresh = () => setPurchasedIds(new Set(getPurchasedCourses()));
+    window.addEventListener(PURCHASED_EVENT, refresh);
+    window.addEventListener("storage", refresh);
+    window.addEventListener("focus", refresh);
+    return () => {
+      window.removeEventListener(PURCHASED_EVENT, refresh);
+      window.removeEventListener("storage", refresh);
+      window.removeEventListener("focus", refresh);
+    };
+  }, []);
+
   if (!course) {
     return (
       <section className="min-h-screen flex flex-col items-center justify-center gap-4" style={{ background: "var(--bg-base)" }}>
@@ -232,6 +248,8 @@ export default function KursusPreviewPage() {
       </section>
     );
   }
+
+  const isPurchased = purchasedIds.has(course.id); // ADDED
 
   return (
     <section className="relative min-h-screen overflow-hidden" style={{ background: "var(--bg-base)" }}>
@@ -308,6 +326,13 @@ export default function KursusPreviewPage() {
                     style={{ background: `rgba(${course.accentRgb},0.14)`, color: course.accent, border: `1px solid rgba(${course.accentRgb},0.25)` }}>
                     {course.category}
                   </span>
+                  {/* ADDED: badge status kepemilikan */}
+                  {isPurchased && (
+                    <span className="text-[10px] font-semibold px-2.5 py-[3px] rounded-full flex items-center gap-1"
+                      style={{ background: "rgba(34,197,94,0.14)", color: "#22C55E", border: "1px solid rgba(34,197,94,0.28)" }}>
+                      <CheckCircle2 size={10} /> Sudah Dibeli
+                    </span>
+                  )}
                 </div>
 
                 <h1 className="text-xl sm:text-2xl font-bold mb-2 leading-snug" style={{ color: "var(--text-primary)" }}>
@@ -357,19 +382,29 @@ export default function KursusPreviewPage() {
                     <img src={course.image} alt={course.title} className="w-full h-full object-cover" />
                   </div>
                 )}
-                <p className="text-2xl font-bold mb-4" style={{ color: "var(--text-primary)" }}>{course.price}</p>
+                {/* CHANGED: harga diganti status kalau sudah dibeli */}
+                {isPurchased ? (
+                  <p className="text-[13px] font-semibold mb-4 flex items-center gap-1.5" style={{ color: "#22C55E" }}>
+                    <CheckCircle2 size={16} /> Kamu sudah punya akses
+                  </p>
+                ) : (
+                  <p className="text-2xl font-bold mb-4" style={{ color: "var(--text-primary)" }}>{course.price}</p>
+                )}
+                {/* CHANGED: kalau sudah dibeli, tombol langsung ke roadmap jurusan (bukan payment) */}
                 <button
-                  onClick={() => navigate(`/kursus/${course.id}/payment`)}
+                  onClick={() =>
+                    navigate(isPurchased ? getJurusanRoute(course) : `/kursus/${course.id}/payment`)
+                  }
                   className="w-full text-[13px] font-semibold px-4 py-3 rounded-xl flex items-center justify-center gap-1.5 transition-all duration-200 active:scale-[0.97] mb-3"
                   style={{
-                    background: course.accent,
+                    background: isPurchased ? "#22C55E" : course.accent,
                     color: "#fff",
-                    boxShadow: `inset 0 1px 0 rgba(255,255,255,0.22), 0 4px 16px rgba(${course.accentRgb},0.35)`,
+                    boxShadow: `inset 0 1px 0 rgba(255,255,255,0.22), 0 4px 16px rgba(${isPurchased ? "34,197,94" : course.accentRgb},0.35)`,
                   }}
-                  onMouseEnter={(e) => { e.currentTarget.style.boxShadow = `inset 0 1px 0 rgba(255,255,255,0.28), 0 6px 22px rgba(${course.accentRgb},0.48)`; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.boxShadow = `inset 0 1px 0 rgba(255,255,255,0.22), 0 4px 16px rgba(${course.accentRgb},0.35)`; }}
+                  onMouseEnter={(e) => { e.currentTarget.style.boxShadow = `inset 0 1px 0 rgba(255,255,255,0.28), 0 6px 22px rgba(${isPurchased ? "34,197,94" : course.accentRgb},0.48)`; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.boxShadow = `inset 0 1px 0 rgba(255,255,255,0.22), 0 4px 16px rgba(${isPurchased ? "34,197,94" : course.accentRgb},0.35)`; }}
                 >
-                  Daftar Sekarang <ArrowUpRight size={13} />
+                  {isPurchased ? "Lanjutkan Belajar" : "Daftar Sekarang"} <ArrowUpRight size={13} />
                 </button>
                 <ul className="flex flex-col gap-1.5">
                   {["Akses selamanya", "Sertifikat penyelesaian", "Garansi uang kembali"].map((b) => (

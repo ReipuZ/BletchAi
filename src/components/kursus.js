@@ -10,6 +10,7 @@ export const courses = [
     id: 1,
     title: "Web Development dengan React",
     category: "Rekayasa Perangkat Lunak",
+    jurusanId: "rpl", // ADDED: dipakai untuk arahkan ke /jurusan/:jurusanId (roadmap)
     level: "Pemula",
     rating: 4.9,
     students: "1.2k",
@@ -29,6 +30,7 @@ export const courses = [
     id: 2,
     title: "Desain UI/UX Profesional",
     category: "Desain Grafis",
+    jurusanId: "desain", // ADDED
     level: "Menengah",
     rating: 4.8,
     students: "980",
@@ -48,6 +50,7 @@ export const courses = [
     id: 3,
     title: "Akuntansi Digital & Excel",
     category: "Akuntansi",
+    jurusanId: "akuntansi", // ADDED
     level: "Pemula",
     rating: 4.7,
     students: "2.1k",
@@ -67,6 +70,7 @@ export const courses = [
     id: 4,
     title: "Teknik Perawatan Mesin",
     category: "Teknik Otomotif",
+    jurusanId: "otomotif", // ADDED
     level: "Menengah",
     rating: 4.8,
     students: "760",
@@ -86,6 +90,7 @@ export const courses = [
     id: 5,
     title: "Editing Video & Motion",
     category: "Multimedia",
+    jurusanId: "multimedia", // ADDED
     level: "Pemula",
     rating: 4.9,
     students: "1.5k",
@@ -105,6 +110,7 @@ export const courses = [
     id: 6,
     title: "Pastry & Bakery Modern",
     category: "Tata Boga",
+    jurusanId: "tataboga", // ADDED
     level: "Pemula",
     rating: 4.6,
     students: "640",
@@ -124,4 +130,9 @@ export const courses = [
 
 export function getCourseById(id) {
   return courses.find((c) => String(c.id) === String(id));
+}
+
+// ADDED: helper untuk dapetin rute roadmap jurusan dari sebuah course
+export function getJurusanRoute(course) {
+  return course?.jurusanId ? `/jurusan/${course.jurusanId}` : "/";
 }
