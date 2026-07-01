@@ -12,6 +12,7 @@ import teknikOtomotif from "./interview/teknikOtomotif";
 const TIMER_SECONDS = 60;
 const QUESTIONS_PER_SESSION = 15;
 const STORAGE_KEY = "bletchai_stats";
+const WEAK_POINT_THRESHOLD = 2; // jawaban dengan poin <= ini dianggap kurang tepat
 
 const BIDANG_CONFIG = [
   {
@@ -39,6 +40,40 @@ const BIDANG_CONFIG = [
     icon: <svg viewBox="0 0 20 20" fill="none" className="w-4 h-4"><path d="M10 2c0 0-5 3-5 7h10c0-4-5-7-5-7z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round"/><path d="M5 9v7a2 2 0 002 2h6a2 2 0 002-2V9" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/></svg>,
   },
 ];
+
+/* ─── Course recommendations per bidang ─────────────────────── */
+const COURSE_RECOMMENDATIONS = {
+  "Rekayasa Perangkat Lunak": [
+    { title: "Fundamental Pemrograman & Struktur Data", desc: "Perkuat logika dasar sebelum masuk ke studi kasus interview teknis." },
+    { title: "Algoritma & Problem Solving untuk Interview", desc: "Latihan soal logika yang sering muncul di technical interview." },
+    { title: "Clean Code, Git & Praktik Software Engineering", desc: "Kebiasaan kerja profesional yang dicari recruiter software house." },
+  ],
+  "Desain Grafis": [
+    { title: "Dasar Teori Warna & Tipografi", desc: "Fondasi visual yang sering ditanyakan dalam wawancara desain." },
+    { title: "Adobe Photoshop & Illustrator dari Nol", desc: "Menguasai tools inti industri desain grafis." },
+    { title: "Membangun Portofolio yang Menarik Recruiter", desc: "Cara menyusun portofolio yang meyakinkan HRD." },
+  ],
+  "Akuntansi": [
+    { title: "Dasar Akuntansi & Siklus Pembukuan", desc: "Konsep inti yang wajib dikuasai fresh graduate akuntansi." },
+    { title: "Membaca & Menganalisis Laporan Keuangan", desc: "Latihan interpretasi laporan yang sering ditanyakan HRD." },
+    { title: "Perpajakan Dasar untuk Pemula", desc: "Pemahaman pajak praktis untuk dunia kerja." },
+  ],
+  "Teknik Otomotif": [
+    { title: "Sistem Kelistrikan Kendaraan Dasar", desc: "Materi dasar yang paling sering muncul di interview teknis." },
+    { title: "Perawatan & Perbaikan Mesin Konvensional", desc: "Praktik troubleshooting mesin yang aplikatif." },
+    { title: "Teknologi Kendaraan Modern (EFI & Hybrid)", desc: "Update pengetahuan ke teknologi kendaraan terkini." },
+  ],
+  "Multimedia": [
+    { title: "Dasar Videografi & Sinematografi", desc: "Fondasi teknik pengambilan gambar yang rapi." },
+    { title: "Motion Graphic & Animasi 2D untuk Pemula", desc: "Skill visual yang banyak dicari industri kreatif." },
+    { title: "Editing Video Profesional (Premiere/After Effects)", desc: "Workflow editing yang efisien dan rapi." },
+  ],
+  "Tata Boga": [
+    { title: "Dasar Kuliner & Hygiene Sanitasi", desc: "Standar dasar yang selalu ditanyakan di interview F&B." },
+    { title: "Teknik Memasak & Plating Profesional", desc: "Meningkatkan presentasi dan konsistensi hasil masakan." },
+    { title: "Manajemen Dapur & Food Cost", desc: "Pemahaman operasional dapur skala profesional." },
+  ],
+};
 
 /* ─── Pure logic helpers ─────────────────────────────────────── */
 function pickRandom(arr, n) { return [...arr].sort(() => Math.random() - 0.5).slice(0, Math.min(n, arr.length)); }
@@ -101,6 +136,8 @@ const IconCheck  = () => <svg viewBox="0 0 16 16" fill="none" className="w-3 h-3
 const IconClock  = () => <svg viewBox="0 0 16 16" fill="none" className="w-3 h-3"><circle cx="8" cy="8" r="6" stroke="currentColor" strokeWidth="1.4"/><path d="M8 5v3l2 2" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/></svg>;
 const IconChart  = () => <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5"><rect x="2" y="10" width="3" height="4" rx="0.5" fill="currentColor"/><rect x="6.5" y="6" width="3" height="8" rx="0.5" fill="currentColor"/><rect x="11" y="2" width="3" height="12" rx="0.5" fill="currentColor"/></svg>;
 const IconTrophy = () => <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5"><path d="M4 2h8v6a4 4 0 01-8 0V2z" stroke="currentColor" strokeWidth="1.4"/><path d="M2 3h2M12 3h2M8 12v2M6 14h4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/></svg>;
+const IconAlert  = () => <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5"><path d="M8 2L1 14h14L8 2z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round"/><path d="M8 6.5v3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/><circle cx="8" cy="11.5" r="0.8" fill="currentColor"/></svg>;
+const IconBook   = () => <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5"><path d="M2 3.5A1.5 1.5 0 013.5 2H8v12H3.5A1.5 1.5 0 012 12.5v-9z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round"/><path d="M14 3.5A1.5 1.5 0 0012.5 2H8v12h4.5a1.5 1.5 0 001.5-1.5v-9z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round"/></svg>;
 
 /* ─── TimerBar ───────────────────────────────────────────────── */
 function TimerBar({ seconds, total }) {
@@ -402,14 +439,84 @@ function ActivePanel({ question, answers, currentIdx, totalQ, timer, chatHistory
   );
 }
 
+/* ─── ReviewList — highlight jawaban yang kurang tepat ──────── */
+function ReviewList({ sessionAnswers }) {
+  const weak = sessionAnswers.filter(a => a.point <= WEAK_POINT_THRESHOLD);
+  if (weak.length === 0) return null;
+
+  return (
+    <div className="rounded-xl p-4"
+      style={{ background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.22)" }}>
+      <div className="flex items-center gap-2 mb-3">
+        <span style={{ color: "#EF4444" }}><IconAlert /></span>
+        <p className="text-xs font-semibold" style={{ color: "#EF4444" }}>
+          {weak.length} jawaban perlu ditinjau ulang
+        </p>
+      </div>
+      <div className="flex flex-col gap-2 max-h-[180px] overflow-y-auto pr-1">
+        {weak.map((a, i) => (
+          <div key={i} className="rounded-lg px-3 py-2"
+            style={{ background: "var(--bg-surface)", border: "1px solid rgba(239,68,68,0.18)" }}>
+            <p className="text-[11px] font-medium mb-1 leading-[1.5]" style={{ color: "var(--text-secondary)" }}>
+              {a.question}
+            </p>
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-[11px] leading-[1.5]" style={{ color: "#EF4444" }}>
+                {a.isTimeout ? "Tidak dijawab (waktu habis)" : `Jawaban: ${a.answerText}`}
+              </p>
+              <span className="text-[10px] font-semibold shrink-0" style={{ color: "#EF4444" }}>+{a.point}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ─── CourseRecommendation ──────────────────────────────────── */
+function CourseRecommendation({ bidang, pct, weakCount, color }) {
+  const courses = COURSE_RECOMMENDATIONS[bidang] ?? [];
+  const shown = pct >= 85 ? courses.slice(1) : courses;
+  if (shown.length === 0) return null;
+
+  return (
+    <div className="rounded-xl p-4" style={{ background: "var(--bg-surface)", border: "1px solid var(--border-soft)" }}>
+      <div className="flex items-center gap-2 mb-1">
+        <span style={{ color }}><IconBook /></span>
+        <p className="text-xs font-semibold" style={{ color: "var(--text-primary)" }}>Rekomendasi Kursus untuk Kamu</p>
+      </div>
+      <p className="text-[11px] mb-3" style={{ color: "var(--text-muted)" }}>
+        {weakCount > 0
+          ? `Berdasarkan ${weakCount} jawaban yang masih kurang tepat, kursus berikut bisa membantu memperkuat pemahamanmu di ${bidang}.`
+          : `Untuk menjaga performa dan naik level, coba kursus lanjutan berikut di bidang ${bidang}.`}
+      </p>
+      <div className="flex flex-col gap-2">
+        {shown.map((c, i) => (
+          <div key={i} className="rounded-lg px-3 py-2.5 flex items-start gap-2.5"
+            style={{ background: "var(--bg-surface-md)", border: "1px solid var(--border-soft)" }}>
+            <span className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0" style={{ background: color }} />
+            <div>
+              <p className="text-[11px] font-semibold leading-[1.4]" style={{ color: "var(--text-primary)" }}>{c.title}</p>
+              <p className="text-[10px] leading-[1.5] mt-0.5" style={{ color: "var(--text-muted)" }}>{c.desc}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 /* ─── ResultPanel ────────────────────────────────────────────── */
-function ResultPanel({ score, maxScore, bidang, totalQ, onRetry, onHome }) {
+function ResultPanel({ score, maxScore, bidang, totalQ, sessionAnswers, onRetry, onHome }) {
   const pct   = Math.round((score / maxScore) * 100);
   const grade =
     pct >= 85 ? { label: "Excellent",      color: "#3B82F6"  } :
     pct >= 70 ? { label: "Bagus",          color: "#06B6D4"  } :
     pct >= 55 ? { label: "Cukup",          color: "#F59E0B"  } :
                 { label: "Perlu Latihan",  color: "#F97316"  };
+
+  const bidangCfg = BIDANG_CONFIG.find(b => b.name === bidang);
+  const weakCount = sessionAnswers.filter(a => a.point <= WEAK_POINT_THRESHOLD).length;
 
   return (
     <div className="flex flex-col rounded-2xl overflow-y-auto p-5 gap-5 relative" style={{ ...glass.panel, height: "520px" }}>
@@ -465,6 +572,12 @@ function ResultPanel({ score, maxScore, bidang, totalQ, onRetry, onHome }) {
           : "Masih banyak ruang untuk berkembang. Jangan menyerah — setiap latihan membuat Anda semakin siap."}
       </AIChatBubble>
 
+      {/* ✅ Highlight jawaban yang salah / kurang tepat */}
+      <ReviewList sessionAnswers={sessionAnswers} />
+
+      {/* ✅ Rekomendasi kursus berdasarkan hasil sesi */}
+      <CourseRecommendation bidang={bidang} pct={pct} weakCount={weakCount} color={bidangCfg?.color ?? grade.color} />
+
       <div className="flex gap-2 mt-auto">
         <button onClick={onRetry} className="flex-1 rounded-xl py-2.5 text-xs font-semibold transition-all duration-200"
           style={{ background: "var(--accent-bg)", border: "1px solid var(--accent-border)", color: "var(--accent-light)", boxShadow: "inset 0 1px 0 rgba(59,130,246,0.18)" }}
@@ -496,6 +609,7 @@ export default function InterviewSection({ openStatsRef }) {
   const [score,         setScore]         = useState(0);
   const [timer,         setTimer]         = useState(TIMER_SECONDS);
   const [chatHistory,   setChatHistory]   = useState([]);
+  const [sessionAnswers, setSessionAnswers] = useState([]); // ✅ rekam jawaban per soal untuk review + rekomendasi
   const [stats,         setStats]         = useState(() => loadStats() ?? getInitialStats());
   const timerRef           = useRef(null);
   const feedbackTimeoutRef = useRef(null);
@@ -521,13 +635,21 @@ export default function InterviewSection({ openStatsRef }) {
   useEffect(() => {
     if (sessionState === "active" && timer === 0 && !isAnswered) {
       clearTimer(); setIsTimeout(true); setIsAnswered(true); setIsTyping(true);
+      const q = questions[currentIdx];
+      // ✅ catat jawaban timeout sebagai kurang tepat (0 poin) untuk keperluan review
+      setSessionAnswers(prev => [...prev, {
+        question: q?.question ?? "",
+        answerText: "Tidak menjawab",
+        point: 0,
+        isTimeout: true,
+      }]);
       feedbackTimeoutRef.current = setTimeout(() => {
         feedbackTimeoutRef.current = null;
         setIsTyping(false);
         setChatHistory(h => [...h, { role: "ai", text: getHRDFeedback(0, true) }]);
       }, 1200);
     }
-  }, [timer, isAnswered, sessionState, clearTimer]);
+  }, [timer, isAnswered, sessionState, clearTimer, questions, currentIdx]);
 
   useEffect(() => () => { clearTimer(); clearFeedback(); }, [clearTimer, clearFeedback]);
 
@@ -538,7 +660,7 @@ export default function InterviewSection({ openStatsRef }) {
     clearFeedback();
     const picked = pickRandom(cfg.data, QUESTIONS_PER_SESSION);
     setQuestions(picked); setCurrentIdx(0); setIsAnswered(false); setIsTimeout(false);
-    setIsTyping(false); setScore(0);
+    setIsTyping(false); setScore(0); setSessionAnswers([]); // ✅ reset review setiap sesi baru
     setChatHistory([{ role: "ai", text: picked[0].question }]);
     setSessionState("active"); startTimer();
   }, [activeBidang, startTimer, clearFeedback]);
@@ -552,6 +674,13 @@ export default function InterviewSection({ openStatsRef }) {
     const earned = ans.point;
     setScore(s => s + earned); setIsAnswered(true); setIsTimeout(false);
     setChatHistory(h => [...h, { role: "user", text: ans.text, point: earned, label: labels[idx] }]);
+    // ✅ simpan jawaban untuk ditinjau di layar hasil
+    setSessionAnswers(prev => [...prev, {
+      question: q.question,
+      answerText: ans.text,
+      point: earned,
+      isTimeout: false,
+    }]);
     setIsTyping(true);
     feedbackTimeoutRef.current = setTimeout(() => {
       feedbackTimeoutRef.current = null;
@@ -760,7 +889,8 @@ export default function InterviewSection({ openStatsRef }) {
               )}
               {sessionState === "result" && (
                 <ResultPanel score={score} maxScore={maxScoreResult} bidang={activeBidang}
-                  totalQ={questions.length} onRetry={handleRetry} onHome={handleBack} />
+                  totalQ={questions.length} sessionAnswers={sessionAnswers}
+                  onRetry={handleRetry} onHome={handleBack} />
               )}
             </motion.div>
           </div>
